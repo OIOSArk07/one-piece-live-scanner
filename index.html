@@ -11,7 +11,7 @@
     content="#0f1117"
   >
 
-  <title>One Piece Live Stock Scanner — High Quality</title>
+  <title>One Piece Live Stock Scanner — Reliable Queue</title>
 
   <style>
     :root {
@@ -717,6 +717,24 @@
           >
             Permission Help
           </button>
+
+          <button
+            id="nextCardButton"
+            type="button"
+            onclick="readyForNextCard()"
+            disabled
+          >
+            I Removed Card — Next
+          </button>
+
+          <button
+            id="retrySaveButton"
+            class="primary hidden"
+            type="button"
+            onclick="retryPendingSave(false)"
+          >
+            Retry Same Save
+          </button>
         </div>
 
         <div
@@ -819,6 +837,18 @@
 
       pendingRequestId:
         "",
+
+      pendingRequestPayload:
+        null,
+
+      pendingRequestTimer:
+        null,
+
+      pendingRequestRetries:
+        0,
+
+      pendingRequestAcknowledged:
+        false,
 
       candidate:
         "",
@@ -2282,6 +2312,8 @@
       state.active =
         false;
 
+      clearPendingSaveWatchdog();
+
       window.clearTimeout(
         state.timer
       );
@@ -2755,6 +2787,8 @@
           setStatus(
             "Ready. Slide the next card inside the guide."
           );
+
+          updateQueueButtons();
         } else {
           setStatus(
             "Card removed. Keep the guide clear for one moment…"
@@ -2794,11 +2828,41 @@
         return;
       }
 
+      if (
+        state.pendingRequestId
+      ) {
+        setStatus(
+          "The previous card is still being saved. Wait for its result or press Retry Same Save."
+        );
+
+        return;
+      }
+
       const requestId =
         randomToken();
 
       state.pendingRequestId =
         requestId;
+
+      state.pendingRequestPayload = {
+        action:
+          "SCAN",
+
+        requestId:
+          requestId,
+
+        cardNumber:
+          cardNumber,
+
+        increment:
+          state.increment
+      };
+
+      state.pendingRequestRetries =
+        0;
+
+      state.pendingRequestAcknowledged =
+        false;
 
       state.awaitingClear =
         true;
@@ -2812,27 +2876,23 @@
       state.candidateHits =
         0;
 
+      updateQueueButtons();
+
       setStatus(
         "Recognized " +
         cardNumber +
-        ". Saving +" +
+        ". Sending +" +
         state.increment +
-        " Stock…"
+        " Stock to the Collection Manager…"
       );
 
-      sendToParent({
-        action:
-          "SCAN",
+      sendToParent(
+        state.pendingRequestPayload
+      );
 
-        requestId:
-          requestId,
-
-        cardNumber:
-          cardNumber,
-
-        increment:
-          state.increment
-      });
+      schedulePendingSaveWatchdog(
+        12000
+      );
     }
 
 
@@ -2882,8 +2942,39 @@
         return;
       }
 
+      if (
+        data.pending
+      ) {
+        state.pendingRequestAcknowledged =
+          true;
+
+        setStatus(
+          data.message ||
+          "The Collection Manager received the card and is processing it."
+        );
+
+        schedulePendingSaveWatchdog(
+          30000
+        );
+
+        updateQueueButtons();
+
+        return;
+      }
+
+      clearPendingSaveWatchdog();
+
       state.pendingRequestId =
         "";
+
+      state.pendingRequestPayload =
+        null;
+
+      state.pendingRequestRetries =
+        0;
+
+      state.pendingRequestAcknowledged =
+        false;
 
       if (
         data.ok
@@ -2938,7 +3029,7 @@
             result.message ||
             "Stock saved."
           ) +
-          " Remove the card until Ready appears."
+          " Remove the card, then press Next if Ready does not appear automatically."
         );
       } else {
         state.history.unshift({
@@ -2966,11 +3057,175 @@
             data.message ||
             "The Stock update failed."
           ) +
-          " Remove the card to continue."
+          " Remove the card before continuing."
         );
       }
 
+      updateQueueButtons();
       renderSummary();
+    }
+
+
+    function schedulePendingSaveWatchdog(
+      delay
+    ) {
+      clearPendingSaveWatchdog();
+
+      if (
+        !state.pendingRequestId
+      ) {
+        return;
+      }
+
+      state.pendingRequestTimer =
+        window.setTimeout(
+          function() {
+            retryPendingSave(
+              true
+            );
+          },
+          Math.max(
+            3000,
+            Number(
+              delay ||
+              12000
+            )
+          )
+        );
+    }
+
+
+    function clearPendingSaveWatchdog() {
+      window.clearTimeout(
+        state.pendingRequestTimer
+      );
+
+      state.pendingRequestTimer =
+        null;
+    }
+
+
+    function retryPendingSave(
+      automatic
+    ) {
+      if (
+        !state.pendingRequestId ||
+        !state.pendingRequestPayload
+      ) {
+        return;
+      }
+
+      /*
+       * Retries reuse the same request ID. The Collection Manager
+       * caches the completed result, so this cannot add Stock
+       * twice even if the first response was merely delayed.
+       */
+      state.pendingRequestRetries++;
+
+      sendToParent(
+        state.pendingRequestPayload
+      );
+
+      if (
+        automatic &&
+        state.pendingRequestRetries <=
+          2
+      ) {
+        setStatus(
+          state.pendingRequestAcknowledged
+            ? "The save is taking longer than expected. Checking the same request again without adding twice…"
+            : "The Collection Manager did not acknowledge yet. Re-sending the same safe request…"
+        );
+
+        schedulePendingSaveWatchdog(
+          18000
+        );
+      } else {
+        setStatus(
+          "Still waiting for the Collection Manager. Keep both tabs open and press Retry Same Save."
+        );
+
+        document
+          .getElementById(
+            "retrySaveButton"
+          )
+          .classList
+          .remove(
+            "hidden"
+          );
+
+        schedulePendingSaveWatchdog(
+          30000
+        );
+      }
+
+      updateQueueButtons();
+    }
+
+
+    function readyForNextCard() {
+      if (
+        state.pendingRequestId
+      ) {
+        setStatus(
+          "Wait for the current Stock save to finish before moving to the next card."
+        );
+
+        return;
+      }
+
+      state.awaitingClear =
+        false;
+
+      state.clearFrames =
+        0;
+
+      state.lastAccepted =
+        "";
+
+      state.candidate =
+        "";
+
+      state.candidateHits =
+        0;
+
+      setStatus(
+        "Ready. Slide the next card inside the guide."
+      );
+
+      updateQueueButtons();
+    }
+
+
+    function updateQueueButtons() {
+      const nextButton =
+        document.getElementById(
+          "nextCardButton"
+        );
+
+      const retryButton =
+        document.getElementById(
+          "retrySaveButton"
+        );
+
+      if (
+        nextButton
+      ) {
+        nextButton.disabled =
+          Boolean(
+            state.pendingRequestId
+          ) ||
+          !state.awaitingClear;
+      }
+
+      if (
+        retryButton
+      ) {
+        retryButton.classList.toggle(
+          "hidden",
+          !state.pendingRequestId
+        );
+      }
     }
 
 
