@@ -11,7 +11,7 @@
     content="#0f1117"
   >
 
-  <title>One Piece Live Stock Scanner — Review Before Save</title>
+  <title>One Piece Live Stock Scanner — Fast Review</title>
 
   <style>
     :root {
@@ -793,6 +793,36 @@
             macro lens. Clean the lens, use bright even lighting,
             and hold the Card Number close to the green guide.
           </div>
+
+          <div class="camera-quality-grid" style="margin-top:9px;">
+            <label>
+              Recognition speed
+
+              <select
+                id="recognitionMode"
+                onchange="recognitionModeChanged()"
+              >
+                <option value="FAST" selected>
+                  Fast — recommended for phones
+                </option>
+
+                <option value="BALANCED">
+                  Balanced
+                </option>
+
+                <option value="ACCURATE">
+                  Accurate — slower
+                </option>
+              </select>
+            </label>
+
+            <div
+              id="recognitionReadout"
+              class="quality-readout"
+            >
+              Fast OCR
+            </div>
+          </div>
         </section>
 
         <section class="increment">
@@ -978,6 +1008,22 @@
             id="reviewCardMeta"
             class="review-card-meta"
           ></div>
+
+          <label
+            class="review-amount"
+            style="margin-top:10px;"
+          >
+            Card Number — correct it when OCR was wrong
+
+            <input
+              id="reviewCardNumberInput"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              value=""
+              oninput="reviewCardNumberChanged()"
+            >
+          </label>
         </div>
 
         <div class="review-stock-grid">
@@ -1151,6 +1197,24 @@
       reviewAmount:
         1,
 
+      reviewLookupTimer:
+        null,
+
+      reviewLookupRetries:
+        0,
+
+      reviewLookupAcknowledged:
+        false,
+
+      recognitionMode:
+        "FAST",
+
+      ocrMissCount:
+        0,
+
+      lastOcrDurationMs:
+        0,
+
       candidate:
         "",
 
@@ -1212,6 +1276,16 @@
             state.increment;
 
         updateIncrement();
+
+        state.recognitionMode =
+          document
+            .getElementById(
+              "recognitionMode"
+            )
+            .value ||
+          "FAST";
+
+        updateRecognitionReadout();
         checkPermissionState();
 
         if (
@@ -2814,6 +2888,9 @@
       state.busy =
         true;
 
+      const started =
+        performance.now();
+
       try {
         const crop =
           createCardNumberCrop(
@@ -2823,20 +2900,33 @@
         const worker =
           await getWorker();
 
-        const variants = [
-          makeVariant(
-            crop,
-            "contrast"
-          ),
-          makeVariant(
-            crop,
-            "threshold"
-          ),
-          makeVariant(
-            crop,
-            "inverted"
-          )
-        ];
+        const mode =
+          state.recognitionMode ||
+          "FAST";
+
+        const plannedModes =
+          mode ===
+            "ACCURATE"
+            ? [
+                "contrast",
+                "threshold",
+                "inverted"
+              ]
+            : (
+                mode ===
+                  "BALANCED"
+                  ? [
+                      "contrast",
+                      "threshold"
+                    ]
+                  : [
+                      state.ocrMissCount %
+                        3 ===
+                        2
+                        ? "threshold"
+                        : "contrast"
+                    ]
+              );
 
         const numbers =
           [];
@@ -2851,14 +2941,17 @@
           let index =
             0;
           index <
-            variants.length;
+            plannedModes.length;
           index++
         ) {
           const result =
             await worker.recognize(
-              variants[
-                index
-              ]
+              makeVariant(
+                crop,
+                plannedModes[
+                  index
+                ]
+              )
             );
 
           const text =
@@ -2874,15 +2967,18 @@
             text
           );
 
+          const passConfidence =
+            Number(
+              result &&
+              result.data &&
+              result.data.confidence ||
+              0
+            );
+
           confidence =
             Math.max(
               confidence,
-              Number(
-                result &&
-                result.data &&
-                result.data.confidence ||
-                0
-              )
+              passConfidence
             );
 
           const number =
@@ -2896,6 +2992,20 @@
             numbers.push(
               number
             );
+
+            /*
+             * In Fast mode, a clean high-confidence read is enough
+             * for this frame. The same-number frame confirmation
+             * below still protects against accidental saves.
+             */
+            if (
+              mode ===
+                "FAST" &&
+              passConfidence >=
+                45
+            ) {
+              break;
+            }
           }
         }
 
@@ -2934,19 +3044,39 @@
             })[0] ||
           "";
 
+        state.ocrMissCount =
+          cardNumber
+            ? 0
+            : state.ocrMissCount +
+              1;
+
+        state.lastOcrDurationMs =
+          Math.round(
+            performance.now() -
+            started
+          );
+
+        updateRecognitionReadout();
+
         return {
           cardNumber:
             cardNumber,
 
           confirmations:
             cardNumber
-              ? counts[
-                  cardNumber
-                ]
+              ? Math.max(
+                  1,
+                  counts[
+                    cardNumber
+                  ]
+                )
               : 0,
 
           confidence:
             confidence,
+
+          durationMs:
+            state.lastOcrDurationMs,
 
           rawText:
             cleanRaw(
@@ -3038,6 +3168,11 @@
             result.confidence
           ) +
           "% · " +
+          Number(
+            result.durationMs ||
+            0
+          ) +
+          " ms · " +
           result.rawText;
 
       if (
@@ -3147,6 +3282,12 @@
           state.increment
         );
 
+      state.reviewLookupRetries =
+        0;
+
+      state.reviewLookupAcknowledged =
+        false;
+
       state.awaitingClear =
         true;
 
@@ -3160,6 +3301,7 @@
         0;
 
       clearPendingSaveWatchdog();
+      clearReviewLookupTimer();
 
       document
         .getElementById(
@@ -3175,6 +3317,13 @@
           "reviewCardNumber"
         )
         .textContent =
+          cardNumber;
+
+      document
+        .getElementById(
+          "reviewCardNumberInput"
+        )
+        .value =
           cardNumber;
 
       document
@@ -3229,13 +3378,28 @@
           "reviewRetryButton"
         )
         .disabled =
-          true;
+          false;
 
       setStatus(
         "Recognized " +
         cardNumber +
-        ". Review the card and enter Stock."
+        " in " +
+        state.lastOcrDurationMs +
+        " ms. Loading the card…"
       );
+
+      sendReviewLookup();
+    }
+
+
+    function sendReviewLookup() {
+      if (
+        !state.reviewOpen ||
+        !state.reviewLookupRequestId ||
+        !state.reviewCardNumber
+      ) {
+        return;
+      }
 
       sendToParent({
         action:
@@ -3245,8 +3409,188 @@
           state.reviewLookupRequestId,
 
         cardNumber:
-          cardNumber
+          state.reviewCardNumber
       });
+
+      scheduleReviewLookupTimeout(
+        state.reviewLookupAcknowledged
+          ? 20000
+          : 7000
+      );
+    }
+
+
+    function scheduleReviewLookupTimeout(
+      delay
+    ) {
+      clearReviewLookupTimer();
+
+      state.reviewLookupTimer =
+        window.setTimeout(
+          function() {
+            if (
+              !state.reviewOpen ||
+              state.reviewPreview
+            ) {
+              return;
+            }
+
+            state.reviewLookupRetries++;
+
+            if (
+              state.reviewLookupRetries <=
+                2
+            ) {
+              setReviewMessage(
+                state.reviewLookupAcknowledged
+                  ? "The spreadsheet lookup is taking longer than expected. Retrying…"
+                  : "The Collection Manager has not answered. Retrying the lookup…",
+                ""
+              );
+
+              sendReviewLookup();
+
+              return;
+            }
+
+            setReviewMessage(
+              state.reviewLookupAcknowledged
+                ? "The spreadsheet lookup timed out. Press Retry Save to try loading the card again."
+                : "The Collection Manager did not respond. This usually means the private app is still on an older deployment. Replace StockScanner.gs and CollectionWebApp.html, deploy a New version, reload the private /exec page, then reopen this scanner.",
+              "error"
+            );
+          },
+          Math.max(
+            3000,
+            Number(
+              delay ||
+              7000
+            )
+          )
+        );
+    }
+
+
+    function clearReviewLookupTimer() {
+      window.clearTimeout(
+        state.reviewLookupTimer
+      );
+
+      state.reviewLookupTimer =
+        null;
+    }
+
+
+    function reviewCardNumberChanged() {
+      const input =
+        document.getElementById(
+          "reviewCardNumberInput"
+        );
+
+      const normalized =
+        extractCardNumber(
+          input.value
+        ) ||
+        String(
+          input.value ||
+          ""
+        )
+          .trim()
+          .toUpperCase();
+
+      document
+        .getElementById(
+          "reviewCardNumber"
+        )
+        .textContent =
+          normalized ||
+          "—";
+
+      state.reviewCardNumber =
+        normalized;
+
+      state.reviewPreview =
+        null;
+
+      state.reviewLookupRequestId =
+        randomToken();
+
+      state.reviewLookupRetries =
+        0;
+
+      state.reviewLookupAcknowledged =
+        false;
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          true;
+
+      setReviewMessage(
+        "Loading the corrected Card Number…",
+        ""
+      );
+
+      sendReviewLookup();
+    }
+
+
+    function recognitionModeChanged() {
+      const select =
+        document.getElementById(
+          "recognitionMode"
+        );
+
+      state.recognitionMode =
+        select
+          ? select.value
+          : "FAST";
+
+      state.ocrMissCount =
+        0;
+
+      updateRecognitionReadout();
+
+      setStatus(
+        state.recognitionMode ===
+          "FAST"
+          ? "Fast recognition selected. This is recommended for phones."
+          : (
+              state.recognitionMode ===
+                "BALANCED"
+                ? "Balanced recognition selected."
+                : "Accurate recognition selected. It may be much slower on phones."
+            )
+      );
+    }
+
+
+    function updateRecognitionReadout() {
+      const element =
+        document.getElementById(
+          "recognitionReadout"
+        );
+
+      if (
+        !element
+      ) {
+        return;
+      }
+
+      element.textContent =
+        (
+          state.recognitionMode ||
+          "FAST"
+        ) +
+        (
+          state.lastOcrDurationMs
+            ? " · " +
+              state.lastOcrDurationMs +
+              " ms"
+            : " OCR"
+        );
     }
 
 
@@ -3393,6 +3737,28 @@
 
     function retryReviewedCardSave() {
       if (
+        !state.reviewPreview
+      ) {
+        state.reviewLookupRequestId =
+          randomToken();
+
+        state.reviewLookupRetries =
+          0;
+
+        state.reviewLookupAcknowledged =
+          false;
+
+        setReviewMessage(
+          "Retrying card lookup…",
+          ""
+        );
+
+        sendReviewLookup();
+
+        return;
+      }
+
+      if (
         state.pendingRequestId
       ) {
         retryPendingSave(
@@ -3427,11 +3793,16 @@
 
 
     function closeReviewDialog() {
+      clearReviewLookupTimer();
+
       state.reviewOpen =
         false;
 
       state.reviewLookupRequestId =
         "";
+
+      state.reviewLookupAcknowledged =
+        false;
 
       state.reviewPreview =
         null;
@@ -3518,6 +3889,33 @@
 
       if (
         data.action ===
+          "LOOKUP_PENDING"
+      ) {
+        if (
+          data.requestId !==
+            state.reviewLookupRequestId
+        ) {
+          return;
+        }
+
+        state.reviewLookupAcknowledged =
+          true;
+
+        setReviewMessage(
+          data.message ||
+          "Collection Manager received the card. Loading spreadsheet data…",
+          ""
+        );
+
+        scheduleReviewLookupTimeout(
+          20000
+        );
+
+        return;
+      }
+
+      if (
+        data.action ===
           "LOOKUP_RESULT"
       ) {
         if (
@@ -3526,6 +3924,8 @@
         ) {
           return;
         }
+
+        clearReviewLookupTimer();
 
         if (
           !data.ok
@@ -3553,6 +3953,13 @@
             .disabled =
               true;
 
+          document
+            .getElementById(
+              "reviewRetryButton"
+            )
+            .disabled =
+              false;
+
           return;
         }
 
@@ -3578,6 +3985,14 @@
 
         document
           .getElementById(
+            "reviewCardNumberInput"
+          )
+          .value =
+            preview.cardNumber ||
+            state.reviewCardNumber;
+
+        document
+          .getElementById(
             "reviewCardName"
           )
           .textContent =
@@ -3594,7 +4009,15 @@
               preview.type,
               preview.rarity,
               preview.source,
-              preview.destinationSheet
+              preview.destinationSheet,
+              preview.lookupMs !==
+                undefined
+                ? (
+                    "Lookup " +
+                    preview.lookupMs +
+                    " ms"
+                  )
+                : ""
             ]
               .filter(
                 Boolean
@@ -3633,6 +4056,13 @@
         document
           .getElementById(
             "reviewSaveButton"
+          )
+          .disabled =
+            false;
+
+        document
+          .getElementById(
+            "reviewRetryButton"
           )
           .disabled =
             false;
@@ -4401,11 +4831,6 @@
       const guideRect =
         guide.getBoundingClientRect();
 
-      /*
-       * The preview uses object-fit: cover. Convert the visible
-       * green guide back into native camera pixels so OCR receives
-       * the original detail instead of a resized portrait frame.
-       */
       const scale =
         Math.max(
           videoRect.width /
@@ -4462,11 +4887,11 @@
 
       const paddingX =
         sourceWidth *
-        0.08;
+        0.06;
 
       const paddingY =
         sourceHeight *
-        0.16;
+        0.12;
 
       sourceX -=
         paddingX;
@@ -4527,27 +4952,36 @@
           "cropCanvas"
         );
 
-      const upscale =
-        sourceWidth <
-          900
-          ? 2.4
-          : 1.7;
+      const mode =
+        state.recognitionMode ||
+        "FAST";
+
+      const targetWidth =
+        mode ===
+          "ACCURATE"
+          ? 1400
+          : (
+              mode ===
+                "BALANCED"
+                ? 1050
+                : 760
+            );
 
       crop.width =
-        Math.min(
-          2200,
+        Math.round(
           Math.max(
-            1100,
-            Math.round(
+            620,
+            Math.min(
+              targetWidth,
               sourceWidth *
-              upscale
+              1.5
             )
           )
         );
 
       crop.height =
         Math.max(
-          320,
+          220,
           Math.round(
             sourceHeight *
             (
