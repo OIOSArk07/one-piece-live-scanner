@@ -8,7 +8,7 @@
   >
   <meta name="theme-color" content="#0f1117">
 
-  <title>One Piece Live Stock Scanner 1.7</title>
+  <title>One Piece Live Stock Scanner 1.8</title>
 
   <style>
     :root {
@@ -372,7 +372,7 @@
 
     .session-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 7px;
       margin-top: 10px;
     }
@@ -622,6 +622,17 @@
       margin-top: 10px;
     }
 
+    .bridge-frame {
+      position: fixed;
+      left: -20px;
+      bottom: -20px;
+      width: 4px;
+      height: 4px;
+      border: 0;
+      opacity: 0.01;
+      pointer-events: none;
+    }
+
     canvas {
       display: none;
     }
@@ -650,7 +661,7 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>Reliable Fast Session · Full Replacement · Scanner 1.7.0</span>
+          <span>Foreground Sheets Bridge · Mobile OCR Recovery · Scanner 1.8.0</span>
         </div>
 
         <button type="button" onclick="window.close()">
@@ -899,6 +910,11 @@
           </div>
 
           <div class="session-pill">
+            <span>Sheets bridge</span>
+            <strong id="bridgeStatus">Connecting</strong>
+          </div>
+
+          <div class="session-pill">
             <span>Cards cached</span>
             <strong id="fastLibraryCount">0</strong>
           </div>
@@ -929,6 +945,13 @@
             disabled
           >
             Retry Failed Saves
+          </button>
+
+          <button
+            type="button"
+            onclick="reconnectForegroundBridge()"
+          >
+            Reconnect Sheets
           </button>
 
           <button
@@ -1098,6 +1121,13 @@
     </section>
   </div>
 
+  <iframe
+    id="bridgeFrame"
+    class="bridge-frame"
+    title="Apps Script foreground bridge"
+    aria-hidden="true"
+  ></iframe>
+
   <canvas id="frameCanvas"></canvas>
   <canvas id="cropCanvas"></canvas>
 
@@ -1107,13 +1137,24 @@
     "use strict";
 
     const SCANNER_VERSION =
-      "1.7.0";
+      "1.8.0";
 
     const FAST_INDEX_CACHE_KEY =
       "ONE_PIECE_LIVE_FAST_INDEX_V1";
 
     const SYNC_QUEUE_KEY =
       "ONE_PIECE_LIVE_SYNC_QUEUE_V1";
+
+    /*
+     * Paste the private Apps Script /exec URL between the quotes.
+     * Example:
+     * https://script.google.com/macros/s/DEPLOYMENT_ID/exec
+     *
+     * This foreground iframe bridge keeps google.script.run active
+     * while the phone is showing the scanner tab.
+     */
+    const APPS_SCRIPT_WEB_APP_URL =
+      "PASTE_YOUR_PRIVATE_APPS_SCRIPT_EXEC_URL_HERE";
 
     const params =
       new URLSearchParams(
@@ -1125,13 +1166,34 @@
         params.get(
           "sessionToken"
         ) ||
-        "",
+        randomToken(),
 
       parentOrigin:
         params.get(
           "parentOrigin"
         ) ||
         "",
+
+      bridgeUrl:
+        params.get(
+          "bridgeUrl"
+        ) ||
+        APPS_SCRIPT_WEB_APP_URL,
+
+      bridgeFrame:
+        null,
+
+      bridgeReady:
+        false,
+
+      bridgeLastSeenAt:
+        0,
+
+      bridgeReconnectTimer:
+        null,
+
+      bridgeHeartbeatTimer:
+        null,
 
       increment:
         clampIncrement(
@@ -1158,6 +1220,12 @@
 
       workerPromise:
         null,
+
+      workerRecycleRequested:
+        false,
+
+      acceptedSinceWorkerRecycle:
+        0,
 
       facingMode:
         "environment",
@@ -1296,9 +1364,50 @@
       updateRecognitionReadout();
       renderHistory();
 
+      state.bridgeFrame =
+        document.getElementById(
+          "bridgeFrame"
+        );
+
       window.addEventListener(
         "message",
-        receiveParentMessage
+        receiveScannerMessage
+      );
+
+      document.addEventListener(
+        "visibilitychange",
+        function() {
+          if (
+            document.visibilityState ===
+              "visible"
+          ) {
+            if (
+              !state.bridgeReady
+            ) {
+              reconnectForegroundBridge();
+            }
+
+            if (
+              state.active &&
+              !state.reviewOpen
+            ) {
+              scheduleScanLoop(
+                180
+              );
+            }
+          }
+        }
+      );
+
+      window.addEventListener(
+        "pageshow",
+        function() {
+          if (
+            !state.bridgeReady
+          ) {
+            reconnectForegroundBridge();
+          }
+        }
       );
 
       window.addEventListener(
@@ -1325,6 +1434,10 @@
         );
       }
 
+      connectForegroundBridge();
+
+      startBridgeHeartbeat();
+
       await checkPermissionState();
 
       sendToParent({
@@ -1340,13 +1453,17 @@
 
       window.setTimeout(
         function() {
-          requestFastLibraryRefresh(
-            false
-          );
+          if (
+            state.bridgeReady
+          ) {
+            requestFastLibraryRefresh(
+              false
+            );
 
-          processScannerSyncQueue();
+            processScannerSyncQueue();
+          }
         },
-        500
+        1000
       );
     }
 
@@ -2417,6 +2534,18 @@
         return;
       }
 
+      if (
+        state.workerRecycleRequested
+      ) {
+        setStatus(
+          "Refreshing OCR memory for the next cards…"
+        );
+
+        await recycleOcrWorker(
+          true
+        );
+      }
+
       const video =
         document.getElementById(
           "video"
@@ -2483,8 +2612,12 @@
           error
         );
 
+        await recycleOcrWorker(
+          false
+        );
+
         setStatus(
-          "OCR had a temporary problem. The scanner will keep trying."
+          "OCR was restarted after a temporary problem. Keep the next Card Number inside the green guide."
         );
       }
 
@@ -2578,6 +2711,110 @@
         canvas.width,
         canvas.height
       );
+    }
+
+
+
+    function withTimeout(
+      promise,
+      timeoutMs,
+      message
+    ) {
+      let timer;
+
+      const timeout =
+        new Promise(function(resolve, reject) {
+          timer =
+            window.setTimeout(
+              function() {
+                reject(
+                  new Error(
+                    message ||
+                    "The operation timed out."
+                  )
+                );
+              },
+              Math.max(
+                1000,
+                Number(
+                  timeoutMs ||
+                  12000
+                )
+              )
+            );
+        });
+
+      return Promise.race([
+        promise,
+        timeout
+      ]).finally(function() {
+        window.clearTimeout(
+          timer
+        );
+      });
+    }
+
+
+    function releaseCanvas(
+      canvas
+    ) {
+      if (
+        !canvas
+      ) {
+        return;
+      }
+
+      try {
+        canvas.width =
+          1;
+
+        canvas.height =
+          1;
+      } catch (error) {
+        console.log(
+          error
+        );
+      }
+    }
+
+
+    async function recycleOcrWorker(
+      showMessage
+    ) {
+      const worker =
+        state.worker;
+
+      state.worker =
+        null;
+
+      state.workerPromise =
+        null;
+
+      state.workerRecycleRequested =
+        false;
+
+      if (
+        worker &&
+        typeof worker.terminate ===
+          "function"
+      ) {
+        try {
+          await worker.terminate();
+        } catch (error) {
+          console.log(
+            "OCR worker cleanup warning.",
+            error
+          );
+        }
+      }
+
+      if (
+        showMessage
+      ) {
+        setStatus(
+          "OCR memory refreshed. Ready for the next cards."
+        );
+      }
     }
 
 
@@ -2897,40 +3134,56 @@
       canvas,
       mode
     ) {
-      const result =
-        await worker.recognize(
-          makeVariant(
-            canvas,
-            mode
-          )
+      const variant =
+        makeVariant(
+          canvas,
+          mode
         );
 
-      const text =
-        result &&
-        result.data
-          ? String(
-              result.data.text ||
-              ""
+      try {
+        const result =
+          await withTimeout(
+            worker.recognize(
+              variant
+            ),
+            state.recognitionMode ===
+              "ACCURATE"
+              ? 20000
+              : 14000,
+            "OCR recognition timed out."
+          );
+
+        const text =
+          result &&
+          result.data
+            ? String(
+                result.data.text ||
+                ""
+              )
+            : "";
+
+        return {
+          text:
+            text,
+
+          confidence:
+            Number(
+              result &&
+              result.data &&
+              result.data.confidence ||
+              0
+            ),
+
+          cardNumber:
+            extractCardNumber(
+              text
             )
-          : "";
-
-      return {
-        text:
-          text,
-
-        confidence:
-          Number(
-            result &&
-            result.data &&
-            result.data.confidence ||
-            0
-          ),
-
-        cardNumber:
-          extractCardNumber(
-            text
-          )
-      };
+        };
+      } finally {
+        releaseCanvas(
+          variant
+        );
+      }
     }
 
 
@@ -2943,6 +3196,15 @@
       const started =
         performance.now();
 
+      let tight =
+        null;
+
+      let normal =
+        null;
+
+      let wide =
+        null;
+
       try {
         /*
          * These three crops all cover the green guide, but at
@@ -2950,34 +3212,34 @@
          * cost, copyright text, and borders. The wide crop recovers
          * a card held slightly off-center.
          */
-        const tight =
+        tight =
           createCrop(
             frame,
             0.425,
             0.805,
             0.445,
             0.105,
-            1550
+            1200
           );
 
-        const normal =
+        normal =
           createCrop(
             frame,
             0.405,
             0.785,
             0.515,
             0.145,
-            1650
+            1300
           );
 
-        const wide =
+        wide =
           createCrop(
             frame,
             0.335,
             0.755,
             0.625,
             0.205,
-            1750
+            1400
           );
 
         const worker =
@@ -3178,6 +3440,18 @@
             )
         };
       } finally {
+        releaseCanvas(
+          tight
+        );
+
+        releaseCanvas(
+          normal
+        );
+
+        releaseCanvas(
+          wide
+        );
+
         state.busy =
           false;
       }
@@ -4210,6 +4484,19 @@
       persistScannerSyncQueue();
       updateFastSessionStatus();
 
+      state.acceptedSinceWorkerRecycle++;
+
+      if (
+        state.acceptedSinceWorkerRecycle >=
+          3
+      ) {
+        state.acceptedSinceWorkerRecycle =
+          0;
+
+        state.workerRecycleRequested =
+          true;
+      }
+
       closeReview(
         true
       );
@@ -4356,16 +4643,25 @@
         return;
       }
 
-      sendToParent({
-        action:
-          "LOOKUP",
+      if (
+        !sendToBackend({
+          action:
+            "LOOKUP",
 
-        requestId:
-          state.reviewLookupRequestId,
+          requestId:
+            state.reviewLookupRequestId,
 
-        cardNumber:
-          state.reviewCardNumber
-      });
+          cardNumber:
+            state.reviewCardNumber
+        })
+      ) {
+        setReviewMessage(
+          "The foreground Sheets bridge is not connected. Press Reconnect Sheets, then retry the card lookup.",
+          "error"
+        );
+
+        return;
+      }
 
       scheduleReviewLookupTimeout(
         state.reviewLookupAcknowledged
@@ -4506,12 +4802,275 @@
     }
 
 
+
+    function configuredBridgeUrl() {
+      const value =
+        String(
+          state.bridgeUrl ||
+          ""
+        ).trim();
+
+      if (
+        !value ||
+        value ===
+          "PASTE_YOUR_PRIVATE_APPS_SCRIPT_EXEC_URL_HERE"
+      ) {
+        return "";
+      }
+
+      try {
+        const url =
+          new URL(
+            value
+          );
+
+        if (
+          url.protocol !==
+            "https:"
+        ) {
+          return "";
+        }
+
+        url.hash =
+          "";
+
+        return url.toString();
+      } catch (error) {
+        return "";
+      }
+    }
+
+
+    function connectForegroundBridge() {
+      const base =
+        configuredBridgeUrl();
+
+      state.bridgeReady =
+        false;
+
+      updateFastSessionStatus();
+
+      if (
+        !base
+      ) {
+        setStatus(
+          "Paste the private Apps Script /exec URL into APPS_SCRIPT_WEB_APP_URL in GitHub index.html."
+        );
+
+        return;
+      }
+
+      const frame =
+        state.bridgeFrame ||
+        document.getElementById(
+          "bridgeFrame"
+        );
+
+      state.bridgeFrame =
+        frame;
+
+      if (
+        !frame
+      ) {
+        setStatus(
+          "The foreground Sheets bridge frame is missing."
+        );
+
+        return;
+      }
+
+      let url;
+
+      try {
+        url =
+          new URL(
+            base
+          );
+      } catch (error) {
+        setStatus(
+          "The Apps Script bridge URL is not valid."
+        );
+
+        return;
+      }
+
+      url.searchParams.set(
+        "liveScannerBridge",
+        "1"
+      );
+
+      url.searchParams.set(
+        "scannerOrigin",
+        window.location.origin
+      );
+
+      url.searchParams.set(
+        "sessionToken",
+        state.sessionToken
+      );
+
+      url.searchParams.set(
+        "scannerVersion",
+        SCANNER_VERSION
+      );
+
+      url.searchParams.set(
+        "bridgeRefresh",
+        String(
+          Date.now()
+        )
+      );
+
+      frame.src =
+        url.toString();
+
+      setStatus(
+        "Connecting the foreground Sheets bridge…"
+      );
+
+      scheduleBridgeReconnect(
+        12000
+      );
+    }
+
+
+    function reconnectForegroundBridge() {
+      window.clearTimeout(
+        state.bridgeReconnectTimer
+      );
+
+      state.bridgeReconnectTimer =
+        null;
+
+      connectForegroundBridge();
+    }
+
+
+    function scheduleBridgeReconnect(
+      delay
+    ) {
+      window.clearTimeout(
+        state.bridgeReconnectTimer
+      );
+
+      state.bridgeReconnectTimer =
+        window.setTimeout(
+          function() {
+            if (
+              state.bridgeReady
+            ) {
+              return;
+            }
+
+            setStatus(
+              "The Sheets bridge did not connect. Confirm the private /exec URL, redeploy Apps Script, then press Reconnect Sheets."
+            );
+
+            updateFastSessionStatus();
+          },
+          Math.max(
+            5000,
+            Number(
+              delay ||
+              12000
+            )
+          )
+        );
+    }
+
+
+    function startBridgeHeartbeat() {
+      window.clearInterval(
+        state.bridgeHeartbeatTimer
+      );
+
+      state.bridgeHeartbeatTimer =
+        window.setInterval(
+          function() {
+            if (
+              !state.bridgeReady
+            ) {
+              return;
+            }
+
+            if (
+              Date.now() -
+              Number(
+                state.bridgeLastSeenAt ||
+                0
+              ) >
+                30000
+            ) {
+              state.bridgeReady =
+                false;
+
+              updateFastSessionStatus();
+
+              reconnectForegroundBridge();
+
+              return;
+            }
+
+            sendToBridge({
+              action:
+                "PING",
+
+              sentAt:
+                Date.now()
+            });
+          },
+          10000
+        );
+    }
+
+
+    function sendToBridge(
+      payload
+    ) {
+      if (
+        !state.bridgeReady ||
+        !state.bridgeFrame ||
+        !state.bridgeFrame.contentWindow
+      ) {
+        return false;
+      }
+
+      state.bridgeFrame.contentWindow.postMessage(
+        Object.assign(
+          {
+            type:
+              "ONE_PIECE_LIVE_SCANNER_BRIDGE",
+
+            sessionToken:
+              state.sessionToken,
+
+            scannerVersion:
+              SCANNER_VERSION
+          },
+          payload ||
+          {}
+        ),
+        "*"
+      );
+
+      return true;
+    }
+
+
+    function sendToBackend(
+      payload
+    ) {
+      return sendToBridge(
+        payload
+      );
+    }
+
+
     function requestFastLibraryRefresh(
       force
     ) {
       if (
-        !window.opener ||
-        window.opener.closed
+        !state.bridgeReady
       ) {
         state.fastLibraryLoading =
           false;
@@ -4519,7 +5078,7 @@
         updateFastSessionStatus();
 
         setStatus(
-          "Open this scanner from the private Collection Manager so the card library can connect."
+          "The foreground Sheets bridge is not connected yet."
         );
 
         return;
@@ -4530,7 +5089,7 @@
 
       updateFastSessionStatus();
 
-      sendToParent({
+      sendToBackend({
         action:
           "BOOTSTRAP",
 
@@ -4803,11 +5362,10 @@
       }
 
       if (
-        !window.opener ||
-        window.opener.closed
+        !state.bridgeReady
       ) {
         setStatus(
-          "Queued cards are waiting. Reopen the scanner from the Collection Manager to resume syncing."
+          "Queued cards are waiting for the foreground Sheets bridge. Press Reconnect Sheets."
         );
 
         return;
@@ -4829,22 +5387,40 @@
       persistScannerSyncQueue();
       updateFastSessionStatus();
 
-      sendToParent({
-        action:
-          "SAVE",
+      const sent =
+        sendToBackend({
+          action:
+            "SAVE",
 
-        requestId:
-          item.requestId,
+          requestId:
+            item.requestId,
 
-        cardNumber:
-          item.cardNumber,
+          cardNumber:
+            item.cardNumber,
 
-        amount:
-          item.amount,
+          amount:
+            item.amount,
 
-        indexRow:
-          item.indexRow
-      });
+          indexRow:
+            item.indexRow
+        });
+
+      if (
+        !sent
+      ) {
+        item.status =
+          "PENDING";
+
+        state.syncInFlight =
+          "";
+
+        persistScannerSyncQueue();
+        updateFastSessionStatus();
+
+        reconnectForegroundBridge();
+
+        return;
+      }
 
       scheduleScannerSyncWatchdog(
         item,
@@ -5268,6 +5844,20 @@
                   : "Not ready"
               );
 
+      const bridgeStatus =
+        document.getElementById(
+          "bridgeStatus"
+        );
+
+      if (
+        bridgeStatus
+      ) {
+        bridgeStatus.textContent =
+          state.bridgeReady
+            ? "Connected"
+            : "Disconnected";
+      }
+
       document
         .getElementById(
           "fastLibraryCount"
@@ -5397,25 +5987,9 @@
     }
 
 
-    function receiveParentMessage(
+    function receiveScannerMessage(
       event
     ) {
-      if (
-        state.parentOrigin &&
-        event.origin !==
-          state.parentOrigin
-      ) {
-        return;
-      }
-
-      if (
-        window.opener &&
-        event.source !==
-          window.opener
-      ) {
-        return;
-      }
-
       const data =
         event.data &&
         typeof event.data ===
@@ -5423,11 +5997,80 @@
           ? event.data
           : {};
 
+      const fromBridge =
+        data.type ===
+          "ONE_PIECE_LIVE_SCANNER_BRIDGE_RESULT" &&
+        data.sessionToken ===
+          state.sessionToken &&
+        state.bridgeFrame &&
+        event.source ===
+          state.bridgeFrame.contentWindow;
+
+      const fromOpener =
+        data.type ===
+          "ONE_PIECE_LIVE_SCANNER_RESULT" &&
+        data.sessionToken ===
+          state.sessionToken &&
+        (
+          !window.opener ||
+          event.source ===
+            window.opener
+        ) &&
+        (
+          !state.parentOrigin ||
+          event.origin ===
+            state.parentOrigin
+        );
+
       if (
-        data.type !==
-          "ONE_PIECE_LIVE_SCANNER_RESULT" ||
-        data.sessionToken !==
-          state.sessionToken
+        !fromBridge &&
+        !fromOpener
+      ) {
+        return;
+      }
+
+      if (
+        fromBridge
+      ) {
+        state.bridgeLastSeenAt =
+          Date.now();
+      }
+
+      if (
+        data.action ===
+          "BRIDGE_READY"
+      ) {
+        state.bridgeReady =
+          true;
+
+        state.bridgeLastSeenAt =
+          Date.now();
+
+        window.clearTimeout(
+          state.bridgeReconnectTimer
+        );
+
+        state.bridgeReconnectTimer =
+          null;
+
+        updateFastSessionStatus();
+
+        setStatus(
+          "Foreground Sheets bridge connected. Saves will continue while the scanner stays open."
+        );
+
+        requestFastLibraryRefresh(
+          false
+        );
+
+        processScannerSyncQueue();
+
+        return;
+      }
+
+      if (
+        data.action ===
+          "PONG"
       ) {
         return;
       }
