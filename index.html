@@ -11,7 +11,7 @@
     content="#0f1117"
   >
 
-  <title>One Piece Live Stock Scanner</title>
+  <title>One Piece Live Stock Scanner — High Quality</title>
 
   <style>
     :root {
@@ -180,6 +180,110 @@
 
     .permission-help.show {
       display:block;
+    }
+
+    .camera-quality-panel {
+      margin-top:12px;
+      padding:11px;
+      border:1px solid var(--line);
+      border-radius:13px;
+      background:rgba(0,0,0,.18);
+    }
+
+    .camera-quality-grid {
+      display:grid;
+      grid-template-columns:minmax(0,1.3fr) minmax(150px,.7fr);
+      gap:9px;
+      align-items:end;
+    }
+
+    .camera-quality-grid label,
+    .zoom-control label {
+      display:grid;
+      gap:6px;
+      color:var(--muted);
+      font-size:.68rem;
+      font-weight:850;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .camera-quality-grid select {
+      min-height:42px;
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0d1016;
+      color:var(--text);
+      padding:8px 10px;
+    }
+
+    .quality-readout {
+      min-height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px 10px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0d1016;
+      color:#d8ffe6;
+      font-size:.7rem;
+      font-weight:900;
+      text-align:center;
+    }
+
+    .camera-adjustments {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto auto;
+      gap:8px;
+      align-items:end;
+      margin-top:9px;
+    }
+
+    .zoom-control {
+      display:none;
+    }
+
+    .zoom-control.show {
+      display:grid;
+    }
+
+    .zoom-row {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 58px;
+      gap:8px;
+      align-items:center;
+    }
+
+    .zoom-row input[type="range"] {
+      width:100%;
+    }
+
+    .zoom-value {
+      min-height:38px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--line);
+      border-radius:9px;
+      background:#0d1016;
+      font-size:.72rem;
+      font-weight:900;
+    }
+
+    .quality-tips {
+      margin-top:9px;
+      color:var(--muted);
+      font-size:.68rem;
+      line-height:1.5;
+    }
+
+    @media (max-width:560px) {
+      .camera-quality-grid,
+      .camera-adjustments {
+        grid-template-columns:1fr;
+      }
     }
 
     .increment {
@@ -405,7 +509,7 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>Camera permission is requested on this HTTPS page.</span>
+          <span>High-resolution camera, focus, zoom, and light controls.</span>
         </div>
 
         <button
@@ -443,6 +547,84 @@
             id="permissionHelp"
             class="permission-help"
           ></div>
+        </section>
+
+        <section class="camera-quality-panel">
+          <div class="camera-quality-grid">
+            <label>
+              Camera lens
+
+              <select
+                id="cameraSelect"
+                onchange="cameraSelectionChanged()"
+              >
+                <option value="">
+                  Automatic rear camera
+                </option>
+              </select>
+            </label>
+
+            <div
+              id="qualityReadout"
+              class="quality-readout"
+            >
+              Camera not started
+            </div>
+          </div>
+
+          <div class="camera-adjustments">
+            <div
+              id="zoomControl"
+              class="zoom-control"
+            >
+              <label>
+                Camera zoom
+
+                <div class="zoom-row">
+                  <input
+                    id="zoomSlider"
+                    type="range"
+                    min="1"
+                    max="1"
+                    step="0.1"
+                    value="1"
+                    oninput="applyCameraZoom()"
+                  >
+
+                  <div
+                    id="zoomValue"
+                    class="zoom-value"
+                  >
+                    1.0×
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <button
+              id="focusButton"
+              type="button"
+              onclick="refocusCamera()"
+              disabled
+            >
+              Refocus
+            </button>
+
+            <button
+              id="torchButton"
+              type="button"
+              onclick="toggleCameraTorch()"
+              disabled
+            >
+              Turn On Light
+            </button>
+          </div>
+
+          <div class="quality-tips">
+            Use the normal rear camera rather than an ultra-wide or
+            macro lens. Clean the lens, use bright even lighting,
+            and hold the Card Number close to the green guide.
+          </div>
         </section>
 
         <section class="increment">
@@ -660,7 +842,31 @@
         [],
 
       permissionState:
-        "unknown"
+        "unknown",
+
+      selectedDeviceId:
+        "",
+
+      videoDevices:
+        [],
+
+      videoTrack:
+        null,
+
+      trackCapabilities:
+        {},
+
+      trackSettings:
+        {},
+
+      zoom:
+        1,
+
+      torchOn:
+        false,
+
+      autoSelectedPreferredCamera:
+        false
     };
 
 
@@ -676,6 +882,16 @@
 
         updateIncrement();
         checkPermissionState();
+
+        if (
+          navigator.mediaDevices &&
+          navigator.mediaDevices.addEventListener
+        ) {
+          navigator.mediaDevices.addEventListener(
+            "devicechange",
+            populateCameraDevices
+          );
+        }
 
         window.addEventListener(
           "message",
@@ -902,37 +1118,21 @@
       }
 
       setStatus(
-        "Requesting camera access… choose Allow in the browser prompt."
+        "Requesting the highest available camera quality… choose Allow if prompted."
       );
 
       stopCamera();
 
       try {
         const stream =
-          await navigator.mediaDevices.getUserMedia({
-            audio:
-              false,
-
-            video: {
-              facingMode: {
-                ideal:
-                  state.facingMode
-              },
-
-              width: {
-                ideal:
-                  1920
-              },
-
-              height: {
-                ideal:
-                  1080
-              }
-            }
-          });
+          await openHighQualityCameraStream();
 
         state.stream =
           stream;
+
+        state.videoTrack =
+          stream.getVideoTracks()[0] ||
+          null;
 
         const video =
           document.getElementById(
@@ -943,6 +1143,11 @@
           stream;
 
         await video.play();
+
+        await applyHighQualityTrackSettings();
+        await populateCameraDevices();
+
+        updateCameraQualityControls();
 
         setPermissionState(
           "granted"
@@ -973,6 +1178,18 @@
             "Camera Granted";
 
         setStatus(
+          "Letting the camera focus…"
+        );
+
+        await waitMilliseconds(
+          650
+        );
+
+        await refocusCamera(
+          true
+        );
+
+        setStatus(
           "Loading local OCR…"
         );
 
@@ -984,12 +1201,14 @@
           return;
         }
 
+        updateCameraQualityControls();
+
         setStatus(
-          "Ready. Slide one card inside the guide."
+          "Ready. Keep the Card Number sharp inside the green guide."
         );
 
         scheduleLoop(
-          100
+          150
         );
       } catch (error) {
         state.active =
@@ -1019,7 +1238,7 @@
           );
 
           setStatus(
-            "Camera access was denied. Change the browser or device Camera permission to Allow, reload this page, then press Request Camera Access again."
+            "Camera access was denied. Change the site Camera permission to Allow, reload, and press Request Camera Access again."
           );
         } else if (
           error &&
@@ -1051,6 +1270,969 @@
           );
         }
       }
+    }
+
+
+    async function openHighQualityCameraStream() {
+      const supported =
+        navigator.mediaDevices.getSupportedConstraints
+          ? navigator.mediaDevices.getSupportedConstraints()
+          : {};
+
+      const video =
+        {
+          width: {
+            ideal:
+              3840
+          },
+
+          height: {
+            ideal:
+              2160
+          },
+
+          frameRate: {
+            ideal:
+              15,
+
+            max:
+              30
+          }
+        };
+
+      if (
+        state.selectedDeviceId
+      ) {
+        video.deviceId = {
+          exact:
+            state.selectedDeviceId
+        };
+      } else {
+        video.facingMode = {
+          ideal:
+            state.facingMode
+        };
+      }
+
+      if (
+        supported.resizeMode
+      ) {
+        video.resizeMode =
+          "none";
+      }
+
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          audio:
+            false,
+
+          video:
+            video
+        });
+      } catch (error) {
+        if (
+          error &&
+          (
+            error.name ===
+              "OverconstrainedError" ||
+            error.name ===
+              "ConstraintNotSatisfiedError"
+          )
+        ) {
+          const fallback =
+            {
+              width: {
+                ideal:
+                  1920
+              },
+
+              height: {
+                ideal:
+                  1080
+              },
+
+              frameRate: {
+                ideal:
+                  15,
+
+                max:
+                  30
+              }
+            };
+
+          if (
+            state.selectedDeviceId
+          ) {
+            fallback.deviceId = {
+              exact:
+                state.selectedDeviceId
+            };
+          } else {
+            fallback.facingMode = {
+              ideal:
+                state.facingMode
+            };
+          }
+
+          return await navigator.mediaDevices.getUserMedia({
+            audio:
+              false,
+
+            video:
+              fallback
+          });
+        }
+
+        throw error;
+      }
+    }
+
+
+    async function applyHighQualityTrackSettings() {
+      const track =
+        state.videoTrack;
+
+      if (
+        !track
+      ) {
+        return;
+      }
+
+      state.trackCapabilities =
+        track.getCapabilities
+          ? track.getCapabilities()
+          : {};
+
+      state.trackSettings =
+        track.getSettings
+          ? track.getSettings()
+          : {};
+
+      const capabilities =
+        state.trackCapabilities;
+
+      const advanced =
+        [];
+
+      if (
+        Array.isArray(
+          capabilities.focusMode
+        ) &&
+        capabilities.focusMode.indexOf(
+          "continuous"
+        ) !==
+          -1
+      ) {
+        advanced.push({
+          focusMode:
+            "continuous"
+        });
+      }
+
+      if (
+        Array.isArray(
+          capabilities.exposureMode
+        ) &&
+        capabilities.exposureMode.indexOf(
+          "continuous"
+        ) !==
+          -1
+      ) {
+        advanced.push({
+          exposureMode:
+            "continuous"
+        });
+      }
+
+      if (
+        Array.isArray(
+          capabilities.whiteBalanceMode
+        ) &&
+        capabilities.whiteBalanceMode.indexOf(
+          "continuous"
+        ) !==
+          -1
+      ) {
+        advanced.push({
+          whiteBalanceMode:
+            "continuous"
+        });
+      }
+
+      const constraints =
+        {};
+
+      if (
+        capabilities.width &&
+        Number(
+          capabilities.width.max ||
+          0
+        ) >
+          Number(
+            state.trackSettings.width ||
+            0
+          )
+      ) {
+        constraints.width = {
+          ideal:
+            Math.min(
+              3840,
+              Number(
+                capabilities.width.max
+              )
+            )
+        };
+      }
+
+      if (
+        capabilities.height &&
+        Number(
+          capabilities.height.max ||
+          0
+        ) >
+          Number(
+            state.trackSettings.height ||
+            0
+          )
+      ) {
+        constraints.height = {
+          ideal:
+            Math.min(
+              2160,
+              Number(
+                capabilities.height.max
+              )
+            )
+        };
+      }
+
+      if (
+        capabilities.frameRate
+      ) {
+        constraints.frameRate = {
+          ideal:
+            Math.min(
+              15,
+              Number(
+                capabilities.frameRate.max ||
+                15
+              )
+            ),
+
+          max:
+            Math.min(
+              30,
+              Number(
+                capabilities.frameRate.max ||
+                30
+              )
+            )
+        };
+      }
+
+      if (
+        advanced.length
+      ) {
+        constraints.advanced =
+          advanced;
+      }
+
+      if (
+        Object.keys(
+          constraints
+        ).length
+      ) {
+        try {
+          await track.applyConstraints(
+            constraints
+          );
+        } catch (error) {
+          console.log(
+            "High-quality constraints were partially unsupported.",
+            error
+          );
+
+          if (
+            advanced.length
+          ) {
+            try {
+              await track.applyConstraints({
+                advanced:
+                  advanced
+              });
+            } catch (ignored) {
+              console.log(
+                ignored
+              );
+            }
+          }
+        }
+      }
+
+      state.trackSettings =
+        track.getSettings
+          ? track.getSettings()
+          : state.trackSettings;
+    }
+
+
+    async function populateCameraDevices() {
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.enumerateDevices
+      ) {
+        return;
+      }
+
+      const devices =
+        await navigator.mediaDevices.enumerateDevices();
+
+      state.videoDevices =
+        devices.filter(function(device) {
+          return (
+            device.kind ===
+              "videoinput"
+          );
+        });
+
+      const select =
+        document.getElementById(
+          "cameraSelect"
+        );
+
+      if (
+        !select
+      ) {
+        return;
+      }
+
+      const currentDeviceId =
+        state.videoTrack &&
+        state.videoTrack.getSettings
+          ? (
+              state.videoTrack.getSettings().deviceId ||
+              state.selectedDeviceId
+            )
+          : state.selectedDeviceId;
+
+      select.innerHTML =
+        '<option value="">Automatic rear camera</option>';
+
+      state.videoDevices
+        .slice()
+        .sort(compareCameraDevices)
+        .forEach(function(device, index) {
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value =
+            device.deviceId;
+
+          option.textContent =
+            device.label ||
+            (
+              "Camera " +
+              (
+                index +
+                1
+              )
+            );
+
+          select.appendChild(
+            option
+          );
+        });
+
+      if (
+        currentDeviceId &&
+        state.videoDevices.some(function(device) {
+          return (
+            device.deviceId ===
+              currentDeviceId
+          );
+        })
+      ) {
+        select.value =
+          currentDeviceId;
+
+        state.selectedDeviceId =
+          currentDeviceId;
+      }
+
+      if (
+        !state.autoSelectedPreferredCamera &&
+        state.videoDevices.length >
+          1
+      ) {
+        const current =
+          state.videoDevices.find(function(device) {
+            return (
+              device.deviceId ===
+                currentDeviceId
+            );
+          });
+
+        const preferred =
+          state.videoDevices
+            .slice()
+            .sort(compareCameraDevices)[0];
+
+        if (
+          current &&
+          preferred &&
+          cameraLooksLowQuality(
+            current.label
+          ) &&
+          !cameraLooksLowQuality(
+            preferred.label
+          ) &&
+          preferred.deviceId !==
+            current.deviceId
+        ) {
+          state.autoSelectedPreferredCamera =
+            true;
+
+          state.selectedDeviceId =
+            preferred.deviceId;
+
+          select.value =
+            preferred.deviceId;
+
+          setStatus(
+            "Switching away from an ultra-wide or macro camera to a sharper rear camera…"
+          );
+
+          stopScanner(
+            false
+          );
+
+          await requestCameraAndStart();
+
+          return;
+        }
+      }
+    }
+
+
+    function compareCameraDevices(
+      left,
+      right
+    ) {
+      return (
+        cameraPreferenceScore(
+          right.label
+        ) -
+          cameraPreferenceScore(
+            left.label
+          ) ||
+        String(
+          left.label ||
+          ""
+        ).localeCompare(
+          String(
+            right.label ||
+            ""
+          )
+        )
+      );
+    }
+
+
+    function cameraPreferenceScore(
+      label
+    ) {
+      const text =
+        String(
+          label ||
+          ""
+        ).toLowerCase();
+
+      let score =
+        0;
+
+      if (
+        /\b(back|rear|environment)\b/.test(
+          text
+        )
+      ) {
+        score +=
+          40;
+      }
+
+      if (
+        /\b(main|standard|wide)\b/.test(
+          text
+        )
+      ) {
+        score +=
+          15;
+      }
+
+      if (
+        /\b(front|user|selfie)\b/.test(
+          text
+        )
+      ) {
+        score -=
+          30;
+      }
+
+      if (
+        /\b(ultra|0\.5|macro|telephoto|tele)\b/.test(
+          text
+        )
+      ) {
+        score -=
+          45;
+      }
+
+      return score;
+    }
+
+
+    function cameraLooksLowQuality(
+      label
+    ) {
+      return /\b(ultra|0\.5|macro|telephoto|tele)\b/i.test(
+        String(
+          label ||
+          ""
+        )
+      );
+    }
+
+
+    async function cameraSelectionChanged() {
+      const select =
+        document.getElementById(
+          "cameraSelect"
+        );
+
+      state.selectedDeviceId =
+        select
+          ? select.value
+          : "";
+
+      state.autoSelectedPreferredCamera =
+        true;
+
+      if (
+        state.active
+      ) {
+        stopScanner(
+          false
+        );
+
+        await requestCameraAndStart();
+      }
+    }
+
+
+    function updateCameraQualityControls() {
+      const track =
+        state.videoTrack;
+
+      const settings =
+        track &&
+        track.getSettings
+          ? track.getSettings()
+          : state.trackSettings ||
+            {};
+
+      const capabilities =
+        track &&
+        track.getCapabilities
+          ? track.getCapabilities()
+          : state.trackCapabilities ||
+            {};
+
+      state.trackSettings =
+        settings;
+
+      state.trackCapabilities =
+        capabilities;
+
+      const readout =
+        document.getElementById(
+          "qualityReadout"
+        );
+
+      if (
+        readout
+      ) {
+        const width =
+          Number(
+            settings.width ||
+            0
+          );
+
+        const height =
+          Number(
+            settings.height ||
+            0
+          );
+
+        const frameRate =
+          Number(
+            settings.frameRate ||
+            0
+          );
+
+        readout.textContent =
+          width &&
+          height
+            ? (
+                width +
+                " × " +
+                height +
+                (
+                  frameRate
+                    ? " · " +
+                      Math.round(
+                        frameRate
+                      ) +
+                      " fps"
+                    : ""
+                )
+              )
+            : "Resolution unavailable";
+      }
+
+      const focusButton =
+        document.getElementById(
+          "focusButton"
+        );
+
+      if (
+        focusButton
+      ) {
+        focusButton.disabled =
+          !track;
+      }
+
+      const torchButton =
+        document.getElementById(
+          "torchButton"
+        );
+
+      if (
+        torchButton
+      ) {
+        const torchSupported =
+          Boolean(
+            capabilities.torch
+          );
+
+        torchButton.disabled =
+          !torchSupported;
+
+        torchButton.textContent =
+          state.torchOn
+            ? "Turn Off Light"
+            : (
+                torchSupported
+                  ? "Turn On Light"
+                  : "Light Unavailable"
+              );
+      }
+
+      const zoomControl =
+        document.getElementById(
+          "zoomControl"
+        );
+
+      const zoomSlider =
+        document.getElementById(
+          "zoomSlider"
+        );
+
+      if (
+        capabilities.zoom &&
+        Number(
+          capabilities.zoom.max ||
+          0
+        ) >
+          Number(
+            capabilities.zoom.min ||
+            0
+          )
+      ) {
+        const minimum =
+          Number(
+            capabilities.zoom.min
+          );
+
+        const maximum =
+          Number(
+            capabilities.zoom.max
+          );
+
+        const step =
+          Number(
+            capabilities.zoom.step ||
+            0.1
+          );
+
+        state.zoom =
+          Math.max(
+            minimum,
+            Math.min(
+              maximum,
+              Number(
+                settings.zoom ||
+                state.zoom ||
+                minimum
+              )
+            )
+          );
+
+        zoomSlider.min =
+          minimum;
+
+        zoomSlider.max =
+          maximum;
+
+        zoomSlider.step =
+          step;
+
+        zoomSlider.value =
+          state.zoom;
+
+        zoomControl.classList.add(
+          "show"
+        );
+      } else {
+        zoomControl.classList.remove(
+          "show"
+        );
+      }
+
+      updateZoomValue();
+    }
+
+
+    async function applyCurrentAdvancedCameraSettings() {
+      const track =
+        state.videoTrack;
+
+      if (
+        !track ||
+        !track.applyConstraints
+      ) {
+        return;
+      }
+
+      const capabilities =
+        track.getCapabilities
+          ? track.getCapabilities()
+          : {};
+
+      const advanced =
+        [];
+
+      if (
+        Array.isArray(
+          capabilities.focusMode
+        ) &&
+        capabilities.focusMode.indexOf(
+          "continuous"
+        ) !==
+          -1
+      ) {
+        advanced.push({
+          focusMode:
+            "continuous"
+        });
+      }
+
+      if (
+        capabilities.zoom
+      ) {
+        advanced.push({
+          zoom:
+            state.zoom
+        });
+      }
+
+      if (
+        capabilities.torch
+      ) {
+        advanced.push({
+          torch:
+            state.torchOn
+        });
+      }
+
+      if (
+        !advanced.length
+      ) {
+        return;
+      }
+
+      const current =
+        track.getConstraints
+          ? track.getConstraints()
+          : {};
+
+      current.advanced =
+        advanced;
+
+      await track.applyConstraints(
+        current
+      );
+
+      state.trackSettings =
+        track.getSettings
+          ? track.getSettings()
+          : state.trackSettings;
+    }
+
+
+    async function applyCameraZoom() {
+      const slider =
+        document.getElementById(
+          "zoomSlider"
+        );
+
+      state.zoom =
+        Number(
+          slider.value ||
+          1
+        );
+
+      updateZoomValue();
+
+      try {
+        await applyCurrentAdvancedCameraSettings();
+        updateCameraQualityControls();
+      } catch (error) {
+        setStatus(
+          "This camera could not apply that zoom amount."
+        );
+      }
+    }
+
+
+    function updateZoomValue() {
+      const value =
+        document.getElementById(
+          "zoomValue"
+        );
+
+      if (
+        value
+      ) {
+        value.textContent =
+          Number(
+            state.zoom ||
+            1
+          ).toFixed(
+            1
+          ) +
+          "×";
+      }
+    }
+
+
+    async function toggleCameraTorch() {
+      state.torchOn =
+        !state.torchOn;
+
+      try {
+        await applyCurrentAdvancedCameraSettings();
+        updateCameraQualityControls();
+
+        setStatus(
+          state.torchOn
+            ? "Camera light is on. Avoid glare directly over the Card Number."
+            : "Camera light is off."
+        );
+      } catch (error) {
+        state.torchOn =
+          false;
+
+        updateCameraQualityControls();
+
+        setStatus(
+          "This browser or camera could not control the light."
+        );
+      }
+    }
+
+
+    async function refocusCamera(
+      quiet
+    ) {
+      const track =
+        state.videoTrack;
+
+      if (
+        !track
+      ) {
+        return;
+      }
+
+      const capabilities =
+        track.getCapabilities
+          ? track.getCapabilities()
+          : {};
+
+      try {
+        if (
+          Array.isArray(
+            capabilities.focusMode
+          ) &&
+          capabilities.focusMode.indexOf(
+            "single-shot"
+          ) !==
+            -1
+        ) {
+          await track.applyConstraints({
+            advanced: [
+              {
+                focusMode:
+                  "single-shot"
+              }
+            ]
+          });
+
+          await waitMilliseconds(
+            350
+          );
+        }
+
+        await applyCurrentAdvancedCameraSettings();
+
+        if (
+          !quiet
+        ) {
+          setStatus(
+            "Refocusing… hold the card still for one second."
+          );
+        }
+      } catch (error) {
+        if (
+          !quiet
+        ) {
+          setStatus(
+            "Automatic refocus is unavailable. Move the card slightly farther away, then slowly bring it closer."
+          );
+        }
+      }
+    }
+
+
+    function waitMilliseconds(
+      milliseconds
+    ) {
+      return new Promise(function(resolve) {
+        window.setTimeout(
+          resolve,
+          milliseconds
+        );
+      });
     }
 
 
@@ -1123,6 +2305,8 @@
         .disabled =
           false;
 
+      updateCameraQualityControls();
+
       if (
         showMessage
       ) {
@@ -1147,6 +2331,18 @@
       state.stream =
         null;
 
+      state.videoTrack =
+        null;
+
+      state.trackCapabilities =
+        {};
+
+      state.trackSettings =
+        {};
+
+      state.torchOn =
+        false;
+
       const video =
         document.getElementById(
           "video"
@@ -1154,6 +2350,8 @@
 
       video.srcObject =
         null;
+
+      updateCameraQualityControls();
     }
 
 
@@ -1240,26 +2438,10 @@
         return;
       }
 
-      const frame =
-        document.getElementById(
-          "frameCanvas"
-        );
-
-      frame.width =
-        1200;
-
-      frame.height =
-        1676;
-
-      drawImageCover(
-        video,
-        frame
-      );
-
       try {
         const result =
           await recognizeCardNumber(
-            frame
+            video
           );
 
         if (
@@ -1286,7 +2468,7 @@
         scheduleLoop(
           state.awaitingClear
             ? 500
-            : 450
+            : 500
         );
       }
     }
@@ -1315,6 +2497,10 @@
           makeVariant(
             crop,
             "threshold"
+          ),
+          makeVariant(
+            crop,
+            "inverted"
           )
         ];
 
@@ -2148,30 +3334,159 @@
 
 
     function createCardNumberCrop(
-      frame
+      video
     ) {
-      const sourceX =
-        Math.round(
-          frame.width *
-          0.47
+      const videoWidth =
+        Number(
+          video.videoWidth ||
+          0
         );
 
-      const sourceY =
-        Math.round(
-          frame.height *
-          0.835
+      const videoHeight =
+        Number(
+          video.videoHeight ||
+          0
         );
 
-      const sourceWidth =
-        Math.round(
-          frame.width *
-          0.52
+      if (
+        !videoWidth ||
+        !videoHeight
+      ) {
+        throw new Error(
+          "The camera frame does not have a usable resolution."
+        );
+      }
+
+      const videoRect =
+        video.getBoundingClientRect();
+
+      const guide =
+        document.querySelector(
+          ".number-guide"
         );
 
-      const sourceHeight =
-        Math.round(
-          frame.height *
-          0.16
+      const guideRect =
+        guide.getBoundingClientRect();
+
+      /*
+       * The preview uses object-fit: cover. Convert the visible
+       * green guide back into native camera pixels so OCR receives
+       * the original detail instead of a resized portrait frame.
+       */
+      const scale =
+        Math.max(
+          videoRect.width /
+            videoWidth,
+          videoRect.height /
+            videoHeight
+        );
+
+      const renderedWidth =
+        videoWidth *
+        scale;
+
+      const renderedHeight =
+        videoHeight *
+        scale;
+
+      const offsetX =
+        (
+          videoRect.width -
+          renderedWidth
+        ) /
+        2;
+
+      const offsetY =
+        (
+          videoRect.height -
+          renderedHeight
+        ) /
+        2;
+
+      let sourceX =
+        (
+          guideRect.left -
+          videoRect.left -
+          offsetX
+        ) /
+        scale;
+
+      let sourceY =
+        (
+          guideRect.top -
+          videoRect.top -
+          offsetY
+        ) /
+        scale;
+
+      let sourceWidth =
+        guideRect.width /
+        scale;
+
+      let sourceHeight =
+        guideRect.height /
+        scale;
+
+      const paddingX =
+        sourceWidth *
+        0.08;
+
+      const paddingY =
+        sourceHeight *
+        0.16;
+
+      sourceX -=
+        paddingX;
+
+      sourceY -=
+        paddingY;
+
+      sourceWidth +=
+        paddingX *
+        2;
+
+      sourceHeight +=
+        paddingY *
+        2;
+
+      sourceX =
+        Math.max(
+          0,
+          Math.min(
+            videoWidth -
+            2,
+            sourceX
+          )
+        );
+
+      sourceY =
+        Math.max(
+          0,
+          Math.min(
+            videoHeight -
+            2,
+            sourceY
+          )
+        );
+
+      sourceWidth =
+        Math.max(
+          2,
+          Math.min(
+            videoWidth -
+            sourceX,
+            sourceWidth
+          )
+        );
+
+      sourceHeight =
+        Math.max(
+          2,
+          Math.min(
+            videoHeight -
+            sourceY,
+            sourceHeight
+          )
         );
 
       const crop =
@@ -2179,15 +3494,33 @@
           "cropCanvas"
         );
 
+      const upscale =
+        sourceWidth <
+          900
+          ? 2.4
+          : 1.7;
+
       crop.width =
-        1800;
+        Math.min(
+          2200,
+          Math.max(
+            1100,
+            Math.round(
+              sourceWidth *
+              upscale
+            )
+          )
+        );
 
       crop.height =
-        Math.round(
-          sourceHeight *
-          (
-            crop.width /
-            sourceWidth
+        Math.max(
+          320,
+          Math.round(
+            sourceHeight *
+            (
+              crop.width /
+              sourceWidth
+            )
           )
         );
 
@@ -2203,6 +3536,16 @@
           }
         );
 
+      context.fillStyle =
+        "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        crop.width,
+        crop.height
+      );
+
       context.imageSmoothingEnabled =
         true;
 
@@ -2210,7 +3553,7 @@
         "high";
 
       context.drawImage(
-        frame,
+        video,
         sourceX,
         sourceY,
         sourceWidth,
@@ -2269,6 +3612,21 @@
       const pixels =
         imageData.data;
 
+      let threshold =
+        155;
+
+      if (
+        mode ===
+          "threshold" ||
+        mode ===
+          "inverted"
+      ) {
+        threshold =
+          calculateOtsuThreshold(
+            pixels
+          );
+      }
+
       for (
         let index =
           0;
@@ -2303,9 +3661,18 @@
         ) {
           value =
             gray >
-              155
+              threshold
               ? 255
               : 0;
+        } else if (
+          mode ===
+            "inverted"
+        ) {
+          value =
+            gray >
+              threshold
+              ? 0
+              : 255;
         } else {
           value =
             Math.max(
@@ -2316,7 +3683,7 @@
                   gray -
                   128
                 ) *
-                  1.9 +
+                  2.15 +
                 128
               )
             );
@@ -2347,6 +3714,140 @@
       );
 
       return canvas;
+    }
+
+
+    function calculateOtsuThreshold(
+      pixels
+    ) {
+      const histogram =
+        new Array(
+          256
+        ).fill(
+          0
+        );
+
+      let total =
+        0;
+
+      let sum =
+        0;
+
+      for (
+        let index =
+          0;
+        index <
+          pixels.length;
+        index +=
+          4
+      ) {
+        const gray =
+          Math.round(
+            pixels[
+              index
+            ] *
+              0.299 +
+            pixels[
+              index +
+                1
+            ] *
+              0.587 +
+            pixels[
+              index +
+                2
+            ] *
+              0.114
+          );
+
+        histogram[
+          gray
+        ]++;
+
+        total++;
+
+        sum +=
+          gray;
+      }
+
+      let backgroundWeight =
+        0;
+
+      let backgroundSum =
+        0;
+
+      let maximumVariance =
+        0;
+
+      let threshold =
+        155;
+
+      for (
+        let value =
+          0;
+        value <
+          256;
+        value++
+      ) {
+        backgroundWeight +=
+          histogram[
+            value
+          ];
+
+        if (
+          !backgroundWeight
+        ) {
+          continue;
+        }
+
+        const foregroundWeight =
+          total -
+          backgroundWeight;
+
+        if (
+          !foregroundWeight
+        ) {
+          break;
+        }
+
+        backgroundSum +=
+          value *
+          histogram[
+            value
+          ];
+
+        const backgroundMean =
+          backgroundSum /
+          backgroundWeight;
+
+        const foregroundMean =
+          (
+            sum -
+            backgroundSum
+          ) /
+          foregroundWeight;
+
+        const variance =
+          backgroundWeight *
+          foregroundWeight *
+          Math.pow(
+            backgroundMean -
+            foregroundMean,
+            2
+          );
+
+        if (
+          variance >
+            maximumVariance
+        ) {
+          maximumVariance =
+            variance;
+
+          threshold =
+            value;
+        }
+      }
+
+      return threshold;
     }
 
 
