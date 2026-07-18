@@ -11,7 +11,7 @@
     content="#0f1117"
   >
 
-  <title>One Piece Live Stock Scanner — Fast Session</title>
+  <title>One Piece Live Stock Scanner — Reliable Fast Session</title>
 
   <style>
     :root {
@@ -1027,6 +1027,13 @@
             disabled
           >
             Retry Failed Saves
+          </button>
+
+          <button
+            type="button"
+            onclick="resumePendingScannerSaves()"
+          >
+            Resume Pending Saves
           </button>
         </div>
 
@@ -4113,7 +4120,7 @@
 
       scheduleScannerSyncWatchdog(
         item,
-        30000
+        18000
       );
     }
 
@@ -4145,7 +4152,7 @@
 
             setStatus(
               item.cardNumber +
-              " is still waiting for Sheets. It will retry safely in the background."
+              " has not received a final Sheets confirmation yet. The same transaction will retry safely."
             );
 
             window.setTimeout(
@@ -4171,6 +4178,52 @@
 
       state.syncWatchdog =
         null;
+    }
+
+
+    function resumePendingScannerSaves() {
+      clearScannerSyncWatchdog();
+
+      if (
+        state.syncInFlight
+      ) {
+        const active =
+          state.syncQueue.find(function(item) {
+            return (
+              item.requestId ===
+                state.syncInFlight
+            );
+          });
+
+        if (
+          active
+        ) {
+          active.status =
+            "PENDING";
+        }
+      }
+
+      state.syncInFlight =
+        "";
+
+      state.syncQueue.forEach(function(item) {
+        if (
+          item.status ===
+            "IN_FLIGHT"
+        ) {
+          item.status =
+            "PENDING";
+        }
+      });
+
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
+
+      setStatus(
+        "Resuming pending Stock saves with safe transaction IDs…"
+      );
+
+      processScannerSyncQueue();
     }
 
 
@@ -5003,7 +5056,7 @@
       ) {
         scheduleScannerSyncWatchdog(
           item,
-          30000
+          18000
         );
 
         return;
