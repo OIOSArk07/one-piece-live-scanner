@@ -11,7 +11,7 @@
     content="#0f1117"
   >
 
-  <title>One Piece Live Stock Scanner — Reliable Queue</title>
+  <title>One Piece Live Stock Scanner — Review Before Save</title>
 
   <style>
     :root {
@@ -479,6 +479,174 @@
       word-break:break-word;
     }
 
+    .review-backdrop {
+      position:fixed;
+      inset:0;
+      z-index:1000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      background:rgba(0,0,0,.76);
+      backdrop-filter:blur(4px);
+    }
+
+    .review-dialog {
+      width:min(470px,100%);
+      max-height:92vh;
+      overflow:auto;
+      border:1px solid rgba(238,224,55,.48);
+      border-radius:16px;
+      background:var(--panel);
+      box-shadow:0 24px 80px rgba(0,0,0,.58);
+    }
+
+    .review-header {
+      padding:14px 15px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .review-header strong {
+      display:block;
+      font-size:1rem;
+    }
+
+    .review-header span {
+      display:block;
+      margin-top:4px;
+      color:var(--muted);
+      font-size:.7rem;
+    }
+
+    .review-body {
+      padding:14px 15px;
+    }
+
+    .review-card {
+      padding:11px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(0,0,0,.18);
+    }
+
+    .review-card-number {
+      color:var(--accent);
+      font-size:1.05rem;
+      font-weight:950;
+    }
+
+    .review-card-name {
+      margin-top:3px;
+      font-size:.86rem;
+      font-weight:850;
+    }
+
+    .review-card-meta {
+      margin-top:5px;
+      color:var(--muted);
+      font-size:.68rem;
+      line-height:1.45;
+    }
+
+    .review-stock-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:11px;
+    }
+
+    .review-stock-box {
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:#0d1016;
+      text-align:center;
+    }
+
+    .review-stock-box span {
+      display:block;
+      color:var(--muted);
+      font-size:.59rem;
+      font-weight:900;
+      letter-spacing:.05em;
+      text-transform:uppercase;
+    }
+
+    .review-stock-box strong {
+      display:block;
+      margin-top:5px;
+      font-size:1.18rem;
+    }
+
+    .review-amount {
+      display:grid;
+      gap:6px;
+      margin-top:12px;
+      color:var(--muted);
+      font-size:.68rem;
+      font-weight:850;
+      letter-spacing:.05em;
+      text-transform:uppercase;
+    }
+
+    .review-amount-row {
+      display:grid;
+      grid-template-columns:auto minmax(90px,1fr) auto;
+      gap:7px;
+      align-items:center;
+    }
+
+    .review-amount-row input {
+      min-height:46px;
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0d1016;
+      color:var(--text);
+      text-align:center;
+      font-size:1.05rem;
+      font-weight:950;
+    }
+
+    .review-message {
+      min-height:42px;
+      margin-top:11px;
+      padding:9px 10px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      color:var(--muted);
+      background:rgba(0,0,0,.16);
+      font-size:.7rem;
+      line-height:1.45;
+    }
+
+    .review-message.error {
+      border-color:rgba(255,102,111,.52);
+      color:#ffd9dc;
+    }
+
+    .review-message.good {
+      border-color:rgba(86,211,136,.52);
+      color:#d8ffe6;
+    }
+
+    .review-actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:12px;
+    }
+
+    .review-actions button {
+      flex:1 1 135px;
+    }
+
+    @media (max-width:480px) {
+      .review-stock-grid {
+        grid-template-columns:1fr;
+      }
+    }
+
     .hidden {
       display:none !important;
     }
@@ -629,7 +797,7 @@
 
         <section class="increment">
           <label>
-            Stock added per accepted card
+            Default amount shown in review popup
 
             <div class="increment-row">
               <button
@@ -775,6 +943,124 @@
     </section>
   </main>
 
+  <div
+    id="reviewBackdrop"
+    class="review-backdrop hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reviewTitle"
+  >
+    <section class="review-dialog">
+      <div class="review-header">
+        <strong id="reviewTitle">Review scanned card</strong>
+        <span>
+          Confirm the card and choose how much Stock to add.
+        </span>
+      </div>
+
+      <div class="review-body">
+        <div class="review-card">
+          <div
+            id="reviewCardNumber"
+            class="review-card-number"
+          >
+            —
+          </div>
+
+          <div
+            id="reviewCardName"
+            class="review-card-name"
+          >
+            Loading card…
+          </div>
+
+          <div
+            id="reviewCardMeta"
+            class="review-card-meta"
+          ></div>
+        </div>
+
+        <div class="review-stock-grid">
+          <div class="review-stock-box">
+            <span>Current Stock</span>
+            <strong id="reviewCurrentStock">—</strong>
+          </div>
+
+          <div class="review-stock-box">
+            <span>New Stock</span>
+            <strong id="reviewNewStock">—</strong>
+          </div>
+        </div>
+
+        <label class="review-amount">
+          Add this many to Stock
+
+          <div class="review-amount-row">
+            <button
+              type="button"
+              onclick="changeReviewAmount(-1)"
+            >
+              −
+            </button>
+
+            <input
+              id="reviewAmountInput"
+              type="number"
+              min="1"
+              max="99"
+              step="1"
+              inputmode="numeric"
+              value="1"
+              oninput="updateReviewAmount()"
+            >
+
+            <button
+              type="button"
+              onclick="changeReviewAmount(1)"
+            >
+              +
+            </button>
+          </div>
+        </label>
+
+        <div
+          id="reviewMessage"
+          class="review-message"
+        >
+          Loading card information…
+        </div>
+
+        <div class="review-actions">
+          <button
+            id="reviewSaveButton"
+            class="primary"
+            type="button"
+            onclick="saveReviewedCard()"
+            disabled
+          >
+            Save to Collection
+          </button>
+
+          <button
+            id="reviewRetryButton"
+            type="button"
+            onclick="retryReviewedCardSave()"
+            disabled
+          >
+            Retry Save
+          </button>
+
+          <button
+            type="button"
+            onclick="cancelReviewedCard()"
+          >
+            Cancel / Scan Again
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <canvas
     id="frameCanvas"
     class="hidden"
@@ -849,6 +1135,21 @@
 
       pendingRequestAcknowledged:
         false,
+
+      reviewOpen:
+        false,
+
+      reviewLookupRequestId:
+        "",
+
+      reviewCardNumber:
+        "",
+
+      reviewPreview:
+        null,
+
+      reviewAmount:
+        1,
 
       candidate:
         "",
@@ -2445,7 +2746,8 @@
 
       if (
         state.busy ||
-        state.pendingRequestId
+        state.pendingRequestId ||
+        state.reviewOpen
       ) {
         scheduleLoop(
           250
@@ -2751,7 +3053,7 @@
         return;
       }
 
-      submitCard(
+      requestCardReview(
         cardNumber
       );
     }
@@ -2814,7 +3116,7 @@
     }
 
 
-    function submitCard(
+    function requestCardReview(
       cardNumber
     ) {
       if (
@@ -2828,41 +3130,22 @@
         return;
       }
 
-      if (
-        state.pendingRequestId
-      ) {
-        setStatus(
-          "The previous card is still being saved. Wait for its result or press Retry Same Save."
-        );
+      state.reviewOpen =
+        true;
 
-        return;
-      }
-
-      const requestId =
+      state.reviewLookupRequestId =
         randomToken();
 
-      state.pendingRequestId =
-        requestId;
+      state.reviewCardNumber =
+        cardNumber;
 
-      state.pendingRequestPayload = {
-        action:
-          "SCAN",
+      state.reviewPreview =
+        null;
 
-        requestId:
-          requestId,
-
-        cardNumber:
-          cardNumber,
-
-        increment:
+      state.reviewAmount =
+        clampIncrement(
           state.increment
-      };
-
-      state.pendingRequestRetries =
-        0;
-
-      state.pendingRequestAcknowledged =
-        false;
+        );
 
       state.awaitingClear =
         true;
@@ -2876,14 +3159,226 @@
       state.candidateHits =
         0;
 
-      updateQueueButtons();
+      clearPendingSaveWatchdog();
+
+      document
+        .getElementById(
+          "reviewBackdrop"
+        )
+        .classList
+        .remove(
+          "hidden"
+        );
+
+      document
+        .getElementById(
+          "reviewCardNumber"
+        )
+        .textContent =
+          cardNumber;
+
+      document
+        .getElementById(
+          "reviewCardName"
+        )
+        .textContent =
+          "Loading card…";
+
+      document
+        .getElementById(
+          "reviewCardMeta"
+        )
+        .textContent =
+          "";
+
+      document
+        .getElementById(
+          "reviewCurrentStock"
+        )
+        .textContent =
+          "—";
+
+      document
+        .getElementById(
+          "reviewNewStock"
+        )
+        .textContent =
+          "—";
+
+      document
+        .getElementById(
+          "reviewAmountInput"
+        )
+        .value =
+          state.reviewAmount;
+
+      setReviewMessage(
+        "Loading card information from the Collection Manager…",
+        ""
+      );
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "reviewRetryButton"
+        )
+        .disabled =
+          true;
 
       setStatus(
         "Recognized " +
         cardNumber +
-        ". Sending +" +
-        state.increment +
-        " Stock to the Collection Manager…"
+        ". Review the card and enter Stock."
+      );
+
+      sendToParent({
+        action:
+          "LOOKUP",
+
+        requestId:
+          state.reviewLookupRequestId,
+
+        cardNumber:
+          cardNumber
+      });
+    }
+
+
+    function updateReviewAmount() {
+      const input =
+        document.getElementById(
+          "reviewAmountInput"
+        );
+
+      state.reviewAmount =
+        clampIncrement(
+          input.value
+        );
+
+      input.value =
+        state.reviewAmount;
+
+      if (
+        state.reviewPreview
+      ) {
+        document
+          .getElementById(
+            "reviewNewStock"
+          )
+          .textContent =
+            Number(
+              state.reviewPreview.currentStock ||
+              0
+            ) +
+            state.reviewAmount;
+
+        document
+          .getElementById(
+            "reviewSaveButton"
+          )
+          .textContent =
+            "Save +" +
+            state.reviewAmount +
+            " to Collection";
+      }
+    }
+
+
+    function changeReviewAmount(
+      delta
+    ) {
+      state.reviewAmount =
+        clampIncrement(
+          state.reviewAmount +
+          Number(
+            delta ||
+            0
+          )
+        );
+
+      document
+        .getElementById(
+          "reviewAmountInput"
+        )
+        .value =
+          state.reviewAmount;
+
+      updateReviewAmount();
+    }
+
+
+    function saveReviewedCard() {
+      if (
+        !state.reviewOpen ||
+        !state.reviewPreview ||
+        state.pendingRequestId
+      ) {
+        return;
+      }
+
+      updateReviewAmount();
+
+      const requestId =
+        randomToken();
+
+      state.pendingRequestId =
+        requestId;
+
+      state.pendingRequestPayload = {
+        action:
+          "SAVE",
+
+        requestId:
+          requestId,
+
+        cardNumber:
+          state.reviewCardNumber,
+
+        amount:
+          state.reviewAmount
+      };
+
+      state.pendingRequestRetries =
+        0;
+
+      state.pendingRequestAcknowledged =
+        false;
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "reviewRetryButton"
+        )
+        .disabled =
+          false;
+
+      setReviewMessage(
+        "Saving +" +
+        state.reviewAmount +
+        " Stock to " +
+        state.reviewPreview.destinationSheet +
+        "…",
+        ""
+      );
+
+      setStatus(
+        "Saving " +
+        state.reviewCardNumber +
+        " +" +
+        state.reviewAmount +
+        " Stock…"
       );
 
       sendToParent(
@@ -2891,8 +3386,89 @@
       );
 
       schedulePendingSaveWatchdog(
-        12000
+        15000
       );
+    }
+
+
+    function retryReviewedCardSave() {
+      if (
+        state.pendingRequestId
+      ) {
+        retryPendingSave(
+          false
+        );
+
+        return;
+      }
+
+      saveReviewedCard();
+    }
+
+
+    function cancelReviewedCard() {
+      if (
+        state.pendingRequestId
+      ) {
+        setReviewMessage(
+          "Wait for the current save to finish before closing this review.",
+          "error"
+        );
+
+        return;
+      }
+
+      closeReviewDialog();
+
+      setStatus(
+        "Remove the card, then slide the next card into the guide."
+      );
+    }
+
+
+    function closeReviewDialog() {
+      state.reviewOpen =
+        false;
+
+      state.reviewLookupRequestId =
+        "";
+
+      state.reviewPreview =
+        null;
+
+      document
+        .getElementById(
+          "reviewBackdrop"
+        )
+        .classList
+        .add(
+          "hidden"
+        );
+
+      updateQueueButtons();
+    }
+
+
+    function setReviewMessage(
+      message,
+      type
+    ) {
+      const element =
+        document.getElementById(
+          "reviewMessage"
+        );
+
+      element.className =
+        "review-message" +
+        (
+          type
+            ? " " +
+              type
+            : ""
+        );
+
+      element.textContent =
+        message;
     }
 
 
@@ -2935,7 +3511,138 @@
         data.type !==
           "ONE_PIECE_LIVE_SCANNER_RESULT" ||
         data.sessionToken !==
-          state.sessionToken ||
+          state.sessionToken
+      ) {
+        return;
+      }
+
+      if (
+        data.action ===
+          "LOOKUP_RESULT"
+      ) {
+        if (
+          data.requestId !==
+            state.reviewLookupRequestId
+        ) {
+          return;
+        }
+
+        if (
+          !data.ok
+        ) {
+          state.reviewPreview =
+            null;
+
+          document
+            .getElementById(
+              "reviewCardName"
+            )
+            .textContent =
+              "Card could not be loaded";
+
+          setReviewMessage(
+            data.message ||
+            "The card was not found in the Collection or Master Catalog.",
+            "error"
+          );
+
+          document
+            .getElementById(
+              "reviewSaveButton"
+            )
+            .disabled =
+              true;
+
+          return;
+        }
+
+        const preview =
+          data.preview ||
+          {};
+
+        state.reviewPreview =
+          preview;
+
+        state.reviewAmount =
+          clampIncrement(
+            state.increment
+          );
+
+        document
+          .getElementById(
+            "reviewCardNumber"
+          )
+          .textContent =
+            preview.cardNumber ||
+            state.reviewCardNumber;
+
+        document
+          .getElementById(
+            "reviewCardName"
+          )
+          .textContent =
+            preview.name ||
+            "Unknown name";
+
+        document
+          .getElementById(
+            "reviewCardMeta"
+          )
+          .textContent =
+            [
+              preview.color,
+              preview.type,
+              preview.rarity,
+              preview.source,
+              preview.destinationSheet
+            ]
+              .filter(
+                Boolean
+              )
+              .join(
+                " · "
+              );
+
+        document
+          .getElementById(
+            "reviewCurrentStock"
+          )
+          .textContent =
+            Number(
+              preview.currentStock ||
+              0
+            );
+
+        document
+          .getElementById(
+            "reviewAmountInput"
+          )
+          .value =
+            state.reviewAmount;
+
+        updateReviewAmount();
+
+        setReviewMessage(
+          preview.message ||
+          "Review the card and press Save.",
+          preview.inCollection
+            ? "good"
+            : ""
+        );
+
+        document
+          .getElementById(
+            "reviewSaveButton"
+          )
+          .disabled =
+            false;
+
+        return;
+      }
+
+      if (
+        data.action !==
+          "SAVE_RESULT" ||
         data.requestId !==
           state.pendingRequestId
       ) {
@@ -2948,9 +3655,10 @@
         state.pendingRequestAcknowledged =
           true;
 
-        setStatus(
+        setReviewMessage(
           data.message ||
-          "The Collection Manager received the card and is processing it."
+          "The Collection Manager received the save and is processing it.",
+          ""
         );
 
         schedulePendingSaveWatchdog(
@@ -3011,8 +3719,8 @@
 
           increment:
             Number(
-              result.increment ||
-              state.increment
+              result.amount ||
+              state.reviewAmount
             )
         });
 
@@ -3023,13 +3731,52 @@
           );
 
         signalSuccess();
+        renderSummary();
 
-        setStatus(
-          (
-            result.message ||
-            "Stock saved."
-          ) +
-          " Remove the card, then press Next if Ready does not appear automatically."
+        setReviewMessage(
+          result.message ||
+          "Stock saved successfully.",
+          "good"
+        );
+
+        document
+          .getElementById(
+            "reviewCurrentStock"
+          )
+          .textContent =
+            Number(
+              result.stock ||
+              0
+            );
+
+        document
+          .getElementById(
+            "reviewNewStock"
+          )
+          .textContent =
+            Number(
+              result.stock ||
+              0
+            );
+
+        document
+          .getElementById(
+            "reviewRetryButton"
+          )
+          .disabled =
+            true;
+
+        window.setTimeout(
+          function() {
+            closeReviewDialog();
+
+            setStatus(
+              "Saved " +
+              result.cardNumber +
+              ". Remove the card until Ready appears."
+            );
+          },
+          700
         );
       } else {
         state.history.unshift({
@@ -3037,7 +3784,7 @@
             false,
 
           cardNumber:
-            state.lastAccepted,
+            state.reviewCardNumber,
 
           message:
             data.message ||
@@ -3051,18 +3798,30 @@
           );
 
         signalError();
+        renderSummary();
 
-        setStatus(
-          (
-            data.message ||
-            "The Stock update failed."
-          ) +
-          " Remove the card before continuing."
+        setReviewMessage(
+          data.message ||
+          "The Stock update failed. Check the card data and press Retry Save.",
+          "error"
         );
+
+        document
+          .getElementById(
+            "reviewSaveButton"
+          )
+          .disabled =
+            false;
+
+        document
+          .getElementById(
+            "reviewRetryButton"
+          )
+          .disabled =
+            false;
       }
 
       updateQueueButtons();
-      renderSummary();
     }
 
 
@@ -3142,7 +3901,7 @@
         );
       } else {
         setStatus(
-          "Still waiting for the Collection Manager. Keep both tabs open and press Retry Same Save."
+          "Still waiting for the Collection Manager. Keep both tabs open and press Retry Save in the review window."
         );
 
         document
@@ -3172,6 +3931,12 @@
         );
 
         return;
+      }
+
+      if (
+        state.reviewOpen
+      ) {
+        closeReviewDialog();
       }
 
       state.awaitingClear =
@@ -3208,6 +3973,11 @@
           "retrySaveButton"
         );
 
+      const reviewRetry =
+        document.getElementById(
+          "reviewRetryButton"
+        );
+
       if (
         nextButton
       ) {
@@ -3215,16 +3985,24 @@
           Boolean(
             state.pendingRequestId
           ) ||
+          state.reviewOpen ||
           !state.awaitingClear;
       }
 
       if (
         retryButton
       ) {
-        retryButton.classList.toggle(
-          "hidden",
-          !state.pendingRequestId
+        retryButton.classList.add(
+          "hidden"
         );
+      }
+
+      if (
+        reviewRetry
+      ) {
+        reviewRetry.disabled =
+          !state.pendingRequestId &&
+          !state.reviewPreview;
       }
     }
 
