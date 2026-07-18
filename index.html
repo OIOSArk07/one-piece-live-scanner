@@ -1,0 +1,2665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <meta
+    name="theme-color"
+    content="#0f1117"
+  >
+
+  <title>One Piece Live Stock Scanner</title>
+
+  <style>
+    :root {
+      color-scheme:dark;
+      --bg:#0f1117;
+      --panel:#181b24;
+      --panel2:#11141b;
+      --text:#f4f5f7;
+      --muted:#a8afbd;
+      --line:#343a48;
+      --accent:#eee037;
+      --good:#56d388;
+      --bad:#ff666f;
+      --shadow:0 18px 50px rgba(0,0,0,.36);
+    }
+
+    * {
+      box-sizing:border-box;
+    }
+
+    html,
+    body {
+      margin:0;
+      min-height:100%;
+      background:
+        radial-gradient(circle at top, rgba(238,224,55,.09), transparent 34rem),
+        var(--bg);
+      color:var(--text);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      padding:
+        max(12px, env(safe-area-inset-top))
+        max(12px, env(safe-area-inset-right))
+        max(18px, env(safe-area-inset-bottom))
+        max(12px, env(safe-area-inset-left));
+    }
+
+    main {
+      width:min(660px,100%);
+      margin:0 auto;
+    }
+
+    .panel {
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(24,27,36,.94);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    header {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      padding:14px 15px;
+      border-bottom:1px solid var(--line);
+    }
+
+    header strong {
+      display:block;
+      font-size:1rem;
+    }
+
+    header span {
+      display:block;
+      margin-top:3px;
+      color:var(--muted);
+      font-size:.7rem;
+    }
+
+    button,
+    input {
+      font:inherit;
+    }
+
+    button {
+      min-height:42px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:#252a36;
+      color:var(--text);
+      padding:9px 12px;
+      font-weight:850;
+      cursor:pointer;
+    }
+
+    button.primary {
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#141414;
+    }
+
+    button.danger {
+      background:rgba(255,102,111,.16);
+      border-color:rgba(255,102,111,.55);
+      color:#ffd9dc;
+    }
+
+    button:disabled {
+      opacity:.45;
+      cursor:not-allowed;
+    }
+
+    .content {
+      padding:14px;
+    }
+
+    .permission {
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:13px;
+      background:rgba(0,0,0,.20);
+    }
+
+    .permission-row {
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+
+    .permission-badge {
+      display:inline-flex;
+      align-items:center;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:5px 9px;
+      font-size:.67rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .permission-badge.granted {
+      border-color:rgba(86,211,136,.58);
+      color:#d8ffe6;
+    }
+
+    .permission-badge.denied {
+      border-color:rgba(255,102,111,.58);
+      color:#ffd9dc;
+    }
+
+    .permission-help {
+      display:none;
+      margin-top:10px;
+      padding:10px;
+      border:1px solid rgba(255,102,111,.40);
+      border-radius:10px;
+      color:#ffd9dc;
+      background:rgba(255,102,111,.08);
+      font-size:.72rem;
+      line-height:1.55;
+    }
+
+    .permission-help.show {
+      display:block;
+    }
+
+    .increment {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      align-items:end;
+      margin-top:12px;
+    }
+
+    .increment label {
+      display:grid;
+      gap:6px;
+      color:var(--muted);
+      font-size:.68rem;
+      font-weight:850;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .increment-row {
+      display:grid;
+      grid-template-columns:auto minmax(72px,100px) auto auto;
+      gap:6px;
+      align-items:center;
+    }
+
+    .increment-row input {
+      width:100%;
+      min-height:42px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:#0d1016;
+      color:var(--text);
+      text-align:center;
+      font-weight:900;
+    }
+
+    .stage {
+      position:relative;
+      width:100%;
+      aspect-ratio:3 / 4;
+      margin-top:12px;
+      overflow:hidden;
+      border:1px solid var(--line);
+      border-radius:15px;
+      background:#050608;
+    }
+
+    video {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      background:#050608;
+    }
+
+    .card-guide {
+      position:absolute;
+      inset:5% 9%;
+      border:3px solid rgba(238,224,55,.94);
+      border-radius:18px;
+      box-shadow:
+        0 0 0 999px rgba(0,0,0,.30),
+        0 0 20px rgba(238,224,55,.18);
+      pointer-events:none;
+    }
+
+    .number-guide {
+      position:absolute;
+      right:9%;
+      bottom:5%;
+      width:48%;
+      height:15%;
+      border:3px solid rgba(86,211,136,.94);
+      border-radius:10px;
+      background:rgba(86,211,136,.08);
+      pointer-events:none;
+    }
+
+    .guide-label {
+      position:absolute;
+      left:50%;
+      top:2%;
+      transform:translateX(-50%);
+      padding:5px 9px;
+      border-radius:999px;
+      background:rgba(0,0,0,.75);
+      color:#fff;
+      font-size:.66rem;
+      font-weight:900;
+      white-space:nowrap;
+      pointer-events:none;
+    }
+
+    .controls {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .controls button {
+      flex:1 1 145px;
+    }
+
+    .status {
+      margin-top:10px;
+      min-height:46px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:rgba(0,0,0,.18);
+      color:var(--muted);
+      font-size:.75rem;
+      line-height:1.4;
+    }
+
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .stat {
+      padding:9px 7px;
+      border:1px solid var(--line);
+      border-radius:11px;
+      background:rgba(0,0,0,.18);
+      text-align:center;
+    }
+
+    .stat span {
+      display:block;
+      color:var(--muted);
+      font-size:.59rem;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+    }
+
+    .stat strong {
+      display:block;
+      margin-top:4px;
+      font-size:1.05rem;
+    }
+
+    .history {
+      display:grid;
+      gap:6px;
+      max-height:240px;
+      margin-top:10px;
+      overflow:auto;
+    }
+
+    .history-row {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+      padding:9px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:rgba(0,0,0,.16);
+    }
+
+    .history-row.error {
+      border-color:rgba(255,102,111,.45);
+    }
+
+    .history-row strong {
+      display:block;
+      font-size:.76rem;
+    }
+
+    .history-row span {
+      display:block;
+      margin-top:2px;
+      color:var(--muted);
+      font-size:.66rem;
+    }
+
+    .history-stock {
+      color:#d8ffe6;
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .raw {
+      margin-top:8px;
+      color:#757d8c;
+      font-size:.62rem;
+      word-break:break-word;
+    }
+
+    .hidden {
+      display:none !important;
+    }
+
+    @media (max-width:520px) {
+      .increment {
+        grid-template-columns:1fr;
+      }
+
+      .increment-row {
+        grid-template-columns:auto minmax(70px,1fr) auto;
+      }
+
+      .increment-row .quick-four {
+        grid-column:1 / -1;
+      }
+
+      .stats {
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <section class="panel">
+      <header>
+        <div>
+          <strong>One Piece Live Stock Scanner</strong>
+          <span>Camera permission is requested on this HTTPS page.</span>
+        </div>
+
+        <button
+          type="button"
+          onclick="window.close()"
+        >
+          Close
+        </button>
+      </header>
+
+      <div class="content">
+        <section class="permission">
+          <div class="permission-row">
+            <div>
+              <strong>Camera permission</strong>
+              <span
+                id="permissionBadge"
+                class="permission-badge"
+              >
+                Not checked
+              </span>
+            </div>
+
+            <button
+              id="permissionButton"
+              class="primary"
+              type="button"
+              onclick="requestCameraAndStart()"
+            >
+              Request Camera Access
+            </button>
+          </div>
+
+          <div
+            id="permissionHelp"
+            class="permission-help"
+          ></div>
+        </section>
+
+        <section class="increment">
+          <label>
+            Stock added per accepted card
+
+            <div class="increment-row">
+              <button
+                type="button"
+                onclick="changeIncrement(-1)"
+              >
+                −
+              </button>
+
+              <input
+                id="incrementInput"
+                type="number"
+                min="1"
+                max="99"
+                step="1"
+                inputmode="numeric"
+                value="1"
+                oninput="updateIncrement()"
+              >
+
+              <button
+                type="button"
+                onclick="changeIncrement(1)"
+              >
+                +
+              </button>
+
+              <button
+                class="quick-four"
+                type="button"
+                onclick="setIncrement(4)"
+              >
+                Set +4
+              </button>
+            </div>
+          </label>
+
+          <button
+            id="startButton"
+            class="primary"
+            type="button"
+            onclick="requestCameraAndStart()"
+          >
+            Start Live +1
+          </button>
+        </section>
+
+        <div class="stage">
+          <video
+            id="video"
+            autoplay
+            playsinline
+            muted
+          ></video>
+
+          <div class="card-guide"></div>
+          <div class="number-guide"></div>
+
+          <div class="guide-label">
+            Full card in yellow · Card Number in green
+          </div>
+        </div>
+
+        <div class="controls">
+          <button
+            id="stopButton"
+            class="danger"
+            type="button"
+            onclick="stopScanner(true)"
+            disabled
+          >
+            Stop
+          </button>
+
+          <button
+            type="button"
+            onclick="switchCamera()"
+          >
+            Switch Camera
+          </button>
+
+          <button
+            type="button"
+            onclick="showPermissionHelp()"
+          >
+            Permission Help
+          </button>
+        </div>
+
+        <div
+          id="status"
+          class="status"
+        >
+          Press Request Camera Access. The browser should show an
+          Allow / Block prompt.
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <span>Saved this session</span>
+            <strong id="sessionCount">0</strong>
+          </div>
+
+          <div class="stat">
+            <span>Last card</span>
+            <strong id="lastCard">—</strong>
+          </div>
+
+          <div class="stat">
+            <span>Last Stock</span>
+            <strong id="lastStock">—</strong>
+          </div>
+        </div>
+
+        <div
+          id="history"
+          class="history"
+        ></div>
+
+        <div
+          id="raw"
+          class="raw"
+        ></div>
+      </div>
+    </section>
+  </main>
+
+  <canvas
+    id="frameCanvas"
+    class="hidden"
+  ></canvas>
+
+  <canvas
+    id="cropCanvas"
+    class="hidden"
+  ></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@7/dist/tesseract.min.js"></script>
+
+  <script>
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    const state = {
+      sessionToken:
+        params.get(
+          "sessionToken"
+        ) ||
+        "",
+
+      parentOrigin:
+        params.get(
+          "parentOrigin"
+        ) ||
+        "",
+
+      increment:
+        clampIncrement(
+          params.get(
+            "increment"
+          ) ||
+          1
+        ),
+
+      stream:
+        null,
+
+      facingMode:
+        "environment",
+
+      active:
+        false,
+
+      timer:
+        null,
+
+      worker:
+        null,
+
+      workerPromise:
+        null,
+
+      busy:
+        false,
+
+      pendingRequestId:
+        "",
+
+      candidate:
+        "",
+
+      candidateHits:
+        0,
+
+      awaitingClear:
+        false,
+
+      clearFrames:
+        0,
+
+      lastAccepted:
+        "",
+
+      sessionCount:
+        0,
+
+      history:
+        [],
+
+      permissionState:
+        "unknown"
+    };
+
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function() {
+        document
+          .getElementById(
+            "incrementInput"
+          )
+          .value =
+            state.increment;
+
+        updateIncrement();
+        checkPermissionState();
+
+        window.addEventListener(
+          "message",
+          receiveParentMessage
+        );
+
+        window.addEventListener(
+          "beforeunload",
+          function() {
+            sendToParent({
+              action:
+                "CLOSED"
+            });
+
+            stopScanner(
+              false
+            );
+          }
+        );
+
+        sendToParent({
+          action:
+            "READY"
+        });
+      }
+    );
+
+
+    function clampIncrement(
+      value
+    ) {
+      const number =
+        Math.round(
+          Number(
+            value ||
+            1
+          )
+        );
+
+      return Math.max(
+        1,
+        Math.min(
+          99,
+          Number.isFinite(
+            number
+          )
+            ? number
+            : 1
+        )
+      );
+    }
+
+
+    function updateIncrement() {
+      const input =
+        document.getElementById(
+          "incrementInput"
+        );
+
+      state.increment =
+        clampIncrement(
+          input.value
+        );
+
+      input.value =
+        state.increment;
+
+      document
+        .getElementById(
+          "startButton"
+        )
+        .textContent =
+          "Start Live +" +
+          state.increment;
+    }
+
+
+    function changeIncrement(
+      delta
+    ) {
+      setIncrement(
+        state.increment +
+        Number(
+          delta ||
+          0
+        )
+      );
+    }
+
+
+    function setIncrement(
+      value
+    ) {
+      state.increment =
+        clampIncrement(
+          value
+        );
+
+      document
+        .getElementById(
+          "incrementInput"
+        )
+        .value =
+          state.increment;
+
+      updateIncrement();
+    }
+
+
+    async function checkPermissionState() {
+      if (
+        !navigator.permissions ||
+        !navigator.permissions.query
+      ) {
+        setPermissionState(
+          "unknown"
+        );
+
+        return;
+      }
+
+      try {
+        const status =
+          await navigator.permissions.query({
+            name:
+              "camera"
+          });
+
+        setPermissionState(
+          status.state
+        );
+
+        status.addEventListener(
+          "change",
+          function() {
+            setPermissionState(
+              status.state
+            );
+          }
+        );
+      } catch (error) {
+        setPermissionState(
+          "unknown"
+        );
+      }
+    }
+
+
+    function setPermissionState(
+      value
+    ) {
+      state.permissionState =
+        value ||
+        "unknown";
+
+      const badge =
+        document.getElementById(
+          "permissionBadge"
+        );
+
+      badge.className =
+        "permission-badge";
+
+      if (
+        state.permissionState ===
+          "granted"
+      ) {
+        badge.classList.add(
+          "granted"
+        );
+
+        badge.textContent =
+          "Granted";
+
+        document
+          .getElementById(
+            "permissionHelp"
+          )
+          .classList
+          .remove(
+            "show"
+          );
+      } else if (
+        state.permissionState ===
+          "denied"
+      ) {
+        badge.classList.add(
+          "denied"
+        );
+
+        badge.textContent =
+          "Denied";
+
+        showPermissionHelp();
+      } else if (
+        state.permissionState ===
+          "prompt"
+      ) {
+        badge.textContent =
+          "Will ask";
+      } else {
+        badge.textContent =
+          "Not checked";
+      }
+    }
+
+
+    async function requestCameraAndStart() {
+      if (
+        state.active
+      ) {
+        return;
+      }
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ) {
+        setStatus(
+          "This browser does not provide camera access. Try current Chrome or Safari."
+        );
+
+        return;
+      }
+
+      setStatus(
+        "Requesting camera access… choose Allow in the browser prompt."
+      );
+
+      stopCamera();
+
+      try {
+        const stream =
+          await navigator.mediaDevices.getUserMedia({
+            audio:
+              false,
+
+            video: {
+              facingMode: {
+                ideal:
+                  state.facingMode
+              },
+
+              width: {
+                ideal:
+                  1920
+              },
+
+              height: {
+                ideal:
+                  1080
+              }
+            }
+          });
+
+        state.stream =
+          stream;
+
+        const video =
+          document.getElementById(
+            "video"
+          );
+
+        video.srcObject =
+          stream;
+
+        await video.play();
+
+        setPermissionState(
+          "granted"
+        );
+
+        state.active =
+          true;
+
+        document
+          .getElementById(
+            "stopButton"
+          )
+          .disabled =
+            false;
+
+        document
+          .getElementById(
+            "startButton"
+          )
+          .disabled =
+            true;
+
+        document
+          .getElementById(
+            "permissionButton"
+          )
+          .textContent =
+            "Camera Granted";
+
+        setStatus(
+          "Loading local OCR…"
+        );
+
+        await getWorker();
+
+        if (
+          !state.active
+        ) {
+          return;
+        }
+
+        setStatus(
+          "Ready. Slide one card inside the guide."
+        );
+
+        scheduleLoop(
+          100
+        );
+      } catch (error) {
+        state.active =
+          false;
+
+        document
+          .getElementById(
+            "stopButton"
+          )
+          .disabled =
+            true;
+
+        document
+          .getElementById(
+            "startButton"
+          )
+          .disabled =
+            false;
+
+        if (
+          error &&
+          error.name ===
+            "NotAllowedError"
+        ) {
+          setPermissionState(
+            "denied"
+          );
+
+          setStatus(
+            "Camera access was denied. Change the browser or device Camera permission to Allow, reload this page, then press Request Camera Access again."
+          );
+        } else if (
+          error &&
+          error.name ===
+            "NotFoundError"
+        ) {
+          setStatus(
+            "No camera was found on this device."
+          );
+        } else if (
+          error &&
+          error.name ===
+            "NotReadableError"
+        ) {
+          setStatus(
+            "The camera is being used by another app. Close the other camera app and try again."
+          );
+        } else {
+          setStatus(
+            "Camera could not start: " +
+            (
+              error &&
+              error.message
+                ? error.message
+                : String(
+                    error
+                  )
+            )
+          );
+        }
+      }
+    }
+
+
+    function showPermissionHelp() {
+      const help =
+        document.getElementById(
+          "permissionHelp"
+        );
+
+      const ua =
+        navigator.userAgent ||
+        "";
+
+      let instructions;
+
+      if (
+        /iPhone|iPad|iPod/i.test(
+          ua
+        )
+      ) {
+        instructions =
+          "iPhone / iPad: open the Settings app → Safari or Chrome → Camera → Allow. Return here, reload, and press Request Camera Access.";
+      } else if (
+        /Android/i.test(
+          ua
+        )
+      ) {
+        instructions =
+          "Android Chrome: tap ⋮ → Settings → Site settings → Camera. Find this site under Blocked and change it to Allow. Return here, reload, and press Request Camera Access.";
+      } else {
+        instructions =
+          "Desktop Chrome or Edge: click the tune/lock/camera icon beside the address bar → Site settings → Camera → Allow. Reload this page and press Request Camera Access.";
+      }
+
+      help.textContent =
+        instructions;
+
+      help.classList.add(
+        "show"
+      );
+    }
+
+
+    function stopScanner(
+      showMessage
+    ) {
+      state.active =
+        false;
+
+      window.clearTimeout(
+        state.timer
+      );
+
+      state.timer =
+        null;
+
+      stopCamera();
+
+      document
+        .getElementById(
+          "stopButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "startButton"
+        )
+        .disabled =
+          false;
+
+      if (
+        showMessage
+      ) {
+        setStatus(
+          "Scanner stopped."
+        );
+      }
+    }
+
+
+    function stopCamera() {
+      if (
+        state.stream
+      ) {
+        state.stream
+          .getTracks()
+          .forEach(function(track) {
+            track.stop();
+          });
+      }
+
+      state.stream =
+        null;
+
+      const video =
+        document.getElementById(
+          "video"
+        );
+
+      video.srcObject =
+        null;
+    }
+
+
+    async function switchCamera() {
+      state.facingMode =
+        state.facingMode ===
+          "environment"
+          ? "user"
+          : "environment";
+
+      const wasActive =
+        state.active;
+
+      stopScanner(
+        false
+      );
+
+      if (
+        wasActive
+      ) {
+        await requestCameraAndStart();
+      }
+    }
+
+
+    function scheduleLoop(
+      delay
+    ) {
+      window.clearTimeout(
+        state.timer
+      );
+
+      if (
+        !state.active
+      ) {
+        return;
+      }
+
+      state.timer =
+        window.setTimeout(
+          scanLoop,
+          Math.max(
+            100,
+            Number(
+              delay ||
+              450
+            )
+          )
+        );
+    }
+
+
+    async function scanLoop() {
+      if (
+        !state.active
+      ) {
+        return;
+      }
+
+      if (
+        state.busy ||
+        state.pendingRequestId
+      ) {
+        scheduleLoop(
+          250
+        );
+
+        return;
+      }
+
+      const video =
+        document.getElementById(
+          "video"
+        );
+
+      if (
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
+        scheduleLoop(
+          300
+        );
+
+        return;
+      }
+
+      const frame =
+        document.getElementById(
+          "frameCanvas"
+        );
+
+      frame.width =
+        1200;
+
+      frame.height =
+        1676;
+
+      drawImageCover(
+        video,
+        frame
+      );
+
+      try {
+        const result =
+          await recognizeCardNumber(
+            frame
+          );
+
+        if (
+          result.cardNumber
+        ) {
+          handleCardNumber(
+            result
+          );
+        } else {
+          handleBlankFrame(
+            result.rawText
+          );
+        }
+      } catch (error) {
+        setStatus(
+          error &&
+          error.message
+            ? error.message
+            : String(
+                error
+              )
+        );
+      } finally {
+        scheduleLoop(
+          state.awaitingClear
+            ? 500
+            : 450
+        );
+      }
+    }
+
+
+    async function recognizeCardNumber(
+      frame
+    ) {
+      state.busy =
+        true;
+
+      try {
+        const crop =
+          createCardNumberCrop(
+            frame
+          );
+
+        const worker =
+          await getWorker();
+
+        const variants = [
+          makeVariant(
+            crop,
+            "contrast"
+          ),
+          makeVariant(
+            crop,
+            "threshold"
+          )
+        ];
+
+        const numbers =
+          [];
+
+        const raw =
+          [];
+
+        let confidence =
+          0;
+
+        for (
+          let index =
+            0;
+          index <
+            variants.length;
+          index++
+        ) {
+          const result =
+            await worker.recognize(
+              variants[
+                index
+              ]
+            );
+
+          const text =
+            result &&
+            result.data
+              ? String(
+                  result.data.text ||
+                  ""
+                )
+              : "";
+
+          raw.push(
+            text
+          );
+
+          confidence =
+            Math.max(
+              confidence,
+              Number(
+                result &&
+                result.data &&
+                result.data.confidence ||
+                0
+              )
+            );
+
+          const number =
+            extractCardNumber(
+              text
+            );
+
+          if (
+            number
+          ) {
+            numbers.push(
+              number
+            );
+          }
+        }
+
+        const counts =
+          {};
+
+        numbers.forEach(function(number) {
+          counts[
+            number
+          ] =
+            Number(
+              counts[
+                number
+              ] ||
+              0
+            ) +
+            1;
+        });
+
+        const cardNumber =
+          Object.keys(
+            counts
+          )
+            .sort(function(left, right) {
+              return (
+                counts[
+                  right
+                ] -
+                  counts[
+                    left
+                  ] ||
+                left.localeCompare(
+                  right
+                )
+              );
+            })[0] ||
+          "";
+
+        return {
+          cardNumber:
+            cardNumber,
+
+          confirmations:
+            cardNumber
+              ? counts[
+                  cardNumber
+                ]
+              : 0,
+
+          confidence:
+            confidence,
+
+          rawText:
+            cleanRaw(
+              raw.join(
+                " | "
+              )
+            )
+        };
+      } finally {
+        state.busy =
+          false;
+      }
+    }
+
+
+    function handleCardNumber(
+      result
+    ) {
+      const cardNumber =
+        result.cardNumber;
+
+      state.clearFrames =
+        0;
+
+      if (
+        state.awaitingClear &&
+        cardNumber ===
+          state.lastAccepted
+      ) {
+        setStatus(
+          "Saved " +
+          cardNumber +
+          ". Remove this card until Ready appears."
+        );
+
+        return;
+      }
+
+      if (
+        state.awaitingClear &&
+        cardNumber !==
+          state.lastAccepted
+      ) {
+        state.awaitingClear =
+          false;
+
+        state.candidate =
+          "";
+
+        state.candidateHits =
+          0;
+      }
+
+      if (
+        state.candidate ===
+          cardNumber
+      ) {
+        state.candidateHits +=
+          Math.max(
+            1,
+            Number(
+              result.confirmations ||
+              1
+            )
+          );
+      } else {
+        state.candidate =
+          cardNumber;
+
+        state.candidateHits =
+          Math.max(
+            1,
+            Number(
+              result.confirmations ||
+              1
+            )
+          );
+      }
+
+      document
+        .getElementById(
+          "raw"
+        )
+        .textContent =
+          "OCR: " +
+          cardNumber +
+          " · " +
+          Math.round(
+            result.confidence
+          ) +
+          "% · " +
+          result.rawText;
+
+      if (
+        state.candidateHits <
+          2
+      ) {
+        setStatus(
+          "Checking " +
+          cardNumber +
+          "… keep the card still."
+        );
+
+        return;
+      }
+
+      submitCard(
+        cardNumber
+      );
+    }
+
+
+    function handleBlankFrame(
+      rawText
+    ) {
+      state.candidate =
+        "";
+
+      state.candidateHits =
+        0;
+
+      if (
+        state.awaitingClear
+      ) {
+        state.clearFrames++;
+
+        if (
+          state.clearFrames >=
+            2
+        ) {
+          state.awaitingClear =
+            false;
+
+          state.clearFrames =
+            0;
+
+          state.lastAccepted =
+            "";
+
+          setStatus(
+            "Ready. Slide the next card inside the guide."
+          );
+        } else {
+          setStatus(
+            "Card removed. Keep the guide clear for one moment…"
+          );
+        }
+
+        return;
+      }
+
+      setStatus(
+        "Ready. Slide one card inside the guide."
+      );
+
+      document
+        .getElementById(
+          "raw"
+        )
+        .textContent =
+          rawText
+            ? "OCR: " +
+              rawText
+            : "";
+    }
+
+
+    function submitCard(
+      cardNumber
+    ) {
+      if (
+        !window.opener ||
+        window.opener.closed
+      ) {
+        setStatus(
+          "The Collection Manager tab is not connected. Close this page and reopen Live Scanner from the Collection Manager."
+        );
+
+        return;
+      }
+
+      const requestId =
+        randomToken();
+
+      state.pendingRequestId =
+        requestId;
+
+      state.awaitingClear =
+        true;
+
+      state.lastAccepted =
+        cardNumber;
+
+      state.candidate =
+        "";
+
+      state.candidateHits =
+        0;
+
+      setStatus(
+        "Recognized " +
+        cardNumber +
+        ". Saving +" +
+        state.increment +
+        " Stock…"
+      );
+
+      sendToParent({
+        action:
+          "SCAN",
+
+        requestId:
+          requestId,
+
+        cardNumber:
+          cardNumber,
+
+        increment:
+          state.increment
+      });
+    }
+
+
+    function receiveParentMessage(
+      event
+    ) {
+      if (
+        state.parentOrigin &&
+        event.origin !==
+          state.parentOrigin
+      ) {
+        return;
+      }
+
+      const data =
+        event.data &&
+        typeof event.data ===
+          "object"
+          ? event.data
+          : {};
+
+      if (
+        data.type ===
+          "ONE_PIECE_LIVE_SCANNER_PARENT_CLOSING" &&
+        data.sessionToken ===
+          state.sessionToken
+      ) {
+        setStatus(
+          "The Collection Manager tab closed. Close this scanner."
+        );
+
+        stopScanner(
+          false
+        );
+
+        return;
+      }
+
+      if (
+        data.type !==
+          "ONE_PIECE_LIVE_SCANNER_RESULT" ||
+        data.sessionToken !==
+          state.sessionToken ||
+        data.requestId !==
+          state.pendingRequestId
+      ) {
+        return;
+      }
+
+      state.pendingRequestId =
+        "";
+
+      if (
+        data.ok
+      ) {
+        const result =
+          data.result ||
+          {};
+
+        state.sessionCount++;
+
+        state.history.unshift({
+          ok:
+            true,
+
+          cardNumber:
+            result.cardNumber ||
+            state.lastAccepted,
+
+          name:
+            result.name ||
+            "",
+
+          previousStock:
+            Number(
+              result.previousStock ||
+              0
+            ),
+
+          stock:
+            Number(
+              result.stock ||
+              0
+            ),
+
+          increment:
+            Number(
+              result.increment ||
+              state.increment
+            )
+        });
+
+        state.history =
+          state.history.slice(
+            0,
+            30
+          );
+
+        signalSuccess();
+
+        setStatus(
+          (
+            result.message ||
+            "Stock saved."
+          ) +
+          " Remove the card until Ready appears."
+        );
+      } else {
+        state.history.unshift({
+          ok:
+            false,
+
+          cardNumber:
+            state.lastAccepted,
+
+          message:
+            data.message ||
+            "The Stock update failed."
+        });
+
+        state.history =
+          state.history.slice(
+            0,
+            30
+          );
+
+        signalError();
+
+        setStatus(
+          (
+            data.message ||
+            "The Stock update failed."
+          ) +
+          " Remove the card to continue."
+        );
+      }
+
+      renderSummary();
+    }
+
+
+    function sendToParent(
+      payload
+    ) {
+      if (
+        !window.opener ||
+        window.opener.closed ||
+        !state.parentOrigin ||
+        !state.sessionToken
+      ) {
+        return;
+      }
+
+      window.opener.postMessage(
+        Object.assign(
+          {
+            type:
+              "ONE_PIECE_LIVE_SCANNER",
+
+            sessionToken:
+              state.sessionToken
+          },
+          payload ||
+          {}
+        ),
+        state.parentOrigin
+      );
+    }
+
+
+    function renderSummary() {
+      document
+        .getElementById(
+          "sessionCount"
+        )
+        .textContent =
+          state.sessionCount;
+
+      const latest =
+        state.history[0];
+
+      document
+        .getElementById(
+          "lastCard"
+        )
+        .textContent =
+          latest
+            ? latest.cardNumber
+            : "—";
+
+      document
+        .getElementById(
+          "lastStock"
+        )
+        .textContent =
+          latest &&
+          latest.ok
+            ? latest.stock
+            : "—";
+
+      const history =
+        document.getElementById(
+          "history"
+        );
+
+      history.innerHTML =
+        "";
+
+      state.history.forEach(function(item) {
+        const row =
+          document.createElement(
+            "div"
+          );
+
+        row.className =
+          "history-row" +
+          (
+            item.ok
+              ? ""
+              : " error"
+          );
+
+        const info =
+          document.createElement(
+            "div"
+          );
+
+        const title =
+          document.createElement(
+            "strong"
+          );
+
+        title.textContent =
+          item.cardNumber +
+          (
+            item.name
+              ? " — " +
+                item.name
+              : ""
+          );
+
+        const detail =
+          document.createElement(
+            "span"
+          );
+
+        detail.textContent =
+          item.ok
+            ? (
+                "+" +
+                item.increment +
+                " Stock"
+              )
+            : (
+                item.message ||
+                "Not saved"
+              );
+
+        info.appendChild(
+          title
+        );
+
+        info.appendChild(
+          detail
+        );
+
+        const stock =
+          document.createElement(
+            "div"
+          );
+
+        stock.className =
+          "history-stock";
+
+        stock.textContent =
+          item.ok
+            ? (
+                item.previousStock +
+                " → " +
+                item.stock
+              )
+            : "NOT SAVED";
+
+        row.appendChild(
+          info
+        );
+
+        row.appendChild(
+          stock
+        );
+
+        history.appendChild(
+          row
+        );
+      });
+    }
+
+
+    async function getWorker() {
+      if (
+        state.worker
+      ) {
+        return state.worker;
+      }
+
+      if (
+        state.workerPromise
+      ) {
+        return state.workerPromise;
+      }
+
+      state.workerPromise =
+        (async function() {
+          await waitForTesseract();
+
+          const worker =
+            await Tesseract.createWorker(
+              "eng",
+              1,
+              {
+                logger:
+                  function(message) {
+                    if (
+                      !message ||
+                      typeof message.progress !==
+                        "number"
+                    ) {
+                      return;
+                    }
+
+                    setStatus(
+                      (
+                        message.status ||
+                        "Loading OCR"
+                      ) +
+                      " " +
+                      Math.round(
+                        message.progress *
+                        100
+                      ) +
+                      "%"
+                    );
+                  }
+              }
+            );
+
+          await worker.setParameters({
+            tessedit_pageseg_mode:
+              "7",
+
+            tessedit_char_whitelist:
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-",
+
+            preserve_interword_spaces:
+              "1"
+          });
+
+          state.worker =
+            worker;
+
+          return worker;
+        })();
+
+      try {
+        return await state.workerPromise;
+      } catch (error) {
+        state.workerPromise =
+          null;
+
+        throw error;
+      }
+    }
+
+
+    function waitForTesseract() {
+      return new Promise(
+        function(resolve, reject) {
+          const started =
+            Date.now();
+
+          const timer =
+            window.setInterval(
+              function() {
+                if (
+                  window.Tesseract &&
+                  typeof Tesseract.createWorker ===
+                    "function"
+                ) {
+                  window.clearInterval(
+                    timer
+                  );
+
+                  resolve();
+
+                  return;
+                }
+
+                if (
+                  Date.now() -
+                  started >
+                  20000
+                ) {
+                  window.clearInterval(
+                    timer
+                  );
+
+                  reject(
+                    new Error(
+                      "The OCR library did not load. Check the internet connection and reload."
+                    )
+                  );
+                }
+              },
+              120
+            );
+        }
+      );
+    }
+
+
+    function drawImageCover(
+      source,
+      canvas
+    ) {
+      const sourceWidth =
+        source.videoWidth ||
+        source.width;
+
+      const sourceHeight =
+        source.videoHeight ||
+        source.height;
+
+      if (
+        !sourceWidth ||
+        !sourceHeight
+      ) {
+        throw new Error(
+          "The camera frame has no usable dimensions."
+        );
+      }
+
+      const scale =
+        Math.max(
+          canvas.width /
+            sourceWidth,
+          canvas.height /
+            sourceHeight
+        );
+
+      const drawWidth =
+        sourceWidth *
+        scale;
+
+      const drawHeight =
+        sourceHeight *
+        scale;
+
+      const left =
+        (
+          canvas.width -
+          drawWidth
+        ) /
+        2;
+
+      const top =
+        (
+          canvas.height -
+          drawHeight
+        ) /
+        2;
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false
+          }
+        );
+
+      context.fillStyle =
+        "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      context.drawImage(
+        source,
+        left,
+        top,
+        drawWidth,
+        drawHeight
+      );
+    }
+
+
+    function createCardNumberCrop(
+      frame
+    ) {
+      const sourceX =
+        Math.round(
+          frame.width *
+          0.47
+        );
+
+      const sourceY =
+        Math.round(
+          frame.height *
+          0.835
+        );
+
+      const sourceWidth =
+        Math.round(
+          frame.width *
+          0.52
+        );
+
+      const sourceHeight =
+        Math.round(
+          frame.height *
+          0.16
+        );
+
+      const crop =
+        document.getElementById(
+          "cropCanvas"
+        );
+
+      crop.width =
+        1800;
+
+      crop.height =
+        Math.round(
+          sourceHeight *
+          (
+            crop.width /
+            sourceWidth
+          )
+        );
+
+      const context =
+        crop.getContext(
+          "2d",
+          {
+            alpha:
+              false,
+
+            willReadFrequently:
+              true
+          }
+        );
+
+      context.imageSmoothingEnabled =
+        true;
+
+      context.imageSmoothingQuality =
+        "high";
+
+      context.drawImage(
+        frame,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        crop.width,
+        crop.height
+      );
+
+      return crop;
+    }
+
+
+    function makeVariant(
+      source,
+      mode
+    ) {
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width =
+        source.width;
+
+      canvas.height =
+        source.height;
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false,
+
+            willReadFrequently:
+              true
+          }
+        );
+
+      context.drawImage(
+        source,
+        0,
+        0
+      );
+
+      const imageData =
+        context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+      const pixels =
+        imageData.data;
+
+      for (
+        let index =
+          0;
+        index <
+          pixels.length;
+        index +=
+          4
+      ) {
+        const gray =
+          Math.round(
+            pixels[
+              index
+            ] *
+              0.299 +
+            pixels[
+              index +
+              1
+            ] *
+              0.587 +
+            pixels[
+              index +
+              2
+            ] *
+              0.114
+          );
+
+        let value;
+
+        if (
+          mode ===
+            "threshold"
+        ) {
+          value =
+            gray >
+              155
+              ? 255
+              : 0;
+        } else {
+          value =
+            Math.max(
+              0,
+              Math.min(
+                255,
+                (
+                  gray -
+                  128
+                ) *
+                  1.9 +
+                128
+              )
+            );
+        }
+
+        pixels[
+          index
+        ] =
+          value;
+
+        pixels[
+          index +
+            1
+        ] =
+          value;
+
+        pixels[
+          index +
+            2
+        ] =
+          value;
+      }
+
+      context.putImageData(
+        imageData,
+        0,
+        0
+      );
+
+      return canvas;
+    }
+
+
+    function extractCardNumber(
+      rawText
+    ) {
+      const compact =
+        String(
+          rawText ||
+          ""
+        )
+          .toUpperCase()
+          .replace(
+            /[–—_]/g,
+            "-"
+          )
+          .replace(
+            /0P/g,
+            "OP"
+          )
+          .replace(
+            /5T/g,
+            "ST"
+          )
+          .replace(
+            /E8/g,
+            "EB"
+          )
+          .replace(
+            /PR8/g,
+            "PRB"
+          )
+          .replace(
+            /[^A-Z0-9]/g,
+            "");
+
+      const setMatch =
+        compact.match(
+          /(PRB|OP|ST|EB)([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})/
+        );
+
+      if (
+        setMatch
+      ) {
+        const setNumber =
+          scannerDigits(
+            setMatch[
+              2
+            ]
+          );
+
+        const cardNumber =
+          scannerDigits(
+            setMatch[
+              3
+            ]
+          );
+
+        if (
+          setNumber.length ===
+            2 &&
+          cardNumber.length ===
+            3
+        ) {
+          return (
+            setMatch[
+              1
+            ] +
+            setNumber +
+            "-" +
+            cardNumber
+          );
+        }
+      }
+
+      const promotional =
+        compact.match(
+          /P([0-9OQDILTZSBG]{3})/
+        );
+
+      if (
+        promotional
+      ) {
+        const number =
+          scannerDigits(
+            promotional[
+              1
+            ]
+          );
+
+        if (
+          number.length ===
+            3
+        ) {
+          return (
+            "P-" +
+            number
+          );
+        }
+      }
+
+      return "";
+    }
+
+
+    function scannerDigits(
+      value
+    ) {
+      const map = {
+        O:
+          "0",
+
+        Q:
+          "0",
+
+        D:
+          "0",
+
+        I:
+          "1",
+
+        L:
+          "1",
+
+        T:
+          "1",
+
+        Z:
+          "2",
+
+        S:
+          "5",
+
+        G:
+          "6",
+
+        B:
+          "8"
+      };
+
+      return String(
+        value ||
+        ""
+      )
+        .split(
+          ""
+        )
+        .map(function(character) {
+          return map[
+            character
+          ] ||
+          character;
+        })
+        .join(
+          "")
+        .replace(
+          /\D/g,
+          ""
+        );
+    }
+
+
+    function cleanRaw(
+      value
+    ) {
+      return String(
+        value ||
+        ""
+      )
+        .replace(
+          /\s+/g,
+          " "
+        )
+        .trim()
+        .slice(
+          0,
+          180
+        );
+    }
+
+
+    function randomToken() {
+      if (
+        window.crypto &&
+        typeof window.crypto.randomUUID ===
+          "function"
+      ) {
+        return window.crypto
+          .randomUUID()
+          .replace(
+            /-/g,
+            "");
+      }
+
+      return (
+        Date.now()
+          .toString(
+            36
+          ) +
+        Math.random()
+          .toString(
+            36
+          )
+          .slice(
+            2
+          )
+      );
+    }
+
+
+    function signalSuccess() {
+      try {
+        if (
+          navigator.vibrate
+        ) {
+          navigator.vibrate(
+            120
+          );
+        }
+
+        const AudioContextClass =
+          window.AudioContext ||
+          window.webkitAudioContext;
+
+        if (
+          !AudioContextClass
+        ) {
+          return;
+        }
+
+        const audio =
+          new AudioContextClass();
+
+        const oscillator =
+          audio.createOscillator();
+
+        const gain =
+          audio.createGain();
+
+        oscillator.frequency.value =
+          880;
+
+        gain.gain.value =
+          0.05;
+
+        oscillator.connect(
+          gain
+        );
+
+        gain.connect(
+          audio.destination
+        );
+
+        oscillator.start();
+
+        oscillator.stop(
+          audio.currentTime +
+          0.08
+        );
+
+        oscillator.addEventListener(
+          "ended",
+          function() {
+            audio.close();
+          }
+        );
+      } catch (error) {
+        console.log(
+          error
+        );
+      }
+    }
+
+
+    function signalError() {
+      try {
+        if (
+          navigator.vibrate
+        ) {
+          navigator.vibrate(
+            [
+              100,
+              70,
+              100
+            ]
+          );
+        }
+      } catch (error) {
+        console.log(
+          error
+        );
+      }
+    }
+
+
+    function setStatus(
+      message
+    ) {
+      document
+        .getElementById(
+          "status"
+        )
+        .textContent =
+          message;
+
+      sendToParent({
+        action:
+          "STATUS",
+
+        message:
+          message
+      });
+    }
+  </script>
+</body>
+</html>
