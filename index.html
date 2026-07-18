@@ -11,7 +11,7 @@
     content="#0f1117"
   >
 
-  <title>One Piece Live Stock Scanner — Fast Review</title>
+  <title>One Piece Live Stock Scanner — Fast Session</title>
 
   <style>
     :root {
@@ -399,6 +399,60 @@
       color:var(--muted);
       font-size:.75rem;
       line-height:1.4;
+    }
+
+    .fast-session-bar {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:7px;
+      margin-top:10px;
+    }
+
+    .fast-session-pill {
+      min-width:0;
+      padding:8px 6px;
+      border:1px solid var(--line);
+      border-radius:10px;
+      background:rgba(0,0,0,.18);
+      text-align:center;
+    }
+
+    .fast-session-pill span {
+      display:block;
+      color:var(--muted);
+      font-size:.56rem;
+      font-weight:900;
+      letter-spacing:.05em;
+      text-transform:uppercase;
+    }
+
+    .fast-session-pill strong {
+      display:block;
+      margin-top:4px;
+      overflow:hidden;
+      font-size:.78rem;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .fast-session-actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      margin-top:8px;
+    }
+
+    .fast-session-actions button {
+      flex:1 1 140px;
+      min-height:38px;
+      padding:7px 10px;
+      font-size:.7rem;
+    }
+
+    @media (max-width:560px) {
+      .fast-session-bar {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
     }
 
     .stats {
@@ -925,14 +979,7 @@
             I Removed Card — Next
           </button>
 
-          <button
-            id="retrySaveButton"
-            class="primary hidden"
-            type="button"
-            onclick="retryPendingSave(false)"
-          >
-            Retry Same Save
-          </button>
+
         </div>
 
         <div
@@ -941,6 +988,46 @@
         >
           Press Request Camera Access. The browser should show an
           Allow / Block prompt.
+        </div>
+
+        <div class="fast-session-bar">
+          <div class="fast-session-pill">
+            <span>Card library</span>
+            <strong id="fastLibraryStatus">Loading</strong>
+          </div>
+
+          <div class="fast-session-pill">
+            <span>Cards cached</span>
+            <strong id="fastLibraryCount">0</strong>
+          </div>
+
+          <div class="fast-session-pill">
+            <span>Pending sync</span>
+            <strong id="fastPendingCount">0</strong>
+          </div>
+
+          <div class="fast-session-pill">
+            <span>Failed</span>
+            <strong id="fastFailedCount">0</strong>
+          </div>
+        </div>
+
+        <div class="fast-session-actions">
+          <button
+            type="button"
+            onclick="requestFastLibraryRefresh(true)"
+          >
+            Refresh Card Library
+          </button>
+
+          <button
+            id="retryFailedSyncButton"
+            type="button"
+            onclick="retryFailedScannerSaves()"
+            disabled
+          >
+            Retry Failed Saves
+          </button>
         </div>
 
         <div class="stats">
@@ -1215,6 +1302,30 @@
       lastOcrDurationMs:
         0,
 
+      fastCardIndex:
+        {},
+
+      fastIndexVersion:
+        "",
+
+      fastIndexBuiltAt:
+        "",
+
+      fastLibraryReady:
+        false,
+
+      fastLibraryLoading:
+        false,
+
+      syncQueue:
+        [],
+
+      syncInFlight:
+        "",
+
+      syncWatchdog:
+        null,
+
       candidate:
         "",
 
@@ -1286,6 +1397,9 @@
           "FAST";
 
         updateRecognitionReadout();
+        loadFastLibraryCache();
+        loadScannerSyncQueue();
+        updateFastSessionStatus();
         checkPermissionState();
 
         if (
@@ -1319,8 +1433,22 @@
 
         sendToParent({
           action:
-            "READY"
+            "READY",
+
+          version:
+            state.fastIndexVersion
         });
+
+        window.setTimeout(
+          function() {
+            requestFastLibraryRefresh(
+              false
+            );
+
+            processScannerSyncQueue();
+          },
+          500
+        );
       }
     );
 
@@ -2820,7 +2948,6 @@
 
       if (
         state.busy ||
-        state.pendingRequestId ||
         state.reviewOpen
       ) {
         scheduleLoop(
@@ -3361,11 +3488,6 @@
         .value =
           state.reviewAmount;
 
-      setReviewMessage(
-        "Loading card information from the Collection Manager…",
-        ""
-      );
-
       document
         .getElementById(
           "reviewSaveButton"
@@ -3380,15 +3502,841 @@
         .disabled =
           false;
 
+      const localPreview =
+        fastPreviewForCard(
+          cardNumber
+        );
+
+      if (
+        localPreview
+      ) {
+        applyReviewPreview(
+          localPreview
+        );
+
+        setStatus(
+          "Recognized " +
+          cardNumber +
+          " in " +
+          state.lastOcrDurationMs +
+          " ms. Card loaded instantly from the local session library."
+        );
+
+        return;
+      }
+
+      setReviewMessage(
+        state.fastLibraryReady
+          ? "This card is not in the local library. Checking the spreadsheet…"
+          : "The local card library is still loading. Checking the spreadsheet…",
+        ""
+      );
+
       setStatus(
         "Recognized " +
         cardNumber +
-        " in " +
-        state.lastOcrDurationMs +
-        " ms. Loading the card…"
+        ". Checking the Collection Manager…"
       );
 
       sendReviewLookup();
+    }
+
+
+    function loadFastLibraryCache() {
+      try {
+        const cached =
+          JSON.parse(
+            localStorage.getItem(
+              "ONE_PIECE_LIVE_FAST_INDEX_V1"
+            ) ||
+            "null"
+          );
+
+        if (
+          !cached ||
+          !cached.cards ||
+          typeof cached.cards !==
+            "object"
+        ) {
+          return;
+        }
+
+        state.fastCardIndex =
+          cached.cards;
+
+        state.fastIndexVersion =
+          String(
+            cached.version ||
+            ""
+          );
+
+        state.fastIndexBuiltAt =
+          String(
+            cached.builtAt ||
+            ""
+          );
+
+        state.fastLibraryReady =
+          Object.keys(
+            state.fastCardIndex
+          ).length >
+          0;
+      } catch (error) {
+        console.log(
+          "Fast library cache could not be read.",
+          error
+        );
+      }
+    }
+
+
+    function persistFastLibraryCache() {
+      try {
+        localStorage.setItem(
+          "ONE_PIECE_LIVE_FAST_INDEX_V1",
+          JSON.stringify({
+            version:
+              state.fastIndexVersion,
+
+            builtAt:
+              state.fastIndexBuiltAt,
+
+            cards:
+              state.fastCardIndex
+          })
+        );
+      } catch (error) {
+        console.log(
+          "Fast library cache could not be saved.",
+          error
+        );
+      }
+    }
+
+
+    function requestFastLibraryRefresh(
+      force
+    ) {
+      state.fastLibraryLoading =
+        true;
+
+      updateFastSessionStatus();
+
+      sendToParent({
+        action:
+          "BOOTSTRAP",
+
+        force:
+          force ===
+            true,
+
+        version:
+          force
+            ? ""
+            : state.fastIndexVersion
+      });
+    }
+
+
+    function applyFastBootstrap(
+      bootstrap
+    ) {
+      if (
+        bootstrap.notModified
+      ) {
+        state.fastLibraryReady =
+          Object.keys(
+            state.fastCardIndex
+          ).length >
+          0;
+
+        state.fastLibraryLoading =
+          false;
+
+        updateFastSessionStatus();
+
+        setStatus(
+          "Fast card library is current. Card review is local and instant."
+        );
+
+        return;
+      }
+
+      const index =
+        {};
+
+      (
+        bootstrap.cards ||
+        []
+      ).forEach(function(row) {
+        const cardNumber =
+          String(
+            row[0] ||
+            ""
+          );
+
+        if (
+          !cardNumber
+        ) {
+          return;
+        }
+
+        index[
+          cardNumber
+        ] = {
+          cardNumber:
+            cardNumber,
+
+          name:
+            String(
+              row[1] ||
+              ""
+            ),
+
+          color:
+            String(
+              row[2] ||
+              ""
+            ),
+
+          type:
+            String(
+              row[3] ||
+              ""
+            ),
+
+          rarity:
+            String(
+              row[4] ||
+              ""
+            ),
+
+          stock:
+            Number(
+              row[5] ||
+              0
+            ) ||
+            0,
+
+          destinationSheet:
+            String(
+              row[6] ||
+              ""
+            ),
+
+          collectionRow:
+            Number(
+              row[7] ||
+              0
+            ) ||
+            0,
+
+          inCollection:
+            Number(
+              row[8] ||
+              0
+            ) ===
+              1,
+
+          catalogRow:
+            Number(
+              row[9] ||
+              0
+            ) ||
+            0,
+
+          indexRow:
+            Number(
+              row[10] ||
+              0
+            ) ||
+            0
+        };
+      });
+
+      state.fastCardIndex =
+        index;
+
+      state.fastIndexVersion =
+        String(
+          bootstrap.version ||
+          ""
+        );
+
+      state.fastIndexBuiltAt =
+        String(
+          bootstrap.builtAt ||
+          ""
+        );
+
+      state.fastLibraryReady =
+        Object.keys(
+          index
+        ).length >
+        0;
+
+      state.fastLibraryLoading =
+        false;
+
+      persistFastLibraryCache();
+      updateFastSessionStatus();
+
+      setStatus(
+        "Fast card library loaded: " +
+        Object.keys(
+          index
+        ).length +
+        " cards. Reviews now load without another spreadsheet call."
+      );
+    }
+
+
+    function fastPreviewForCard(
+      cardNumber
+    ) {
+      const record =
+        state.fastCardIndex[
+          cardNumber
+        ];
+
+      if (
+        !record
+      ) {
+        return false;
+      }
+
+      return {
+        ok:
+          true,
+
+        cardNumber:
+          record.cardNumber,
+
+        name:
+          record.name,
+
+        color:
+          record.color,
+
+        type:
+          record.type,
+
+        rarity:
+          record.rarity,
+
+        currentStock:
+          Number(
+            record.stock ||
+            0
+          ) +
+          pendingAmountForCard(
+            cardNumber
+          ),
+
+        inCollection:
+          record.inCollection,
+
+        source:
+          record.inCollection
+            ? "COLLECTION"
+            : "MASTER CATALOG",
+
+        destinationSheet:
+          record.destinationSheet,
+
+        indexRow:
+          record.indexRow,
+
+        local:
+          true,
+
+        message:
+          record.inCollection
+            ? (
+                cardNumber +
+                " loaded instantly from the local session library."
+              )
+            : (
+                cardNumber +
+                " will be added to " +
+                record.destinationSheet +
+                " when its queued save syncs."
+              )
+      };
+    }
+
+
+    function applyReviewPreview(
+      preview
+    ) {
+      state.reviewPreview =
+        preview;
+
+      state.reviewCardNumber =
+        preview.cardNumber ||
+        state.reviewCardNumber;
+
+      state.reviewAmount =
+        clampIncrement(
+          state.increment
+        );
+
+      document
+        .getElementById(
+          "reviewCardNumber"
+        )
+        .textContent =
+          state.reviewCardNumber;
+
+      document
+        .getElementById(
+          "reviewCardNumberInput"
+        )
+        .value =
+          state.reviewCardNumber;
+
+      document
+        .getElementById(
+          "reviewCardName"
+        )
+        .textContent =
+          preview.name ||
+          "Unknown name";
+
+      document
+        .getElementById(
+          "reviewCardMeta"
+        )
+        .textContent =
+          [
+            preview.color,
+            preview.type,
+            preview.rarity,
+            preview.source,
+            preview.destinationSheet,
+            preview.local
+              ? "LOCAL SESSION"
+              : ""
+          ]
+            .filter(
+              Boolean
+            )
+            .join(
+              " · "
+            );
+
+      document
+        .getElementById(
+          "reviewCurrentStock"
+        )
+        .textContent =
+          Number(
+            preview.currentStock ||
+            0
+          );
+
+      document
+        .getElementById(
+          "reviewAmountInput"
+        )
+        .value =
+          state.reviewAmount;
+
+      updateReviewAmount();
+
+      setReviewMessage(
+        preview.message ||
+        "Review the card and press Save.",
+        preview.inCollection
+          ? "good"
+          : ""
+      );
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          false;
+
+      document
+        .getElementById(
+          "reviewRetryButton"
+        )
+        .disabled =
+          false;
+    }
+
+
+    function pendingAmountForCard(
+      cardNumber
+    ) {
+      return state.syncQueue.reduce(function(total, item) {
+        if (
+          item.cardNumber ===
+            cardNumber &&
+          (
+            item.status ===
+              "PENDING" ||
+            item.status ===
+              "IN_FLIGHT"
+          )
+        ) {
+          return total +
+            Number(
+              item.amount ||
+              0
+            );
+        }
+
+        return total;
+      }, 0);
+    }
+
+
+    function loadScannerSyncQueue() {
+      try {
+        const queue =
+          JSON.parse(
+            localStorage.getItem(
+              "ONE_PIECE_LIVE_SYNC_QUEUE_V1"
+            ) ||
+            "[]"
+          );
+
+        state.syncQueue =
+          Array.isArray(
+            queue
+          )
+            ? queue.map(function(item) {
+                if (
+                  item.status ===
+                    "IN_FLIGHT"
+                ) {
+                  item.status =
+                    "PENDING";
+                }
+
+                return item;
+              })
+            : [];
+      } catch (error) {
+        state.syncQueue =
+          [];
+      }
+    }
+
+
+    function persistScannerSyncQueue() {
+      try {
+        localStorage.setItem(
+          "ONE_PIECE_LIVE_SYNC_QUEUE_V1",
+          JSON.stringify(
+            state.syncQueue
+          )
+        );
+      } catch (error) {
+        console.log(
+          "Scanner sync queue could not be saved.",
+          error
+        );
+      }
+    }
+
+
+    function processScannerSyncQueue() {
+      if (
+        state.syncInFlight
+      ) {
+        return;
+      }
+
+      const item =
+        state.syncQueue.find(function(candidate) {
+          return (
+            candidate.status ===
+              "PENDING"
+          );
+        });
+
+      if (
+        !item
+      ) {
+        updateFastSessionStatus();
+
+        return;
+      }
+
+      if (
+        !window.opener ||
+        window.opener.closed
+      ) {
+        setStatus(
+          "Queued cards are waiting. Reopen the scanner from the Collection Manager to resume syncing."
+        );
+
+        return;
+      }
+
+      item.status =
+        "IN_FLIGHT";
+
+      item.attempts =
+        Number(
+          item.attempts ||
+          0
+        ) +
+        1;
+
+      state.syncInFlight =
+        item.requestId;
+
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
+
+      sendToParent({
+        action:
+          "SAVE",
+
+        requestId:
+          item.requestId,
+
+        cardNumber:
+          item.cardNumber,
+
+        amount:
+          item.amount,
+
+        indexRow:
+          item.indexRow
+      });
+
+      scheduleScannerSyncWatchdog(
+        item,
+        30000
+      );
+    }
+
+
+    function scheduleScannerSyncWatchdog(
+      item,
+      delay
+    ) {
+      clearScannerSyncWatchdog();
+
+      state.syncWatchdog =
+        window.setTimeout(
+          function() {
+            if (
+              state.syncInFlight !==
+                item.requestId
+            ) {
+              return;
+            }
+
+            item.status =
+              "PENDING";
+
+            state.syncInFlight =
+              "";
+
+            persistScannerSyncQueue();
+            updateFastSessionStatus();
+
+            setStatus(
+              item.cardNumber +
+              " is still waiting for Sheets. It will retry safely in the background."
+            );
+
+            window.setTimeout(
+              processScannerSyncQueue,
+              1200
+            );
+          },
+          Math.max(
+            5000,
+            Number(
+              delay ||
+              30000
+            )
+          )
+        );
+    }
+
+
+    function clearScannerSyncWatchdog() {
+      window.clearTimeout(
+        state.syncWatchdog
+      );
+
+      state.syncWatchdog =
+        null;
+    }
+
+
+    function retryFailedScannerSaves() {
+      state.syncQueue.forEach(function(item) {
+        if (
+          item.status ===
+            "FAILED"
+        ) {
+          item.status =
+            "PENDING";
+
+          item.error =
+            "";
+        }
+      });
+
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
+      processScannerSyncQueue();
+    }
+
+
+    function updateFastCardAfterSave(
+      result
+    ) {
+      const cardNumber =
+        String(
+          result.cardNumber ||
+          ""
+        );
+
+      if (
+        !cardNumber
+      ) {
+        return;
+      }
+
+      const record =
+        state.fastCardIndex[
+          cardNumber
+        ];
+
+      if (
+        record
+      ) {
+        record.stock =
+          Number(
+            result.stock ||
+            0
+          ) ||
+          0;
+
+        record.inCollection =
+          true;
+
+        record.destinationSheet =
+          String(
+            result.sheetName ||
+            record.destinationSheet ||
+            ""
+          );
+
+        record.collectionRow =
+          Number(
+            result.row ||
+            record.collectionRow ||
+            0
+          ) ||
+          0;
+
+        persistFastLibraryCache();
+      }
+    }
+
+
+    function updateFastSessionStatus() {
+      const libraryStatus =
+        document.getElementById(
+          "fastLibraryStatus"
+        );
+
+      const libraryCount =
+        document.getElementById(
+          "fastLibraryCount"
+        );
+
+      const pendingCount =
+        document.getElementById(
+          "fastPendingCount"
+        );
+
+      const failedCount =
+        document.getElementById(
+          "fastFailedCount"
+        );
+
+      const retryButton =
+        document.getElementById(
+          "retryFailedSyncButton"
+        );
+
+      const count =
+        Object.keys(
+          state.fastCardIndex
+        ).length;
+
+      const pending =
+        state.syncQueue.filter(function(item) {
+          return (
+            item.status ===
+              "PENDING" ||
+            item.status ===
+              "IN_FLIGHT"
+          );
+        }).length;
+
+      const failed =
+        state.syncQueue.filter(function(item) {
+          return (
+            item.status ===
+              "FAILED"
+          );
+        }).length;
+
+      if (
+        libraryStatus
+      ) {
+        libraryStatus.textContent =
+          state.fastLibraryLoading
+            ? "Loading"
+            : (
+                state.fastLibraryReady
+                  ? "Ready"
+                  : "Not ready"
+              );
+      }
+
+      if (
+        libraryCount
+      ) {
+        libraryCount.textContent =
+          count;
+      }
+
+      if (
+        pendingCount
+      ) {
+        pendingCount.textContent =
+          pending;
+      }
+
+      if (
+        failedCount
+      ) {
+        failedCount.textContent =
+          failed;
+      }
+
+      if (
+        retryButton
+      ) {
+        retryButton.disabled =
+          failed ===
+          0;
+      }
     }
 
 
@@ -3512,6 +4460,21 @@
       state.reviewPreview =
         null;
 
+      const localPreview =
+        fastPreviewForCard(
+          normalized
+        );
+
+      if (
+        localPreview
+      ) {
+        applyReviewPreview(
+          localPreview
+        );
+
+        return;
+      }
+
       state.reviewLookupRequestId =
         randomToken();
 
@@ -3529,7 +4492,7 @@
           true;
 
       setReviewMessage(
-        "Loading the corrected Card Number…",
+        "Loading the corrected Card Number from the spreadsheet…",
         ""
       );
 
@@ -3660,8 +4623,7 @@
     function saveReviewedCard() {
       if (
         !state.reviewOpen ||
-        !state.reviewPreview ||
-        state.pendingRequestId
+        !state.reviewPreview
       ) {
         return;
       }
@@ -3671,13 +4633,7 @@
       const requestId =
         randomToken();
 
-      state.pendingRequestId =
-        requestId;
-
-      state.pendingRequestPayload = {
-        action:
-          "SAVE",
-
+      const queued = {
         requestId:
           requestId,
 
@@ -3685,52 +4641,67 @@
           state.reviewCardNumber,
 
         amount:
-          state.reviewAmount
+          state.reviewAmount,
+
+        indexRow:
+          Number(
+            state.reviewPreview.indexRow ||
+            0
+          ),
+
+        name:
+          String(
+            state.reviewPreview.name ||
+            ""
+          ),
+
+        previousStock:
+          Number(
+            state.reviewPreview.currentStock ||
+            0
+          ),
+
+        status:
+          "PENDING",
+
+        attempts:
+          0,
+
+        createdAt:
+          Date.now(),
+
+        error:
+          ""
       };
 
-      state.pendingRequestRetries =
-        0;
+      state.syncQueue.push(
+        queued
+      );
 
-      state.pendingRequestAcknowledged =
-        false;
-
-      document
-        .getElementById(
-          "reviewSaveButton"
-        )
-        .disabled =
-          true;
-
-      document
-        .getElementById(
-          "reviewRetryButton"
-        )
-        .disabled =
-          false;
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
 
       setReviewMessage(
-        "Saving +" +
-        state.reviewAmount +
-        " Stock to " +
-        state.reviewPreview.destinationSheet +
-        "…",
-        ""
+        "Queued +" +
+        queued.amount +
+        " Stock. The scanner will sync it in the background.",
+        "good"
       );
 
-      setStatus(
-        "Saving " +
-        state.reviewCardNumber +
-        " +" +
-        state.reviewAmount +
-        " Stock…"
-      );
+      window.setTimeout(
+        function() {
+          closeReviewDialog();
 
-      sendToParent(
-        state.pendingRequestPayload
-      );
+          setStatus(
+            queued.cardNumber +
+            " +" +
+            queued.amount +
+            " is queued. Remove the card and scan the next one while Sheets syncs."
+          );
 
-      schedulePendingSaveWatchdog(
-        15000
+          processScannerSyncQueue();
+        },
+        250
       );
     }
 
@@ -3868,7 +4839,7 @@
           state.sessionToken
       ) {
         setStatus(
-          "The Collection Manager tab closed. Close this scanner."
+          "The Collection Manager tab closed. Keep this scanner open only after reopening it from the Collection Manager."
         );
 
         stopScanner(
@@ -3884,6 +4855,48 @@
         data.sessionToken !==
           state.sessionToken
       ) {
+        return;
+      }
+
+      if (
+        data.action ===
+          "BOOTSTRAP_PENDING"
+      ) {
+        state.fastLibraryLoading =
+          true;
+
+        updateFastSessionStatus();
+
+        return;
+      }
+
+      if (
+        data.action ===
+          "BOOTSTRAP_RESULT"
+      ) {
+        state.fastLibraryLoading =
+          false;
+
+        if (
+          !data.ok
+        ) {
+          updateFastSessionStatus();
+
+          setStatus(
+            data.message ||
+            "The fast card library could not load."
+          );
+
+          return;
+        }
+
+        applyFastBootstrap(
+          data.bootstrap ||
+          {}
+        );
+
+        processScannerSyncQueue();
+
         return;
       }
 
@@ -3953,128 +4966,34 @@
             .disabled =
               true;
 
-          document
-            .getElementById(
-              "reviewRetryButton"
-            )
-            .disabled =
-              false;
-
           return;
         }
 
-        const preview =
+        applyReviewPreview(
           data.preview ||
-          {};
-
-        state.reviewPreview =
-          preview;
-
-        state.reviewAmount =
-          clampIncrement(
-            state.increment
-          );
-
-        document
-          .getElementById(
-            "reviewCardNumber"
-          )
-          .textContent =
-            preview.cardNumber ||
-            state.reviewCardNumber;
-
-        document
-          .getElementById(
-            "reviewCardNumberInput"
-          )
-          .value =
-            preview.cardNumber ||
-            state.reviewCardNumber;
-
-        document
-          .getElementById(
-            "reviewCardName"
-          )
-          .textContent =
-            preview.name ||
-            "Unknown name";
-
-        document
-          .getElementById(
-            "reviewCardMeta"
-          )
-          .textContent =
-            [
-              preview.color,
-              preview.type,
-              preview.rarity,
-              preview.source,
-              preview.destinationSheet,
-              preview.lookupMs !==
-                undefined
-                ? (
-                    "Lookup " +
-                    preview.lookupMs +
-                    " ms"
-                  )
-                : ""
-            ]
-              .filter(
-                Boolean
-              )
-              .join(
-                " · "
-              );
-
-        document
-          .getElementById(
-            "reviewCurrentStock"
-          )
-          .textContent =
-            Number(
-              preview.currentStock ||
-              0
-            );
-
-        document
-          .getElementById(
-            "reviewAmountInput"
-          )
-          .value =
-            state.reviewAmount;
-
-        updateReviewAmount();
-
-        setReviewMessage(
-          preview.message ||
-          "Review the card and press Save.",
-          preview.inCollection
-            ? "good"
-            : ""
+          {}
         );
-
-        document
-          .getElementById(
-            "reviewSaveButton"
-          )
-          .disabled =
-            false;
-
-        document
-          .getElementById(
-            "reviewRetryButton"
-          )
-          .disabled =
-            false;
 
         return;
       }
 
       if (
         data.action !==
-          "SAVE_RESULT" ||
-        data.requestId !==
-          state.pendingRequestId
+          "SAVE_RESULT"
+      ) {
+        return;
+      }
+
+      const item =
+        state.syncQueue.find(function(candidate) {
+          return (
+            candidate.requestId ===
+              data.requestId
+          );
+        });
+
+      if (
+        !item
       ) {
         return;
       }
@@ -4082,37 +5001,18 @@
       if (
         data.pending
       ) {
-        state.pendingRequestAcknowledged =
-          true;
-
-        setReviewMessage(
-          data.message ||
-          "The Collection Manager received the save and is processing it.",
-          ""
-        );
-
-        schedulePendingSaveWatchdog(
+        scheduleScannerSyncWatchdog(
+          item,
           30000
         );
-
-        updateQueueButtons();
 
         return;
       }
 
-      clearPendingSaveWatchdog();
+      clearScannerSyncWatchdog();
 
-      state.pendingRequestId =
+      state.syncInFlight =
         "";
-
-      state.pendingRequestPayload =
-        null;
-
-      state.pendingRequestRetries =
-        0;
-
-      state.pendingRequestAcknowledged =
-        false;
 
       if (
         data.ok
@@ -4120,6 +5020,18 @@
         const result =
           data.result ||
           {};
+
+        state.syncQueue =
+          state.syncQueue.filter(function(candidate) {
+            return (
+              candidate.requestId !==
+                item.requestId
+            );
+          });
+
+        updateFastCardAfterSave(
+          result
+        );
 
         state.sessionCount++;
 
@@ -4129,15 +5041,17 @@
 
           cardNumber:
             result.cardNumber ||
-            state.lastAccepted,
+            item.cardNumber,
 
           name:
             result.name ||
+            item.name ||
             "",
 
           previousStock:
             Number(
               result.previousStock ||
+              item.previousStock ||
               0
             ),
 
@@ -4150,7 +5064,8 @@
           increment:
             Number(
               result.amount ||
-              state.reviewAmount
+              item.amount ||
+              0
             )
         });
 
@@ -4163,62 +5078,30 @@
         signalSuccess();
         renderSummary();
 
-        setReviewMessage(
+        setStatus(
           result.message ||
-          "Stock saved successfully.",
-          "good"
-        );
-
-        document
-          .getElementById(
-            "reviewCurrentStock"
+          (
+            item.cardNumber +
+            " synced successfully."
           )
-          .textContent =
-            Number(
-              result.stock ||
-              0
-            );
-
-        document
-          .getElementById(
-            "reviewNewStock"
-          )
-          .textContent =
-            Number(
-              result.stock ||
-              0
-            );
-
-        document
-          .getElementById(
-            "reviewRetryButton"
-          )
-          .disabled =
-            true;
-
-        window.setTimeout(
-          function() {
-            closeReviewDialog();
-
-            setStatus(
-              "Saved " +
-              result.cardNumber +
-              ". Remove the card until Ready appears."
-            );
-          },
-          700
         );
       } else {
+        item.status =
+          "FAILED";
+
+        item.error =
+          data.message ||
+          "The background Stock save failed.";
+
         state.history.unshift({
           ok:
             false,
 
           cardNumber:
-            state.reviewCardNumber,
+            item.cardNumber,
 
           message:
-            data.message ||
-            "The Stock update failed."
+            item.error
         });
 
         state.history =
@@ -4230,28 +5113,20 @@
         signalError();
         renderSummary();
 
-        setReviewMessage(
-          data.message ||
-          "The Stock update failed. Check the card data and press Retry Save.",
-          "error"
+        setStatus(
+          item.cardNumber +
+          " could not sync: " +
+          item.error
         );
-
-        document
-          .getElementById(
-            "reviewSaveButton"
-          )
-          .disabled =
-            false;
-
-        document
-          .getElementById(
-            "reviewRetryButton"
-          )
-          .disabled =
-            false;
       }
 
-      updateQueueButtons();
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
+
+      window.setTimeout(
+        processScannerSyncQueue,
+        250
+      );
     }
 
 
