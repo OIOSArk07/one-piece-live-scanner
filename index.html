@@ -6,40 +6,42 @@
     name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
-  <meta
-    name="theme-color"
-    content="#0f1117"
-  >
+  <meta name="theme-color" content="#0f1117">
 
-  <title>One Piece Live Stock Scanner — Reliable Fast Session</title>
+  <title>One Piece Live Stock Scanner 1.7</title>
 
   <style>
     :root {
-      color-scheme:dark;
-      --bg:#0f1117;
-      --panel:#181b24;
-      --panel2:#11141b;
-      --text:#f4f5f7;
-      --muted:#a8afbd;
-      --line:#343a48;
-      --accent:#eee037;
-      --good:#56d388;
-      --bad:#ff666f;
-      --shadow:0 18px 50px rgba(0,0,0,.36);
+      color-scheme: dark;
+      --bg: #0f1117;
+      --panel: #181b24;
+      --panel-2: #11141b;
+      --button: #252a36;
+      --text: #f4f5f7;
+      --muted: #a8afbd;
+      --line: #343a48;
+      --accent: #eee037;
+      --good: #56d388;
+      --bad: #ff666f;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
     }
 
     * {
-      box-sizing:border-box;
+      box-sizing: border-box;
     }
 
     html,
     body {
-      margin:0;
-      min-height:100%;
+      margin: 0;
+      min-height: 100%;
       background:
-        radial-gradient(circle at top, rgba(238,224,55,.09), transparent 34rem),
+        radial-gradient(
+          circle at top,
+          rgba(238, 224, 55, 0.09),
+          transparent 34rem
+        ),
         var(--bg);
-      color:var(--text);
+      color: var(--text);
       font-family:
         Inter,
         ui-sans-serif,
@@ -59,667 +61,584 @@
     }
 
     main {
-      width:min(660px,100%);
-      margin:0 auto;
+      width: min(680px, 100%);
+      margin: 0 auto;
     }
 
     .panel {
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(24,27,36,.94);
-      box-shadow:var(--shadow);
-      overflow:hidden;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(24, 27, 36, 0.96);
+      box-shadow: var(--shadow);
     }
 
     header {
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-      padding:14px 15px;
-      border-bottom:1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 15px;
+      border-bottom: 1px solid var(--line);
     }
 
     header strong {
-      display:block;
-      font-size:1rem;
+      display: block;
+      font-size: 1rem;
     }
 
     header span {
-      display:block;
-      margin-top:3px;
-      color:var(--muted);
-      font-size:.7rem;
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.72rem;
     }
 
     button,
-    input {
-      font:inherit;
+    input,
+    select {
+      font: inherit;
     }
 
     button {
-      min-height:42px;
-      border:1px solid var(--line);
-      border-radius:11px;
-      background:#252a36;
-      color:var(--text);
-      padding:9px 12px;
-      font-weight:850;
-      cursor:pointer;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--button);
+      color: var(--text);
+      padding: 9px 12px;
+      font-weight: 850;
+      cursor: pointer;
     }
 
     button.primary {
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#141414;
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #141414;
     }
 
     button.danger {
-      background:rgba(255,102,111,.16);
-      border-color:rgba(255,102,111,.55);
-      color:#ffd9dc;
+      border-color: rgba(255, 102, 111, 0.55);
+      background: rgba(255, 102, 111, 0.16);
+      color: #ffd9dc;
     }
 
     button:disabled {
-      opacity:.45;
-      cursor:not-allowed;
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    input,
+    select {
+      min-height: 42px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #0d1016;
+      color: var(--text);
+      padding: 8px 10px;
     }
 
     .content {
-      padding:14px;
+      padding: 14px;
     }
 
-    .permission {
-      padding:12px;
-      border:1px solid var(--line);
-      border-radius:13px;
-      background:rgba(0,0,0,.20);
+    .box {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(0, 0, 0, 0.18);
     }
 
     .permission-row {
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 9px;
+      align-items: center;
     }
 
     .permission-badge {
-      display:inline-flex;
-      align-items:center;
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:5px 9px;
-      font-size:.67rem;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.05em;
+      display: inline-flex;
+      align-items: center;
+      margin-left: 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      color: var(--muted);
+      font-size: 0.67rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
     .permission-badge.granted {
-      border-color:rgba(86,211,136,.58);
-      color:#d8ffe6;
+      border-color: rgba(86, 211, 136, 0.58);
+      color: #d8ffe6;
     }
 
     .permission-badge.denied {
-      border-color:rgba(255,102,111,.58);
-      color:#ffd9dc;
+      border-color: rgba(255, 102, 111, 0.58);
+      color: #ffd9dc;
     }
 
     .permission-help {
-      display:none;
-      margin-top:10px;
-      padding:10px;
-      border:1px solid rgba(255,102,111,.40);
-      border-radius:10px;
-      color:#ffd9dc;
-      background:rgba(255,102,111,.08);
-      font-size:.72rem;
-      line-height:1.55;
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid rgba(255, 102, 111, 0.4);
+      border-radius: 10px;
+      background: rgba(255, 102, 111, 0.08);
+      color: #ffd9dc;
+      font-size: 0.73rem;
+      line-height: 1.5;
     }
 
     .permission-help.show {
-      display:block;
+      display: block;
     }
 
-    .camera-quality-panel {
-      margin-top:12px;
-      padding:11px;
-      border:1px solid var(--line);
-      border-radius:13px;
-      background:rgba(0,0,0,.18);
+    .settings {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(150px, 0.7fr);
+      gap: 9px;
+      margin-top: 11px;
+      align-items: end;
     }
 
-    .camera-quality-grid {
-      display:grid;
-      grid-template-columns:minmax(0,1.3fr) minmax(150px,.7fr);
-      gap:9px;
-      align-items:end;
-    }
-
-    .camera-quality-grid label,
-    .zoom-control label {
-      display:grid;
-      gap:6px;
-      color:var(--muted);
-      font-size:.68rem;
-      font-weight:850;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-    }
-
-    .camera-quality-grid select {
-      min-height:42px;
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:10px;
-      background:#0d1016;
-      color:var(--text);
-      padding:8px 10px;
+    .settings label,
+    .amount label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 850;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
     .quality-readout {
-      min-height:42px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:8px 10px;
-      border:1px solid var(--line);
-      border-radius:10px;
-      background:#0d1016;
-      color:#d8ffe6;
-      font-size:.7rem;
-      font-weight:900;
-      text-align:center;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #0d1016;
+      color: #d8ffe6;
+      font-size: 0.7rem;
+      font-weight: 900;
+      text-align: center;
     }
 
-    .camera-adjustments {
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto;
-      gap:8px;
-      align-items:end;
-      margin-top:9px;
+    .camera-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: end;
+      margin-top: 9px;
     }
 
     .zoom-control {
-      display:none;
+      display: none;
     }
 
     .zoom-control.show {
-      display:grid;
+      display: grid;
+      gap: 6px;
     }
 
     .zoom-row {
-      display:grid;
-      grid-template-columns:minmax(0,1fr) 58px;
-      gap:8px;
-      align-items:center;
-    }
-
-    .zoom-row input[type="range"] {
-      width:100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 60px;
+      gap: 8px;
+      align-items: center;
     }
 
     .zoom-value {
-      min-height:38px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid var(--line);
-      border-radius:9px;
-      background:#0d1016;
-      font-size:.72rem;
-      font-weight:900;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #0d1016;
+      font-size: 0.72rem;
+      font-weight: 900;
     }
 
-    .quality-tips {
-      margin-top:9px;
-      color:var(--muted);
-      font-size:.68rem;
-      line-height:1.5;
+    .tips {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 0.68rem;
+      line-height: 1.5;
     }
 
-    @media (max-width:560px) {
-      .camera-quality-grid,
-      .camera-adjustments {
-        grid-template-columns:1fr;
-      }
+    .amount {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+      margin-top: 12px;
     }
 
-    .increment {
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:10px;
-      align-items:end;
-      margin-top:12px;
+    .amount-row {
+      display: grid;
+      grid-template-columns: auto minmax(72px, 100px) auto auto;
+      gap: 6px;
+      align-items: center;
     }
 
-    .increment label {
-      display:grid;
-      gap:6px;
-      color:var(--muted);
-      font-size:.68rem;
-      font-weight:850;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-    }
-
-    .increment-row {
-      display:grid;
-      grid-template-columns:auto minmax(72px,100px) auto auto;
-      gap:6px;
-      align-items:center;
-    }
-
-    .increment-row input {
-      width:100%;
-      min-height:42px;
-      border:1px solid var(--line);
-      border-radius:10px;
-      background:#0d1016;
-      color:var(--text);
-      text-align:center;
-      font-weight:900;
+    .amount-row input {
+      text-align: center;
+      font-weight: 900;
     }
 
     .stage {
-      position:relative;
-      width:100%;
-      aspect-ratio:3 / 4;
-      margin-top:12px;
-      overflow:hidden;
-      border:1px solid var(--line);
-      border-radius:15px;
-      background:#050608;
+      position: relative;
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      margin-top: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #050608;
     }
 
     video {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      background:#050608;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #050608;
     }
 
     .card-guide {
-      position:absolute;
-      inset:5% 9%;
-      border:3px solid rgba(238,224,55,.94);
-      border-radius:18px;
+      position: absolute;
+      inset: 5% 9%;
+      border: 3px solid rgba(238, 224, 55, 0.94);
+      border-radius: 18px;
       box-shadow:
-        0 0 0 999px rgba(0,0,0,.30),
-        0 0 20px rgba(238,224,55,.18);
-      pointer-events:none;
+        0 0 0 999px rgba(0, 0, 0, 0.30),
+        0 0 20px rgba(238, 224, 55, 0.18);
+      pointer-events: none;
     }
 
     .number-guide {
-      position:absolute;
-      right:9%;
-      bottom:5%;
-      width:48%;
-      height:15%;
-      border:3px solid rgba(86,211,136,.94);
-      border-radius:10px;
-      background:rgba(86,211,136,.08);
-      pointer-events:none;
+      position: absolute;
+      right: 9%;
+      bottom: 5%;
+      width: 48%;
+      height: 15%;
+      border: 3px solid rgba(86, 211, 136, 0.94);
+      border-radius: 10px;
+      background: rgba(86, 211, 136, 0.08);
+      pointer-events: none;
     }
 
     .guide-label {
-      position:absolute;
-      left:50%;
-      top:2%;
-      transform:translateX(-50%);
-      padding:5px 9px;
-      border-radius:999px;
-      background:rgba(0,0,0,.75);
-      color:#fff;
-      font-size:.66rem;
-      font-weight:900;
-      white-space:nowrap;
-      pointer-events:none;
+      position: absolute;
+      left: 50%;
+      top: 2%;
+      transform: translateX(-50%);
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 0.66rem;
+      font-weight: 900;
+      white-space: nowrap;
+      pointer-events: none;
     }
 
     .controls {
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:10px;
-    }
-
-    .controls button {
-      flex:1 1 145px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .status {
-      margin-top:10px;
-      min-height:46px;
-      padding:10px;
-      border:1px solid var(--line);
-      border-radius:11px;
-      background:rgba(0,0,0,.18);
-      color:var(--muted);
-      font-size:.75rem;
-      line-height:1.4;
+      min-height: 54px;
+      margin-top: 10px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(0, 0, 0, 0.18);
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.45;
     }
 
-    .fast-session-bar {
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:7px;
-      margin-top:10px;
+    .session-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 10px;
     }
 
-    .fast-session-pill {
-      min-width:0;
-      padding:8px 6px;
-      border:1px solid var(--line);
-      border-radius:10px;
-      background:rgba(0,0,0,.18);
-      text-align:center;
+    .session-pill,
+    .stat {
+      min-width: 0;
+      padding: 9px 6px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(0, 0, 0, 0.18);
+      text-align: center;
     }
 
-    .fast-session-pill span {
-      display:block;
-      color:var(--muted);
-      font-size:.56rem;
-      font-weight:900;
-      letter-spacing:.05em;
-      text-transform:uppercase;
+    .session-pill span,
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.58rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
-    .fast-session-pill strong {
-      display:block;
-      margin-top:4px;
-      overflow:hidden;
-      font-size:.78rem;
-      text-overflow:ellipsis;
-      white-space:nowrap;
+    .session-pill strong,
+    .stat strong {
+      display: block;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+      font-size: 0.94rem;
     }
 
-    .fast-session-actions {
-      display:flex;
-      flex-wrap:wrap;
-      gap:7px;
-      margin-top:8px;
+    .session-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 9px;
     }
 
-    .fast-session-actions button {
-      flex:1 1 140px;
-      min-height:38px;
-      padding:7px 10px;
-      font-size:.7rem;
-    }
-
-    @media (max-width:560px) {
-      .fast-session-bar {
-        grid-template-columns:repeat(2,minmax(0,1fr));
-      }
+    .session-actions .wide {
+      grid-column: 1 / -1;
     }
 
     .stats {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:8px;
-      margin-top:10px;
-    }
-
-    .stat {
-      padding:9px 7px;
-      border:1px solid var(--line);
-      border-radius:11px;
-      background:rgba(0,0,0,.18);
-      text-align:center;
-    }
-
-    .stat span {
-      display:block;
-      color:var(--muted);
-      font-size:.59rem;
-      font-weight:900;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-    }
-
-    .stat strong {
-      display:block;
-      margin-top:4px;
-      font-size:1.05rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 10px;
     }
 
     .history {
-      display:grid;
-      gap:6px;
-      max-height:240px;
-      margin-top:10px;
-      overflow:auto;
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
     }
 
     .history-row {
-      display:grid;
-      grid-template-columns:minmax(0,1fr) auto;
-      gap:8px;
-      align-items:center;
-      padding:9px;
-      border:1px solid var(--line);
-      border-radius:10px;
-      background:rgba(0,0,0,.16);
-    }
-
-    .history-row.error {
-      border-color:rgba(255,102,111,.45);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(0, 0, 0, 0.18);
     }
 
     .history-row strong {
-      display:block;
-      font-size:.76rem;
+      display: block;
+      font-size: 0.78rem;
     }
 
     .history-row span {
-      display:block;
-      margin-top:2px;
-      color:var(--muted);
-      font-size:.66rem;
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.68rem;
     }
 
     .history-stock {
-      color:#d8ffe6;
-      font-weight:900;
-      white-space:nowrap;
+      color: #d8ffe6;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .history-row.error {
+      border-color: rgba(255, 102, 111, 0.48);
     }
 
     .raw {
-      margin-top:8px;
-      color:#757d8c;
-      font-size:.62rem;
-      word-break:break-word;
-    }
-
-    .review-backdrop {
-      position:fixed;
-      inset:0;
-      z-index:1000;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-      background:rgba(0,0,0,.76);
-      backdrop-filter:blur(4px);
-    }
-
-    .review-dialog {
-      width:min(470px,100%);
-      max-height:92vh;
-      overflow:auto;
-      border:1px solid rgba(238,224,55,.48);
-      border-radius:16px;
-      background:var(--panel);
-      box-shadow:0 24px 80px rgba(0,0,0,.58);
-    }
-
-    .review-header {
-      padding:14px 15px;
-      border-bottom:1px solid var(--line);
-    }
-
-    .review-header strong {
-      display:block;
-      font-size:1rem;
-    }
-
-    .review-header span {
-      display:block;
-      margin-top:4px;
-      color:var(--muted);
-      font-size:.7rem;
-    }
-
-    .review-body {
-      padding:14px 15px;
-    }
-
-    .review-card {
-      padding:11px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:rgba(0,0,0,.18);
-    }
-
-    .review-card-number {
-      color:var(--accent);
-      font-size:1.05rem;
-      font-weight:950;
-    }
-
-    .review-card-name {
-      margin-top:3px;
-      font-size:.86rem;
-      font-weight:850;
-    }
-
-    .review-card-meta {
-      margin-top:5px;
-      color:var(--muted);
-      font-size:.68rem;
-      line-height:1.45;
-    }
-
-    .review-stock-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
-      margin-top:11px;
-    }
-
-    .review-stock-box {
-      padding:10px;
-      border:1px solid var(--line);
-      border-radius:11px;
-      background:#0d1016;
-      text-align:center;
-    }
-
-    .review-stock-box span {
-      display:block;
-      color:var(--muted);
-      font-size:.59rem;
-      font-weight:900;
-      letter-spacing:.05em;
-      text-transform:uppercase;
-    }
-
-    .review-stock-box strong {
-      display:block;
-      margin-top:5px;
-      font-size:1.18rem;
-    }
-
-    .review-amount {
-      display:grid;
-      gap:6px;
-      margin-top:12px;
-      color:var(--muted);
-      font-size:.68rem;
-      font-weight:850;
-      letter-spacing:.05em;
-      text-transform:uppercase;
-    }
-
-    .review-amount-row {
-      display:grid;
-      grid-template-columns:auto minmax(90px,1fr) auto;
-      gap:7px;
-      align-items:center;
-    }
-
-    .review-amount-row input {
-      min-height:46px;
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:10px;
-      background:#0d1016;
-      color:var(--text);
-      text-align:center;
-      font-size:1.05rem;
-      font-weight:950;
-    }
-
-    .review-message {
-      min-height:42px;
-      margin-top:11px;
-      padding:9px 10px;
-      border:1px solid var(--line);
-      border-radius:10px;
-      color:var(--muted);
-      background:rgba(0,0,0,.16);
-      font-size:.7rem;
-      line-height:1.45;
-    }
-
-    .review-message.error {
-      border-color:rgba(255,102,111,.52);
-      color:#ffd9dc;
-    }
-
-    .review-message.good {
-      border-color:rgba(86,211,136,.52);
-      color:#d8ffe6;
-    }
-
-    .review-actions {
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:12px;
-    }
-
-    .review-actions button {
-      flex:1 1 135px;
-    }
-
-    @media (max-width:480px) {
-      .review-stock-grid {
-        grid-template-columns:1fr;
-      }
+      min-height: 18px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.67rem;
+      overflow-wrap: anywhere;
     }
 
     .hidden {
-      display:none !important;
+      display: none !important;
     }
 
-    @media (max-width:520px) {
-      .increment {
-        grid-template-columns:1fr;
+    .review-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding:
+        max(14px, env(safe-area-inset-top))
+        14px
+        max(14px, env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.78);
+    }
+
+    .review-dialog {
+      width: min(520px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #171a22;
+      box-shadow: var(--shadow);
+    }
+
+    .review-header {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .review-header strong,
+    .review-header span {
+      display: block;
+    }
+
+    .review-header span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.73rem;
+    }
+
+    .review-body {
+      padding: 14px;
+    }
+
+    .review-card {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #10131a;
+    }
+
+    .review-number {
+      font-size: 1.18rem;
+      font-weight: 950;
+    }
+
+    .review-name {
+      margin-top: 4px;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .review-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1.4;
+    }
+
+    .review-label {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .review-stock-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .review-stock {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #10131a;
+      text-align: center;
+    }
+
+    .review-stock span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.62rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .review-stock strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1.1rem;
+    }
+
+    .review-amount-row {
+      display: grid;
+      grid-template-columns: auto minmax(90px, 1fr) auto;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .review-amount-row input {
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .review-message {
+      min-height: 46px;
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.18);
+      color: var(--muted);
+      font-size: 0.73rem;
+      line-height: 1.45;
+    }
+
+    .review-message.good {
+      border-color: rgba(86, 211, 136, 0.5);
+      color: #d8ffe6;
+    }
+
+    .review-message.error {
+      border-color: rgba(255, 102, 111, 0.5);
+      color: #ffd9dc;
+    }
+
+    .review-actions {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    @media (max-width: 560px) {
+      .settings,
+      .camera-tools,
+      .amount {
+        grid-template-columns: 1fr;
       }
 
-      .increment-row {
-        grid-template-columns:auto minmax(70px,1fr) auto;
-      }
-
-      .increment-row .quick-four {
-        grid-column:1 / -1;
+      .session-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
       .stats {
-        grid-template-columns:1fr;
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -731,22 +650,20 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>High-resolution camera, focus, zoom, and light controls.</span>
+          <span>Reliable Fast Session · Full Replacement · Scanner 1.7.0</span>
         </div>
 
-        <button
-          type="button"
-          onclick="window.close()"
-        >
+        <button type="button" onclick="window.close()">
           Close
         </button>
       </header>
 
       <div class="content">
-        <section class="permission">
+        <section class="box">
           <div class="permission-row">
             <div>
               <strong>Camera permission</strong>
+
               <span
                 id="permissionBadge"
                 class="permission-badge"
@@ -771,8 +688,8 @@
           ></div>
         </section>
 
-        <section class="camera-quality-panel">
-          <div class="camera-quality-grid">
+        <section class="box" style="margin-top: 11px;">
+          <div class="settings">
             <label>
               Camera lens
 
@@ -780,9 +697,7 @@
                 id="cameraSelect"
                 onchange="cameraSelectionChanged()"
               >
-                <option value="">
-                  Automatic rear camera
-                </option>
+                <option value="">Automatic rear camera</option>
               </select>
             </label>
 
@@ -794,7 +709,7 @@
             </div>
           </div>
 
-          <div class="camera-adjustments">
+          <div class="camera-tools">
             <div
               id="zoomControl"
               class="zoom-control"
@@ -842,13 +757,13 @@
             </button>
           </div>
 
-          <div class="quality-tips">
-            Use the normal rear camera rather than an ultra-wide or
-            macro lens. Clean the lens, use bright even lighting,
-            and hold the Card Number close to the green guide.
+          <div class="tips">
+            Use the normal rear camera rather than an ultra-wide or macro
+            lens. Keep the card flat, use bright even lighting, and place the
+            printed Card Number inside the green guide.
           </div>
 
-          <div class="camera-quality-grid" style="margin-top:9px;">
+          <div class="settings">
             <label>
               Recognition speed
 
@@ -874,22 +789,17 @@
               id="recognitionReadout"
               class="quality-readout"
             >
-              Fast OCR
+              FAST OCR
             </div>
           </div>
         </section>
 
-        <section class="increment">
+        <section class="amount">
           <label>
             Default amount shown in review popup
 
-            <div class="increment-row">
-              <button
-                type="button"
-                onclick="changeIncrement(-1)"
-              >
-                −
-              </button>
+            <div class="amount-row">
+              <button type="button" onclick="changeIncrement(-1)">−</button>
 
               <input
                 id="incrementInput"
@@ -902,15 +812,9 @@
                 oninput="updateIncrement()"
               >
 
-              <button
-                type="button"
-                onclick="changeIncrement(1)"
-              >
-                +
-              </button>
+              <button type="button" onclick="changeIncrement(1)">+</button>
 
               <button
-                class="quick-four"
                 type="button"
                 onclick="setIncrement(4)"
               >
@@ -978,41 +882,39 @@
           >
             I Removed Card — Next
           </button>
-
-
         </div>
 
         <div
           id="status"
           class="status"
         >
-          Press Request Camera Access. The browser should show an
-          Allow / Block prompt.
+          Open this scanner from the private Collection Manager, then press
+          Request Camera Access.
         </div>
 
-        <div class="fast-session-bar">
-          <div class="fast-session-pill">
+        <div class="session-grid">
+          <div class="session-pill">
             <span>Card library</span>
             <strong id="fastLibraryStatus">Loading</strong>
           </div>
 
-          <div class="fast-session-pill">
+          <div class="session-pill">
             <span>Cards cached</span>
             <strong id="fastLibraryCount">0</strong>
           </div>
 
-          <div class="fast-session-pill">
+          <div class="session-pill">
             <span>Pending sync</span>
             <strong id="fastPendingCount">0</strong>
           </div>
 
-          <div class="fast-session-pill">
+          <div class="session-pill">
             <span>Failed</span>
             <strong id="fastFailedCount">0</strong>
           </div>
         </div>
 
-        <div class="fast-session-actions">
+        <div class="session-actions">
           <button
             type="button"
             onclick="requestFastLibraryRefresh(true)"
@@ -1030,6 +932,7 @@
           </button>
 
           <button
+            class="wide"
             type="button"
             onclick="resumePendingScannerSaves()"
           >
@@ -1077,36 +980,31 @@
     <section class="review-dialog">
       <div class="review-header">
         <strong id="reviewTitle">Review scanned card</strong>
-        <span>
-          Confirm the card and choose how much Stock to add.
-        </span>
+        <span>Confirm the Card Number and choose how much Stock to add.</span>
       </div>
 
       <div class="review-body">
         <div class="review-card">
           <div
             id="reviewCardNumber"
-            class="review-card-number"
+            class="review-number"
           >
             —
           </div>
 
           <div
             id="reviewCardName"
-            class="review-card-name"
+            class="review-name"
           >
             Loading card…
           </div>
 
           <div
             id="reviewCardMeta"
-            class="review-card-meta"
+            class="review-meta"
           ></div>
 
-          <label
-            class="review-amount"
-            style="margin-top:10px;"
-          >
+          <label class="review-label">
             Card Number — correct it when OCR was wrong
 
             <input
@@ -1115,24 +1013,24 @@
               autocomplete="off"
               spellcheck="false"
               value=""
-              oninput="reviewCardNumberChanged()"
+              onchange="reviewCardNumberChanged()"
             >
           </label>
         </div>
 
         <div class="review-stock-grid">
-          <div class="review-stock-box">
+          <div class="review-stock">
             <span>Current Stock</span>
             <strong id="reviewCurrentStock">—</strong>
           </div>
 
-          <div class="review-stock-box">
+          <div class="review-stock">
             <span>New Stock</span>
             <strong id="reviewNewStock">—</strong>
           </div>
         </div>
 
-        <label class="review-amount">
+        <label class="review-label">
           Add this many to Stock
 
           <div class="review-amount-row">
@@ -1185,9 +1083,8 @@
             id="reviewRetryButton"
             type="button"
             onclick="retryReviewedCardSave()"
-            disabled
           >
-            Retry Save
+            Retry Card Lookup
           </button>
 
           <button
@@ -1201,19 +1098,23 @@
     </section>
   </div>
 
-  <canvas
-    id="frameCanvas"
-    class="hidden"
-  ></canvas>
-
-  <canvas
-    id="cropCanvas"
-    class="hidden"
-  ></canvas>
+  <canvas id="frameCanvas"></canvas>
+  <canvas id="cropCanvas"></canvas>
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@7/dist/tesseract.min.js"></script>
 
   <script>
+    "use strict";
+
+    const SCANNER_VERSION =
+      "1.7.0";
+
+    const FAST_INDEX_CACHE_KEY =
+      "ONE_PIECE_LIVE_FAST_INDEX_V1";
+
+    const SYNC_QUEUE_KEY =
+      "ONE_PIECE_LIVE_SYNC_QUEUE_V1";
+
     const params =
       new URLSearchParams(
         window.location.search
@@ -1243,14 +1144,14 @@
       stream:
         null,
 
-      facingMode:
-        "environment",
-
       active:
         false,
 
       timer:
         null,
+
+      busy:
+        false,
 
       worker:
         null,
@@ -1258,29 +1159,59 @@
       workerPromise:
         null,
 
-      busy:
-        false,
+      facingMode:
+        "environment",
 
-      pendingRequestId:
+      selectedDeviceId:
         "",
 
-      pendingRequestPayload:
+      videoDevices:
+        [],
+
+      videoTrack:
         null,
 
-      pendingRequestTimer:
-        null,
+      trackCapabilities:
+        {},
 
-      pendingRequestRetries:
+      trackSettings:
+        {},
+
+      zoom:
+        1,
+
+      torchOn:
+        false,
+
+      permissionState:
+        "unknown",
+
+      recognitionMode:
+        "FAST",
+
+      ocrMissCount:
         0,
 
-      pendingRequestAcknowledged:
+      lastOcrDurationMs:
+        0,
+
+      candidate:
+        "",
+
+      candidateHits:
+        0,
+
+      awaitingClear:
         false,
+
+      clearFrames:
+        0,
+
+      lastAccepted:
+        "",
 
       reviewOpen:
         false,
-
-      reviewLookupRequestId:
-        "",
 
       reviewCardNumber:
         "",
@@ -1291,6 +1222,9 @@
       reviewAmount:
         1,
 
+      reviewLookupRequestId:
+        "",
+
       reviewLookupTimer:
         null,
 
@@ -1299,15 +1233,6 @@
 
       reviewLookupAcknowledged:
         false,
-
-      recognitionMode:
-        "FAST",
-
-      ocrMissCount:
-        0,
-
-      lastOcrDurationMs:
-        0,
 
       fastCardIndex:
         {},
@@ -1333,131 +1258,97 @@
       syncWatchdog:
         null,
 
-      candidate:
-        "",
-
-      candidateHits:
-        0,
-
-      awaitingClear:
-        false,
-
-      clearFrames:
-        0,
-
-      lastAccepted:
-        "",
-
       sessionCount:
         0,
 
       history:
-        [],
-
-      permissionState:
-        "unknown",
-
-      selectedDeviceId:
-        "",
-
-      videoDevices:
-        [],
-
-      videoTrack:
-        null,
-
-      trackCapabilities:
-        {},
-
-      trackSettings:
-        {},
-
-      zoom:
-        1,
-
-      torchOn:
-        false,
-
-      autoSelectedPreferredCamera:
-        false
+        []
     };
 
 
     document.addEventListener(
       "DOMContentLoaded",
-      function() {
+      initializeScanner
+    );
+
+
+    async function initializeScanner() {
+      document
+        .getElementById(
+          "incrementInput"
+        )
+        .value =
+          state.increment;
+
+      updateIncrement();
+
+      state.recognitionMode =
         document
           .getElementById(
-            "incrementInput"
+            "recognitionMode"
           )
-          .value =
-            state.increment;
+          .value ||
+        "FAST";
 
-        updateIncrement();
+      loadFastLibraryCache();
+      loadScannerSyncQueue();
+      updateFastSessionStatus();
+      updateRecognitionReadout();
+      renderHistory();
 
-        state.recognitionMode =
-          document
-            .getElementById(
-              "recognitionMode"
-            )
-            .value ||
-          "FAST";
+      window.addEventListener(
+        "message",
+        receiveParentMessage
+      );
 
-        updateRecognitionReadout();
-        loadFastLibraryCache();
-        loadScannerSyncQueue();
-        updateFastSessionStatus();
-        checkPermissionState();
+      window.addEventListener(
+        "beforeunload",
+        function() {
+          sendToParent({
+            action:
+              "CLOSED"
+          });
 
-        if (
-          navigator.mediaDevices &&
-          navigator.mediaDevices.addEventListener
-        ) {
-          navigator.mediaDevices.addEventListener(
-            "devicechange",
-            populateCameraDevices
+          stopScanner(
+            false
           );
         }
+      );
 
-        window.addEventListener(
-          "message",
-          receiveParentMessage
-        );
-
-        window.addEventListener(
-          "beforeunload",
-          function() {
-            sendToParent({
-              action:
-                "CLOSED"
-            });
-
-            stopScanner(
-              false
-            );
-          }
-        );
-
-        sendToParent({
-          action:
-            "READY",
-
-          version:
-            state.fastIndexVersion
-        });
-
-        window.setTimeout(
-          function() {
-            requestFastLibraryRefresh(
-              false
-            );
-
-            processScannerSyncQueue();
-          },
-          500
+      if (
+        navigator.mediaDevices &&
+        navigator.mediaDevices.addEventListener
+      ) {
+        navigator.mediaDevices.addEventListener(
+          "devicechange",
+          populateCameraDevices
         );
       }
-    );
+
+      await checkPermissionState();
+
+      sendToParent({
+        action:
+          "READY",
+
+        version:
+          state.fastIndexVersion,
+
+        scannerVersion:
+          SCANNER_VERSION
+      });
+
+      window.setTimeout(
+        function() {
+          requestFastLibraryRefresh(
+            false
+          );
+
+          processScannerSyncQueue();
+        },
+        500
+      );
+    }
 
 
     function clampIncrement(
@@ -1639,6 +1530,21 @@
     }
 
 
+    function showPermissionHelp() {
+      const help =
+        document.getElementById(
+          "permissionHelp"
+        );
+
+      help.classList.add(
+        "show"
+      );
+
+      help.textContent =
+        "In Chrome or Samsung Internet, tap the lock or site-settings icon beside the address, open Permissions, set Camera to Allow, then reload this scanner. The scanner must be opened from an HTTPS address.";
+    }
+
+
     async function requestCameraAndStart() {
       if (
         state.active
@@ -1651,115 +1557,103 @@
         !navigator.mediaDevices.getUserMedia
       ) {
         setStatus(
-          "This browser does not provide camera access. Try current Chrome or Safari."
+          "This browser does not provide camera access. Use a current version of Chrome, Samsung Internet, or Safari."
         );
 
         return;
       }
 
+      document
+        .getElementById(
+          "permissionButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "startButton"
+        )
+        .disabled =
+          true;
+
       setStatus(
-        "Requesting the highest available camera quality… choose Allow if prompted."
+        "Requesting camera access…"
       );
 
-      stopCamera();
-
       try {
-        const stream =
-          await openHighQualityCameraStream();
-
-        state.stream =
-          stream;
-
-        state.videoTrack =
-          stream.getVideoTracks()[0] ||
-          null;
-
-        const video =
-          document.getElementById(
-            "video"
-          );
-
-        video.srcObject =
-          stream;
-
-        await video.play();
-
-        await applyHighQualityTrackSettings();
-        await populateCameraDevices();
-
-        updateCameraQualityControls();
+        await startSelectedCamera();
 
         setPermissionState(
           "granted"
         );
 
-        state.active =
-          true;
-
-        document
-          .getElementById(
-            "stopButton"
-          )
-          .disabled =
-            false;
-
-        document
-          .getElementById(
-            "startButton"
-          )
-          .disabled =
-            true;
-
-        document
-          .getElementById(
-            "permissionButton"
-          )
-          .textContent =
-            "Camera Granted";
+        await populateCameraDevices();
+        configureTrackControls();
 
         setStatus(
-          "Letting the camera focus…"
-        );
-
-        await waitMilliseconds(
-          650
-        );
-
-        await refocusCamera(
-          true
-        );
-
-        setStatus(
-          "Loading local OCR…"
+          "Loading the on-device OCR engine…"
         );
 
         await getWorker();
 
-        if (
-          !state.active
-        ) {
-          return;
-        }
-
-        updateCameraQualityControls();
-
-        setStatus(
-          "Ready. Keep the Card Number sharp inside the green guide."
-        );
-
-        scheduleLoop(
-          150
-        );
-      } catch (error) {
         state.active =
+          true;
+
+        state.candidate =
+          "";
+
+        state.candidateHits =
+          0;
+
+        state.awaitingClear =
           false;
+
+        state.clearFrames =
+          0;
 
         document
           .getElementById(
             "stopButton"
           )
           .disabled =
-            true;
+            false;
+
+        document
+          .getElementById(
+            "nextCardButton"
+          )
+          .disabled =
+            false;
+
+        setStatus(
+          "Ready. Slide one card inside the guide."
+        );
+
+        scheduleScanLoop(
+          150
+        );
+      } catch (error) {
+        setPermissionState(
+          error &&
+          error.name ===
+            "NotAllowedError"
+            ? "denied"
+            : state.permissionState
+        );
+
+        setStatus(
+          cameraErrorMessage(
+            error
+          )
+        );
+      } finally {
+        document
+          .getElementById(
+            "permissionButton"
+          )
+          .disabled =
+            false;
 
         document
           .getElementById(
@@ -1767,352 +1661,198 @@
           )
           .disabled =
             false;
-
-        if (
-          error &&
-          error.name ===
-            "NotAllowedError"
-        ) {
-          setPermissionState(
-            "denied"
-          );
-
-          setStatus(
-            "Camera access was denied. Change the site Camera permission to Allow, reload, and press Request Camera Access again."
-          );
-        } else if (
-          error &&
-          error.name ===
-            "NotFoundError"
-        ) {
-          setStatus(
-            "No camera was found on this device."
-          );
-        } else if (
-          error &&
-          error.name ===
-            "NotReadableError"
-        ) {
-          setStatus(
-            "The camera is being used by another app. Close the other camera app and try again."
-          );
-        } else {
-          setStatus(
-            "Camera could not start: " +
-            (
-              error &&
-              error.message
-                ? error.message
-                : String(
-                    error
-                  )
-            )
-          );
-        }
       }
     }
 
 
-    async function openHighQualityCameraStream() {
-      const supported =
-        navigator.mediaDevices.getSupportedConstraints
-          ? navigator.mediaDevices.getSupportedConstraints()
-          : {};
+    async function startSelectedCamera() {
+      stopMediaTracks();
 
       const video =
-        {
-          width: {
-            ideal:
-              3840
-          },
+        document.getElementById(
+          "video"
+        );
 
-          height: {
-            ideal:
-              2160
-          },
-
-          frameRate: {
-            ideal:
-              15,
-
-            max:
-              30
-          }
-        };
-
-      if (
+      const videoConstraint =
         state.selectedDeviceId
-      ) {
-        video.deviceId = {
-          exact:
-            state.selectedDeviceId
-        };
-      } else {
-        video.facingMode = {
-          ideal:
-            state.facingMode
-        };
-      }
-
-      if (
-        supported.resizeMode
-      ) {
-        video.resizeMode =
-          "none";
-      }
-
-      try {
-        return await navigator.mediaDevices.getUserMedia({
-          audio:
-            false,
-
-          video:
-            video
-        });
-      } catch (error) {
-        if (
-          error &&
-          (
-            error.name ===
-              "OverconstrainedError" ||
-            error.name ===
-              "ConstraintNotSatisfiedError"
-          )
-        ) {
-          const fallback =
-            {
+          ? {
+              deviceId: {
+                exact:
+                  state.selectedDeviceId
+              },
               width: {
                 ideal:
                   1920
               },
-
               height: {
                 ideal:
                   1080
-              },
-
-              frameRate: {
+              }
+            }
+          : {
+              facingMode: {
                 ideal:
-                  15,
-
-                max:
-                  30
+                  state.facingMode
+              },
+              width: {
+                ideal:
+                  1920
+              },
+              height: {
+                ideal:
+                  1080
               }
             };
 
-          if (
-            state.selectedDeviceId
-          ) {
-            fallback.deviceId = {
-              exact:
-                state.selectedDeviceId
-            };
-          } else {
-            fallback.facingMode = {
-              ideal:
-                state.facingMode
-            };
-          }
+      state.stream =
+        await navigator.mediaDevices.getUserMedia({
+          audio:
+            false,
 
-          return await navigator.mediaDevices.getUserMedia({
-            audio:
-              false,
+          video:
+            videoConstraint
+        });
 
-            video:
-              fallback
-          });
-        }
+      video.srcObject =
+        state.stream;
 
-        throw error;
-      }
+      await video.play();
+
+      state.videoTrack =
+        state.stream
+          .getVideoTracks()[0] ||
+        null;
+
+      state.trackCapabilities =
+        state.videoTrack &&
+        typeof state.videoTrack.getCapabilities ===
+          "function"
+          ? state.videoTrack.getCapabilities()
+          : {};
+
+      state.trackSettings =
+        state.videoTrack &&
+        typeof state.videoTrack.getSettings ===
+          "function"
+          ? state.videoTrack.getSettings()
+          : {};
+
+      document
+        .getElementById(
+          "qualityReadout"
+        )
+        .textContent =
+          [
+            state.trackSettings.width &&
+            state.trackSettings.height
+              ? (
+                  state.trackSettings.width +
+                  "×" +
+                  state.trackSettings.height
+                )
+              : "",
+            state.videoTrack
+              ? state.videoTrack.label
+              : ""
+          ]
+            .filter(
+              Boolean
+            )
+            .join(
+              " · "
+            ) ||
+          "Camera ready";
     }
 
 
-    async function applyHighQualityTrackSettings() {
-      const track =
-        state.videoTrack;
-
+    function stopMediaTracks() {
       if (
-        !track
+        state.stream
       ) {
-        return;
+        state.stream
+          .getTracks()
+          .forEach(function(track) {
+            track.stop();
+          });
       }
+
+      state.stream =
+        null;
+
+      state.videoTrack =
+        null;
 
       state.trackCapabilities =
-        track.getCapabilities
-          ? track.getCapabilities()
-          : {};
-
-      state.trackSettings =
-        track.getSettings
-          ? track.getSettings()
-          : {};
-
-      const capabilities =
-        state.trackCapabilities;
-
-      const advanced =
-        [];
-
-      if (
-        Array.isArray(
-          capabilities.focusMode
-        ) &&
-        capabilities.focusMode.indexOf(
-          "continuous"
-        ) !==
-          -1
-      ) {
-        advanced.push({
-          focusMode:
-            "continuous"
-        });
-      }
-
-      if (
-        Array.isArray(
-          capabilities.exposureMode
-        ) &&
-        capabilities.exposureMode.indexOf(
-          "continuous"
-        ) !==
-          -1
-      ) {
-        advanced.push({
-          exposureMode:
-            "continuous"
-        });
-      }
-
-      if (
-        Array.isArray(
-          capabilities.whiteBalanceMode
-        ) &&
-        capabilities.whiteBalanceMode.indexOf(
-          "continuous"
-        ) !==
-          -1
-      ) {
-        advanced.push({
-          whiteBalanceMode:
-            "continuous"
-        });
-      }
-
-      const constraints =
         {};
 
-      if (
-        capabilities.width &&
-        Number(
-          capabilities.width.max ||
-          0
-        ) >
-          Number(
-            state.trackSettings.width ||
-            0
-          )
-      ) {
-        constraints.width = {
-          ideal:
-            Math.min(
-              3840,
-              Number(
-                capabilities.width.max
-              )
-            )
-        };
-      }
-
-      if (
-        capabilities.height &&
-        Number(
-          capabilities.height.max ||
-          0
-        ) >
-          Number(
-            state.trackSettings.height ||
-            0
-          )
-      ) {
-        constraints.height = {
-          ideal:
-            Math.min(
-              2160,
-              Number(
-                capabilities.height.max
-              )
-            )
-        };
-      }
-
-      if (
-        capabilities.frameRate
-      ) {
-        constraints.frameRate = {
-          ideal:
-            Math.min(
-              15,
-              Number(
-                capabilities.frameRate.max ||
-                15
-              )
-            ),
-
-          max:
-            Math.min(
-              30,
-              Number(
-                capabilities.frameRate.max ||
-                30
-              )
-            )
-        };
-      }
-
-      if (
-        advanced.length
-      ) {
-        constraints.advanced =
-          advanced;
-      }
-
-      if (
-        Object.keys(
-          constraints
-        ).length
-      ) {
-        try {
-          await track.applyConstraints(
-            constraints
-          );
-        } catch (error) {
-          console.log(
-            "High-quality constraints were partially unsupported.",
-            error
-          );
-
-          if (
-            advanced.length
-          ) {
-            try {
-              await track.applyConstraints({
-                advanced:
-                  advanced
-              });
-            } catch (ignored) {
-              console.log(
-                ignored
-              );
-            }
-          }
-        }
-      }
-
       state.trackSettings =
-        track.getSettings
-          ? track.getSettings()
-          : state.trackSettings;
+        {};
+
+      const video =
+        document.getElementById(
+          "video"
+        );
+
+      video.srcObject =
+        null;
+    }
+
+
+    function stopScanner(
+      showMessage
+    ) {
+      state.active =
+        false;
+
+      state.busy =
+        false;
+
+      window.clearTimeout(
+        state.timer
+      );
+
+      state.timer =
+        null;
+
+      stopMediaTracks();
+
+      document
+        .getElementById(
+          "stopButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "nextCardButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "qualityReadout"
+        )
+        .textContent =
+          "Camera not started";
+
+      document
+        .getElementById(
+          "zoomControl"
+        )
+        .classList
+        .remove(
+          "show"
+        );
+
+      if (
+        showMessage
+      ) {
+        setStatus(
+          "Live scanning stopped."
+        );
+      }
     }
 
 
@@ -2124,44 +1864,28 @@
         return;
       }
 
-      const devices =
-        await navigator.mediaDevices.enumerateDevices();
+      try {
+        const devices =
+          await navigator.mediaDevices.enumerateDevices();
 
-      state.videoDevices =
-        devices.filter(function(device) {
-          return (
-            device.kind ===
-              "videoinput"
+        state.videoDevices =
+          devices.filter(function(device) {
+            return device.kind ===
+              "videoinput";
+          });
+
+        const select =
+          document.getElementById(
+            "cameraSelect"
           );
-        });
 
-      const select =
-        document.getElementById(
-          "cameraSelect"
-        );
+        const current =
+          state.selectedDeviceId;
 
-      if (
-        !select
-      ) {
-        return;
-      }
+        select.innerHTML =
+          '<option value="">Automatic rear camera</option>';
 
-      const currentDeviceId =
-        state.videoTrack &&
-        state.videoTrack.getSettings
-          ? (
-              state.videoTrack.getSettings().deviceId ||
-              state.selectedDeviceId
-            )
-          : state.selectedDeviceId;
-
-      select.innerHTML =
-        '<option value="">Automatic rear camera</option>';
-
-      state.videoDevices
-        .slice()
-        .sort(compareCameraDevices)
-        .forEach(function(device, index) {
+        state.videoDevices.forEach(function(device, index) {
           const option =
             document.createElement(
               "option"
@@ -2185,551 +1909,334 @@
           );
         });
 
-      if (
-        currentDeviceId &&
-        state.videoDevices.some(function(device) {
-          return (
-            device.deviceId ===
-              currentDeviceId
-          );
-        })
-      ) {
-        select.value =
-          currentDeviceId;
+        if (
+          current &&
+          state.videoDevices.some(function(device) {
+            return device.deviceId ===
+              current;
+          })
+        ) {
+          select.value =
+            current;
+        }
+      } catch (error) {
+        console.log(
+          "Camera list could not be loaded.",
+          error
+        );
+      }
+    }
 
-        state.selectedDeviceId =
-          currentDeviceId;
+
+    async function cameraSelectionChanged() {
+      state.selectedDeviceId =
+        document
+          .getElementById(
+            "cameraSelect"
+          )
+          .value ||
+        "";
+
+      if (
+        !state.stream
+      ) {
+        return;
       }
 
+      const wasActive =
+        state.active;
+
+      state.active =
+        false;
+
+      try {
+        await startSelectedCamera();
+        configureTrackControls();
+
+        state.active =
+          wasActive;
+
+        if (
+          state.active
+        ) {
+          scheduleScanLoop(
+            200
+          );
+        }
+      } catch (error) {
+        setStatus(
+          cameraErrorMessage(
+            error
+          )
+        );
+      }
+    }
+
+
+    async function switchCamera() {
       if (
-        !state.autoSelectedPreferredCamera &&
         state.videoDevices.length >
           1
       ) {
-        const current =
-          state.videoDevices.find(function(device) {
-            return (
-              device.deviceId ===
-                currentDeviceId
-            );
+        const currentIndex =
+          state.videoDevices.findIndex(function(device) {
+            return device.deviceId ===
+              state.selectedDeviceId;
           });
 
-        const preferred =
-          state.videoDevices
-            .slice()
-            .sort(compareCameraDevices)[0];
+        const nextIndex =
+          currentIndex >=
+            0
+            ? (
+                currentIndex +
+                1
+              ) %
+              state.videoDevices.length
+            : 0;
 
-        if (
-          current &&
-          preferred &&
-          cameraLooksLowQuality(
-            current.label
-          ) &&
-          !cameraLooksLowQuality(
-            preferred.label
-          ) &&
-          preferred.deviceId !==
-            current.deviceId
-        ) {
-          state.autoSelectedPreferredCamera =
-            true;
+        state.selectedDeviceId =
+          state.videoDevices[
+            nextIndex
+          ].deviceId;
 
-          state.selectedDeviceId =
-            preferred.deviceId;
+        document
+          .getElementById(
+            "cameraSelect"
+          )
+          .value =
+            state.selectedDeviceId;
+      } else {
+        state.selectedDeviceId =
+          "";
 
-          select.value =
-            preferred.deviceId;
+        state.facingMode =
+          state.facingMode ===
+            "environment"
+            ? "user"
+            : "environment";
+      }
+
+      if (
+        state.stream
+      ) {
+        const wasActive =
+          state.active;
+
+        state.active =
+          false;
+
+        try {
+          await startSelectedCamera();
+          configureTrackControls();
+
+          state.active =
+            wasActive;
+
+          if (
+            state.active
+          ) {
+            scheduleScanLoop(
+              200
+            );
+          }
+        } catch (error) {
+          state.active =
+            wasActive;
 
           setStatus(
-            "Switching away from an ultra-wide or macro camera to a sharper rear camera…"
+            cameraErrorMessage(
+              error
+            )
           );
-
-          stopScanner(
-            false
-          );
-
-          await requestCameraAndStart();
-
-          return;
         }
       }
     }
 
 
-    function compareCameraDevices(
-      left,
-      right
-    ) {
-      return (
-        cameraPreferenceScore(
-          right.label
-        ) -
-          cameraPreferenceScore(
-            left.label
-          ) ||
-        String(
-          left.label ||
-          ""
-        ).localeCompare(
-          String(
-            right.label ||
-            ""
-          )
-        )
-      );
-    }
-
-
-    function cameraPreferenceScore(
-      label
-    ) {
-      const text =
-        String(
-          label ||
-          ""
-        ).toLowerCase();
-
-      let score =
-        0;
-
-      if (
-        /\b(back|rear|environment)\b/.test(
-          text
-        )
-      ) {
-        score +=
-          40;
-      }
-
-      if (
-        /\b(main|standard|wide)\b/.test(
-          text
-        )
-      ) {
-        score +=
-          15;
-      }
-
-      if (
-        /\b(front|user|selfie)\b/.test(
-          text
-        )
-      ) {
-        score -=
-          30;
-      }
-
-      if (
-        /\b(ultra|0\.5|macro|telephoto|tele)\b/.test(
-          text
-        )
-      ) {
-        score -=
-          45;
-      }
-
-      return score;
-    }
-
-
-    function cameraLooksLowQuality(
-      label
-    ) {
-      return /\b(ultra|0\.5|macro|telephoto|tele)\b/i.test(
-        String(
-          label ||
-          ""
-        )
-      );
-    }
-
-
-    async function cameraSelectionChanged() {
-      const select =
-        document.getElementById(
-          "cameraSelect"
-        );
-
-      state.selectedDeviceId =
-        select
-          ? select.value
-          : "";
-
-      state.autoSelectedPreferredCamera =
-        true;
-
-      if (
-        state.active
-      ) {
-        stopScanner(
-          false
-        );
-
-        await requestCameraAndStart();
-      }
-    }
-
-
-    function updateCameraQualityControls() {
-      const track =
-        state.videoTrack;
-
-      const settings =
-        track &&
-        track.getSettings
-          ? track.getSettings()
-          : state.trackSettings ||
-            {};
-
+    function configureTrackControls() {
       const capabilities =
-        track &&
-        track.getCapabilities
-          ? track.getCapabilities()
-          : state.trackCapabilities ||
-            {};
-
-      state.trackSettings =
-        settings;
-
-      state.trackCapabilities =
-        capabilities;
-
-      const readout =
-        document.getElementById(
-          "qualityReadout"
-        );
-
-      if (
-        readout
-      ) {
-        const width =
-          Number(
-            settings.width ||
-            0
-          );
-
-        const height =
-          Number(
-            settings.height ||
-            0
-          );
-
-        const frameRate =
-          Number(
-            settings.frameRate ||
-            0
-          );
-
-        readout.textContent =
-          width &&
-          height
-            ? (
-                width +
-                " × " +
-                height +
-                (
-                  frameRate
-                    ? " · " +
-                      Math.round(
-                        frameRate
-                      ) +
-                      " fps"
-                    : ""
-                )
-              )
-            : "Resolution unavailable";
-      }
-
-      const focusButton =
-        document.getElementById(
-          "focusButton"
-        );
-
-      if (
-        focusButton
-      ) {
-        focusButton.disabled =
-          !track;
-      }
-
-      const torchButton =
-        document.getElementById(
-          "torchButton"
-        );
-
-      if (
-        torchButton
-      ) {
-        const torchSupported =
-          Boolean(
-            capabilities.torch
-          );
-
-        torchButton.disabled =
-          !torchSupported;
-
-        torchButton.textContent =
-          state.torchOn
-            ? "Turn Off Light"
-            : (
-                torchSupported
-                  ? "Turn On Light"
-                  : "Light Unavailable"
-              );
-      }
+        state.trackCapabilities ||
+        {};
 
       const zoomControl =
         document.getElementById(
           "zoomControl"
         );
 
-      const zoomSlider =
+      const slider =
         document.getElementById(
           "zoomSlider"
         );
 
       if (
-        capabilities.zoom &&
-        Number(
-          capabilities.zoom.max ||
-          0
-        ) >
-          Number(
-            capabilities.zoom.min ||
-            0
-          )
+        capabilities.zoom
       ) {
-        const minimum =
-          Number(
-            capabilities.zoom.min
-          );
-
-        const maximum =
-          Number(
-            capabilities.zoom.max
-          );
-
-        const step =
-          Number(
-            capabilities.zoom.step ||
-            0.1
-          );
-
-        state.zoom =
-          Math.max(
-            minimum,
-            Math.min(
-              maximum,
-              Number(
-                settings.zoom ||
-                state.zoom ||
-                minimum
-              )
-            )
-          );
-
-        zoomSlider.min =
-          minimum;
-
-        zoomSlider.max =
-          maximum;
-
-        zoomSlider.step =
-          step;
-
-        zoomSlider.value =
-          state.zoom;
-
         zoomControl.classList.add(
           "show"
         );
+
+        slider.min =
+          capabilities.zoom.min;
+
+        slider.max =
+          capabilities.zoom.max;
+
+        slider.step =
+          capabilities.zoom.step ||
+          0.1;
+
+        const current =
+          Number(
+            state.trackSettings.zoom ||
+            capabilities.zoom.min ||
+            1
+          );
+
+        slider.value =
+          current;
+
+        state.zoom =
+          current;
+
+        document
+          .getElementById(
+            "zoomValue"
+          )
+          .textContent =
+            current.toFixed(
+              1
+            ) +
+            "×";
       } else {
         zoomControl.classList.remove(
           "show"
         );
       }
 
-      updateZoomValue();
-    }
+      document
+        .getElementById(
+          "torchButton"
+        )
+        .disabled =
+          !capabilities.torch;
 
-
-    async function applyCurrentAdvancedCameraSettings() {
-      const track =
-        state.videoTrack;
-
-      if (
-        !track ||
-        !track.applyConstraints
-      ) {
-        return;
-      }
-
-      const capabilities =
-        track.getCapabilities
-          ? track.getCapabilities()
-          : {};
-
-      const advanced =
-        [];
-
-      if (
-        Array.isArray(
-          capabilities.focusMode
-        ) &&
-        capabilities.focusMode.indexOf(
-          "continuous"
-        ) !==
-          -1
-      ) {
-        advanced.push({
-          focusMode:
-            "continuous"
-        });
-      }
-
-      if (
-        capabilities.zoom
-      ) {
-        advanced.push({
-          zoom:
-            state.zoom
-        });
-      }
-
-      if (
-        capabilities.torch
-      ) {
-        advanced.push({
-          torch:
-            state.torchOn
-        });
-      }
-
-      if (
-        !advanced.length
-      ) {
-        return;
-      }
-
-      const current =
-        track.getConstraints
-          ? track.getConstraints()
-          : {};
-
-      current.advanced =
-        advanced;
-
-      await track.applyConstraints(
-        current
-      );
-
-      state.trackSettings =
-        track.getSettings
-          ? track.getSettings()
-          : state.trackSettings;
+      document
+        .getElementById(
+          "focusButton"
+        )
+        .disabled =
+          !state.videoTrack;
     }
 
 
     async function applyCameraZoom() {
-      const slider =
-        document.getElementById(
-          "zoomSlider"
-        );
+      if (
+        !state.videoTrack ||
+        !state.trackCapabilities.zoom
+      ) {
+        return;
+      }
 
-      state.zoom =
+      const value =
         Number(
-          slider.value ||
-          1
+          document
+            .getElementById(
+              "zoomSlider"
+            )
+            .value
         );
-
-      updateZoomValue();
 
       try {
-        await applyCurrentAdvancedCameraSettings();
-        updateCameraQualityControls();
+        await state.videoTrack.applyConstraints({
+          advanced: [
+            {
+              zoom:
+                value
+            }
+          ]
+        });
+
+        state.zoom =
+          value;
+
+        document
+          .getElementById(
+            "zoomValue"
+          )
+          .textContent =
+            value.toFixed(
+              1
+            ) +
+            "×";
       } catch (error) {
         setStatus(
-          "This camera could not apply that zoom amount."
+          "The selected camera did not accept that zoom level."
         );
-      }
-    }
-
-
-    function updateZoomValue() {
-      const value =
-        document.getElementById(
-          "zoomValue"
-        );
-
-      if (
-        value
-      ) {
-        value.textContent =
-          Number(
-            state.zoom ||
-            1
-          ).toFixed(
-            1
-          ) +
-          "×";
       }
     }
 
 
     async function toggleCameraTorch() {
+      if (
+        !state.videoTrack ||
+        !state.trackCapabilities.torch
+      ) {
+        return;
+      }
+
       state.torchOn =
         !state.torchOn;
 
       try {
-        await applyCurrentAdvancedCameraSettings();
-        updateCameraQualityControls();
+        await state.videoTrack.applyConstraints({
+          advanced: [
+            {
+              torch:
+                state.torchOn
+            }
+          ]
+        });
 
-        setStatus(
-          state.torchOn
-            ? "Camera light is on. Avoid glare directly over the Card Number."
-            : "Camera light is off."
-        );
+        document
+          .getElementById(
+            "torchButton"
+          )
+          .textContent =
+            state.torchOn
+              ? "Turn Off Light"
+              : "Turn On Light";
       } catch (error) {
         state.torchOn =
           false;
 
-        updateCameraQualityControls();
-
         setStatus(
-          "This browser or camera could not control the light."
+          "The selected camera could not change its light."
         );
       }
     }
 
 
-    async function refocusCamera(
-      quiet
-    ) {
-      const track =
-        state.videoTrack;
-
+    async function refocusCamera() {
       if (
-        !track
+        !state.videoTrack
       ) {
         return;
       }
 
-      const capabilities =
-        track.getCapabilities
-          ? track.getCapabilities()
-          : {};
-
       try {
+        const capabilities =
+          state.trackCapabilities ||
+          {};
+
         if (
           Array.isArray(
             capabilities.focusMode
           ) &&
-          capabilities.focusMode.indexOf(
+          capabilities.focusMode.includes(
             "single-shot"
-          ) !==
-            -1
+          )
         ) {
-          await track.applyConstraints({
+          await state.videoTrack.applyConstraints({
             advanced: [
               {
                 focusMode:
@@ -2737,189 +2244,133 @@
               }
             ]
           });
-
-          await waitMilliseconds(
-            350
-          );
-        }
-
-        await applyCurrentAdvancedCameraSettings();
-
-        if (
-          !quiet
+        } else if (
+          Array.isArray(
+            capabilities.focusMode
+          ) &&
+          capabilities.focusMode.includes(
+            "continuous"
+          )
         ) {
-          setStatus(
-            "Refocusing… hold the card still for one second."
-          );
-        }
-      } catch (error) {
-        if (
-          !quiet
-        ) {
-          setStatus(
-            "Automatic refocus is unavailable. Move the card slightly farther away, then slowly bring it closer."
-          );
-        }
-      }
-    }
-
-
-    function waitMilliseconds(
-      milliseconds
-    ) {
-      return new Promise(function(resolve) {
-        window.setTimeout(
-          resolve,
-          milliseconds
-        );
-      });
-    }
-
-
-    function showPermissionHelp() {
-      const help =
-        document.getElementById(
-          "permissionHelp"
-        );
-
-      const ua =
-        navigator.userAgent ||
-        "";
-
-      let instructions;
-
-      if (
-        /iPhone|iPad|iPod/i.test(
-          ua
-        )
-      ) {
-        instructions =
-          "iPhone / iPad: open the Settings app → Safari or Chrome → Camera → Allow. Return here, reload, and press Request Camera Access.";
-      } else if (
-        /Android/i.test(
-          ua
-        )
-      ) {
-        instructions =
-          "Android Chrome: tap ⋮ → Settings → Site settings → Camera. Find this site under Blocked and change it to Allow. Return here, reload, and press Request Camera Access.";
-      } else {
-        instructions =
-          "Desktop Chrome or Edge: click the tune/lock/camera icon beside the address bar → Site settings → Camera → Allow. Reload this page and press Request Camera Access.";
-      }
-
-      help.textContent =
-        instructions;
-
-      help.classList.add(
-        "show"
-      );
-    }
-
-
-    function stopScanner(
-      showMessage
-    ) {
-      state.active =
-        false;
-
-      clearPendingSaveWatchdog();
-
-      window.clearTimeout(
-        state.timer
-      );
-
-      state.timer =
-        null;
-
-      stopCamera();
-
-      document
-        .getElementById(
-          "stopButton"
-        )
-        .disabled =
-          true;
-
-      document
-        .getElementById(
-          "startButton"
-        )
-        .disabled =
-          false;
-
-      updateCameraQualityControls();
-
-      if (
-        showMessage
-      ) {
-        setStatus(
-          "Scanner stopped."
-        );
-      }
-    }
-
-
-    function stopCamera() {
-      if (
-        state.stream
-      ) {
-        state.stream
-          .getTracks()
-          .forEach(function(track) {
-            track.stop();
+          await state.videoTrack.applyConstraints({
+            advanced: [
+              {
+                focusMode:
+                  "continuous"
+              }
+            ]
           });
-      }
+        }
 
-      state.stream =
-        null;
-
-      state.videoTrack =
-        null;
-
-      state.trackCapabilities =
-        {};
-
-      state.trackSettings =
-        {};
-
-      state.torchOn =
-        false;
-
-      const video =
-        document.getElementById(
-          "video"
+        setStatus(
+          "Camera refocus requested. Hold the Card Number still."
         );
-
-      video.srcObject =
-        null;
-
-      updateCameraQualityControls();
+      } catch (error) {
+        setStatus(
+          "This camera does not provide a manual refocus control."
+        );
+      }
     }
 
 
-    async function switchCamera() {
-      state.facingMode =
-        state.facingMode ===
-          "environment"
-          ? "user"
-          : "environment";
-
-      const wasActive =
-        state.active;
-
-      stopScanner(
-        false
-      );
+    function cameraErrorMessage(
+      error
+    ) {
+      const name =
+        error &&
+        error.name
+          ? error.name
+          : "";
 
       if (
-        wasActive
+        name ===
+          "NotAllowedError"
       ) {
-        await requestCameraAndStart();
+        return "Camera permission was blocked. Open Permission Help and set Camera to Allow.";
       }
+
+      if (
+        name ===
+          "NotFoundError"
+      ) {
+        return "No camera was found on this device.";
+      }
+
+      if (
+        name ===
+          "NotReadableError"
+      ) {
+        return "The camera is already being used by another app or browser tab.";
+      }
+
+      if (
+        name ===
+          "OverconstrainedError"
+      ) {
+        return "The selected camera could not satisfy the requested settings. Choose Automatic rear camera.";
+      }
+
+      return error &&
+        error.message
+          ? error.message
+          : String(
+              error ||
+              "Camera could not start."
+            );
     }
 
 
-    function scheduleLoop(
+    function recognitionModeChanged() {
+      state.recognitionMode =
+        document
+          .getElementById(
+            "recognitionMode"
+          )
+          .value ||
+        "FAST";
+
+      state.ocrMissCount =
+        0;
+
+      updateRecognitionReadout();
+
+      setStatus(
+        state.recognitionMode ===
+          "FAST"
+          ? "Fast recognition selected. This is recommended for phones."
+          : (
+              state.recognitionMode ===
+                "BALANCED"
+                ? "Balanced recognition selected."
+                : "Accurate recognition selected. It may be slower on phones."
+            )
+      );
+    }
+
+
+    function updateRecognitionReadout() {
+      document
+        .getElementById(
+          "recognitionReadout"
+        )
+        .textContent =
+          (
+            state.recognitionMode ||
+            "FAST"
+          ) +
+          (
+            state.lastOcrDurationMs
+              ? (
+                  " · " +
+                  state.lastOcrDurationMs +
+                  " ms"
+                )
+              : " OCR"
+          );
+    }
+
+
+    function scheduleScanLoop(
       delay
     ) {
       window.clearTimeout(
@@ -2936,10 +2387,10 @@
         window.setTimeout(
           scanLoop,
           Math.max(
-            100,
+            120,
             Number(
               delay ||
-              450
+              650
             )
           )
         );
@@ -2954,11 +2405,13 @@
       }
 
       if (
-        state.busy ||
-        state.reviewOpen
+        document.visibilityState ===
+          "hidden" ||
+        state.reviewOpen ||
+        state.busy
       ) {
-        scheduleLoop(
-          250
+        scheduleScanLoop(
+          350
         );
 
         return;
@@ -2973,18 +2426,46 @@
         !video.videoWidth ||
         !video.videoHeight
       ) {
-        scheduleLoop(
-          300
+        scheduleScanLoop(
+          350
         );
 
         return;
       }
 
+      const frame =
+        document.getElementById(
+          "frameCanvas"
+        );
+
+      frame.width =
+        1200;
+
+      frame.height =
+        1600;
+
+      drawImageCover(
+        video,
+        frame
+      );
+
       try {
         const result =
           await recognizeCardNumber(
-            video
+            frame
           );
+
+        document
+          .getElementById(
+            "raw"
+          )
+          .textContent =
+            result.rawText
+              ? (
+                  "OCR: " +
+                  result.rawText
+                )
+              : "";
 
         if (
           result.cardNumber
@@ -2998,21 +2479,458 @@
           );
         }
       } catch (error) {
-        setStatus(
-          error &&
-          error.message
-            ? error.message
-            : String(
-                error
-              )
+        console.log(
+          error
         );
-      } finally {
-        scheduleLoop(
-          state.awaitingClear
-            ? 500
-            : 500
+
+        setStatus(
+          "OCR had a temporary problem. The scanner will keep trying."
         );
       }
+
+      const delay =
+        state.recognitionMode ===
+          "ACCURATE"
+          ? 1150
+          : (
+              state.recognitionMode ===
+                "BALANCED"
+                ? 850
+                : 620
+            );
+
+      scheduleScanLoop(
+        delay
+      );
+    }
+
+
+    function drawImageCover(
+      video,
+      canvas
+    ) {
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false,
+            willReadFrequently:
+              true
+          }
+        );
+
+      const sourceRatio =
+        video.videoWidth /
+        video.videoHeight;
+
+      const targetRatio =
+        canvas.width /
+        canvas.height;
+
+      let sourceX =
+        0;
+
+      let sourceY =
+        0;
+
+      let sourceWidth =
+        video.videoWidth;
+
+      let sourceHeight =
+        video.videoHeight;
+
+      if (
+        sourceRatio >
+          targetRatio
+      ) {
+        sourceWidth =
+          video.videoHeight *
+          targetRatio;
+
+        sourceX =
+          (
+            video.videoWidth -
+            sourceWidth
+          ) /
+          2;
+      } else {
+        sourceHeight =
+          video.videoWidth /
+          targetRatio;
+
+        sourceY =
+          (
+            video.videoHeight -
+            sourceHeight
+          ) /
+          2;
+      }
+
+      context.drawImage(
+        video,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+    }
+
+
+    async function getWorker() {
+      if (
+        state.worker
+      ) {
+        return state.worker;
+      }
+
+      if (
+        state.workerPromise
+      ) {
+        return state.workerPromise;
+      }
+
+      state.workerPromise =
+        (async function() {
+          const started =
+            Date.now();
+
+          while (
+            !window.Tesseract
+          ) {
+            if (
+              Date.now() -
+              started >
+              15000
+            ) {
+              throw new Error(
+                "The OCR library could not load. Check the internet connection and reload the scanner."
+              );
+            }
+
+            await new Promise(function(resolve) {
+              window.setTimeout(
+                resolve,
+                200
+              );
+            });
+          }
+
+          const worker =
+            await window.Tesseract.createWorker(
+              "eng",
+              1
+            );
+
+          await worker.setParameters({
+            tessedit_pageseg_mode:
+              "7",
+
+            tessedit_char_whitelist:
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-",
+
+            preserve_interword_spaces:
+              "1"
+          });
+
+          state.worker =
+            worker;
+
+          return worker;
+        })();
+
+      try {
+        return await state.workerPromise;
+      } catch (error) {
+        state.workerPromise =
+          null;
+
+        throw error;
+      }
+    }
+
+
+    function createCrop(
+      source,
+      xRatio,
+      yRatio,
+      widthRatio,
+      heightRatio,
+      targetWidth
+    ) {
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      const sourceX =
+        Math.max(
+          0,
+          Math.round(
+            source.width *
+            xRatio
+          )
+        );
+
+      const sourceY =
+        Math.max(
+          0,
+          Math.round(
+            source.height *
+            yRatio
+          )
+        );
+
+      const sourceWidth =
+        Math.max(
+          2,
+          Math.min(
+            source.width -
+            sourceX,
+            Math.round(
+              source.width *
+              widthRatio
+            )
+          )
+        );
+
+      const sourceHeight =
+        Math.max(
+          2,
+          Math.min(
+            source.height -
+            sourceY,
+            Math.round(
+              source.height *
+              heightRatio
+            )
+          )
+        );
+
+      canvas.width =
+        Math.max(
+          900,
+          Math.min(
+            1900,
+            Math.round(
+              targetWidth ||
+              1500
+            )
+          )
+        );
+
+      canvas.height =
+        Math.max(
+          200,
+          Math.round(
+            sourceHeight *
+            (
+              canvas.width /
+              sourceWidth
+            )
+          )
+        );
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false,
+            willReadFrequently:
+              true
+          }
+        );
+
+      context.fillStyle =
+        "#ffffff";
+
+      context.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      context.imageSmoothingEnabled =
+        true;
+
+      context.imageSmoothingQuality =
+        "high";
+
+      context.drawImage(
+        source,
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      return canvas;
+    }
+
+
+    function makeVariant(
+      source,
+      mode
+    ) {
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width =
+        source.width;
+
+      canvas.height =
+        source.height;
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false,
+            willReadFrequently:
+              true
+          }
+        );
+
+      context.drawImage(
+        source,
+        0,
+        0
+      );
+
+      const imageData =
+        context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+      const pixels =
+        imageData.data;
+
+      for (
+        let index = 0;
+        index < pixels.length;
+        index += 4
+      ) {
+        const gray =
+          Math.round(
+            pixels[index] *
+              0.299 +
+            pixels[index + 1] *
+              0.587 +
+            pixels[index + 2] *
+              0.114
+          );
+
+        let value;
+
+        if (
+          mode ===
+            "threshold"
+        ) {
+          value =
+            gray >
+              150
+              ? 255
+              : 0;
+        } else if (
+          mode ===
+            "inverted"
+        ) {
+          value =
+            gray >
+              150
+              ? 0
+              : 255;
+        } else {
+          value =
+            Math.max(
+              0,
+              Math.min(
+                255,
+                (
+                  gray -
+                  122
+                ) *
+                  2.05 +
+                122
+              )
+            );
+        }
+
+        pixels[index] =
+          value;
+
+        pixels[index + 1] =
+          value;
+
+        pixels[index + 2] =
+          value;
+      }
+
+      context.putImageData(
+        imageData,
+        0,
+        0
+      );
+
+      return canvas;
+    }
+
+
+    async function recognizePass(
+      worker,
+      canvas,
+      mode
+    ) {
+      const result =
+        await worker.recognize(
+          makeVariant(
+            canvas,
+            mode
+          )
+        );
+
+      const text =
+        result &&
+        result.data
+          ? String(
+              result.data.text ||
+              ""
+            )
+          : "";
+
+      return {
+        text:
+          text,
+
+        confidence:
+          Number(
+            result &&
+            result.data &&
+            result.data.confidence ||
+            0
+          ),
+
+        cardNumber:
+          extractCardNumber(
+            text
+          )
+      };
     }
 
 
@@ -3026,44 +2944,124 @@
         performance.now();
 
       try {
-        const crop =
-          createCardNumberCrop(
-            frame
+        /*
+         * These three crops all cover the green guide, but at
+         * slightly different sizes. The tight crop removes rarity,
+         * cost, copyright text, and borders. The wide crop recovers
+         * a card held slightly off-center.
+         */
+        const tight =
+          createCrop(
+            frame,
+            0.425,
+            0.805,
+            0.445,
+            0.105,
+            1550
+          );
+
+        const normal =
+          createCrop(
+            frame,
+            0.405,
+            0.785,
+            0.515,
+            0.145,
+            1650
+          );
+
+        const wide =
+          createCrop(
+            frame,
+            0.335,
+            0.755,
+            0.625,
+            0.205,
+            1750
           );
 
         const worker =
           await getWorker();
 
-        const mode =
-          state.recognitionMode ||
-          "FAST";
+        let plan;
 
-        const plannedModes =
-          mode ===
+        if (
+          state.recognitionMode ===
             "ACCURATE"
-            ? [
-                "contrast",
-                "threshold",
-                "inverted"
-              ]
-            : (
-                mode ===
-                  "BALANCED"
-                  ? [
-                      "contrast",
-                      "threshold"
-                    ]
-                  : [
-                      state.ocrMissCount %
-                        3 ===
-                        2
-                        ? "threshold"
-                        : "contrast"
-                    ]
-              );
+        ) {
+          plan = [
+            [
+              tight,
+              "contrast"
+            ],
+            [
+              tight,
+              "threshold"
+            ],
+            [
+              normal,
+              "contrast"
+            ],
+            [
+              normal,
+              "threshold"
+            ],
+            [
+              wide,
+              "contrast"
+            ],
+            [
+              wide,
+              "inverted"
+            ]
+          ];
+        } else if (
+          state.recognitionMode ===
+            "BALANCED"
+        ) {
+          plan = [
+            [
+              tight,
+              "contrast"
+            ],
+            [
+              tight,
+              "threshold"
+            ],
+            [
+              normal,
+              "contrast"
+            ],
+            [
+              wide,
+              "contrast"
+            ]
+          ];
+        } else {
+          plan = [
+            [
+              tight,
+              "contrast"
+            ],
+            [
+              tight,
+              "threshold"
+            ],
+            state.ocrMissCount %
+              2 ===
+              1
+              ? [
+                  normal,
+                  "contrast"
+                ]
+              : null
+          ].filter(
+            Boolean
+          );
+        }
 
-        const numbers =
-          [];
+        const counts =
+          {};
 
         const raw =
           [];
@@ -3072,92 +3070,51 @@
           0;
 
         for (
-          let index =
-            0;
-          index <
-            plannedModes.length;
+          let index = 0;
+          index < plan.length;
           index++
         ) {
-          const result =
-            await worker.recognize(
-              makeVariant(
-                crop,
-                plannedModes[
-                  index
-                ]
-              )
+          const pass =
+            await recognizePass(
+              worker,
+              plan[index][0],
+              plan[index][1]
             );
-
-          const text =
-            result &&
-            result.data
-              ? String(
-                  result.data.text ||
-                  ""
-                )
-              : "";
 
           raw.push(
-            text
+            pass.text
           );
-
-          const passConfidence =
-            Number(
-              result &&
-              result.data &&
-              result.data.confidence ||
-              0
-            );
 
           confidence =
             Math.max(
               confidence,
-              passConfidence
-            );
-
-          const number =
-            extractCardNumber(
-              text
+              pass.confidence
             );
 
           if (
-            number
+            pass.cardNumber
           ) {
-            numbers.push(
-              number
-            );
+            counts[
+              pass.cardNumber
+            ] =
+              Number(
+                counts[
+                  pass.cardNumber
+                ] ||
+                0
+              ) +
+              1;
 
-            /*
-             * In Fast mode, a clean high-confidence read is enough
-             * for this frame. The same-number frame confirmation
-             * below still protects against accidental saves.
-             */
             if (
-              mode ===
-                "FAST" &&
-              passConfidence >=
-                45
+              counts[
+                pass.cardNumber
+              ] >=
+                2
             ) {
               break;
             }
           }
         }
-
-        const counts =
-          {};
-
-        numbers.forEach(function(number) {
-          counts[
-            number
-          ] =
-            Number(
-              counts[
-                number
-              ] ||
-              0
-            ) +
-            1;
-        });
 
         const cardNumber =
           Object.keys(
@@ -3202,7 +3159,8 @@
                   1,
                   counts[
                     cardNumber
-                  ]
+                  ] ||
+                  1
                 )
               : 0,
 
@@ -3226,24 +3184,292 @@
     }
 
 
+    function extractCardNumber(
+      rawText
+    ) {
+      const text =
+        String(
+          rawText ||
+          ""
+        )
+          .toUpperCase()
+          .replace(
+            /[–—_]/g,
+            "-"
+          );
+
+      const compact =
+        text.replace(
+          /[^A-Z0-9]/g,
+          ""
+        );
+
+      const candidates =
+        [];
+
+      let match;
+
+      const full =
+        /(PRB|OP|ST|EB)([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})/g;
+
+      while (
+        (
+          match =
+            full.exec(
+              compact
+            )
+        )
+      ) {
+        addCandidate(
+          candidates,
+          match[1],
+          match[2],
+          match[3]
+        );
+      }
+
+      const directPromo =
+        compact.match(
+          /(?:^|[^A-Z0-9])P([0-9OQDILTZSBG]{3})(?:$|[^A-Z0-9])/
+        ) ||
+        compact.match(
+          /^P([0-9OQDILTZSBG]{3})$/
+        );
+
+      if (
+        directPromo
+      ) {
+        const number =
+          normalizeDigits(
+            directPromo[1]
+          );
+
+        addValidatedCandidate(
+          candidates,
+          "P-" +
+          number
+        );
+      }
+
+      /*
+       * Recover common one-character prefix losses. A reconstructed
+       * value is accepted only when it exists in the cached library.
+       */
+      const shortenedRules = [
+        {
+          regex:
+            /^P([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})$/,
+          prefix:
+            "OP"
+        },
+        {
+          regex:
+            /^O([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})$/,
+          prefix:
+            "OP"
+        },
+        {
+          regex:
+            /^T([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})$/,
+          prefix:
+            "ST"
+        },
+        {
+          regex:
+            /^B([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})$/,
+          prefix:
+            "EB"
+        },
+        {
+          regex:
+            /^RB([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})$/,
+          prefix:
+            "PRB"
+        }
+      ];
+
+      shortenedRules.forEach(function(rule) {
+        const shortened =
+          compact.match(
+            rule.regex
+          );
+
+        if (
+          shortened
+        ) {
+          addCandidate(
+            candidates,
+            rule.prefix,
+            shortened[1],
+            shortened[2]
+          );
+        }
+      });
+
+      return candidates[0] ||
+        "";
+    }
+
+
+    function normalizeDigits(
+      value
+    ) {
+      const map = {
+        O:
+          "0",
+        Q:
+          "0",
+        D:
+          "0",
+        I:
+          "1",
+        L:
+          "1",
+        T:
+          "1",
+        Z:
+          "2",
+        S:
+          "5",
+        B:
+          "8",
+        G:
+          "6"
+      };
+
+      return String(
+        value ||
+        ""
+      )
+        .split(
+          ""
+        )
+        .map(function(character) {
+          return map[
+            character
+          ] ||
+          character;
+        })
+        .join(
+          ""
+        )
+        .replace(
+          /[^0-9]/g,
+          ""
+        );
+    }
+
+
+    function addCandidate(
+      candidates,
+      prefix,
+      setText,
+      cardText
+    ) {
+      const setNumber =
+        normalizeDigits(
+          setText
+        );
+
+      const cardNumber =
+        normalizeDigits(
+          cardText
+        );
+
+      if (
+        setNumber.length !==
+          2 ||
+        cardNumber.length !==
+          3
+      ) {
+        return;
+      }
+
+      addValidatedCandidate(
+        candidates,
+        prefix +
+        setNumber +
+        "-" +
+        cardNumber
+      );
+    }
+
+
+    function addValidatedCandidate(
+      candidates,
+      cardNumber
+    ) {
+      if (
+        !cardNumber
+      ) {
+        return;
+      }
+
+      if (
+        state.fastLibraryReady &&
+        Object.keys(
+          state.fastCardIndex
+        ).length >
+          0 &&
+        !state.fastCardIndex[
+          cardNumber
+        ]
+      ) {
+        return;
+      }
+
+      if (
+        candidates.indexOf(
+          cardNumber
+        ) ===
+          -1
+      ) {
+        candidates.push(
+          cardNumber
+        );
+      }
+    }
+
+
     function handleCardNumber(
       result
     ) {
       const cardNumber =
-        result.cardNumber;
+        String(
+          result.cardNumber ||
+          ""
+        );
+
+      if (
+        !cardNumber
+      ) {
+        return;
+      }
 
       state.clearFrames =
         0;
 
+      /*
+       * Core 1.7 fix:
+       * - The exact card just accepted remains blocked.
+       * - A different valid Card Number immediately unlocks the
+       *   scanner, even when the camera never saw a blank frame.
+       */
       if (
         state.awaitingClear &&
         cardNumber ===
           state.lastAccepted
       ) {
+        state.candidate =
+          "";
+
+        state.candidateHits =
+          0;
+
         setStatus(
           "Saved " +
           cardNumber +
-          ". Remove this card until Ready appears."
+          ". Show a different card or clear the guide."
         );
 
         return;
@@ -3257,11 +3483,20 @@
         state.awaitingClear =
           false;
 
+        state.clearFrames =
+          0;
+
         state.candidate =
           "";
 
         state.candidateHits =
           0;
+
+        setStatus(
+          "New card " +
+          cardNumber +
+          " detected. Confirming…"
+        );
       }
 
       if (
@@ -3299,7 +3534,10 @@
           cardNumber +
           " · " +
           Math.round(
-            result.confidence
+            Number(
+              result.confidence ||
+              0
+            )
           ) +
           "% · " +
           Number(
@@ -3307,7 +3545,10 @@
             0
           ) +
           " ms · " +
-          result.rawText;
+          String(
+            result.rawText ||
+            ""
+          );
 
       if (
         state.candidateHits <
@@ -3338,50 +3579,79 @@
         0;
 
       if (
-        state.awaitingClear
+        !state.awaitingClear
       ) {
-        state.clearFrames++;
+        return;
+      }
 
-        if (
-          state.clearFrames >=
-            2
-        ) {
-          state.awaitingClear =
-            false;
-
-          state.clearFrames =
-            0;
-
-          state.lastAccepted =
-            "";
-
-          setStatus(
-            "Ready. Slide the next card inside the guide."
-          );
-
-          updateQueueButtons();
-        } else {
-          setStatus(
-            "Card removed. Keep the guide clear for one moment…"
-          );
-        }
+      /*
+       * Partial OCR such as only "P" is not a blank guide.
+       * This prevents the same card from becoming unlocked merely
+       * because one OCR pass missed most of its Card Number.
+       */
+      if (
+        String(
+          rawText ||
+          ""
+        )
+          .replace(
+            /[^A-Z0-9]/gi,
+            ""
+          )
+          .length >
+          0
+      ) {
+        state.clearFrames =
+          0;
 
         return;
       }
 
-      setStatus(
-        "Ready. Slide one card inside the guide."
-      );
+      state.clearFrames++;
 
-      document
-        .getElementById(
-          "raw"
-        )
-        .textContent =
-          rawText
-            ? "OCR: " +
-              rawText
-            : "";
+      if (
+        state.clearFrames >=
+          2
+      ) {
+        state.awaitingClear =
+          false;
+
+        state.clearFrames =
+          0;
+
+        state.lastAccepted =
+          "";
+
+        setStatus(
+          "Ready. Slide the next card inside the guide."
+        );
+      } else {
+        setStatus(
+          "Card removed. Keep the guide clear for one moment…"
+        );
+      }
+    }
+
+
+    function readyForNextCard() {
+      state.awaitingClear =
+        false;
+
+      state.clearFrames =
+        0;
+
+      state.lastAccepted =
+        "";
+
+      state.candidate =
+        "";
+
+      state.candidateHits =
+        0;
+
+      setStatus(
+        "Ready. Slide the next card inside the guide."
+      );
     }
 
 
@@ -3389,21 +3659,13 @@
       cardNumber
     ) {
       if (
-        !window.opener ||
-        window.opener.closed
+        state.reviewOpen
       ) {
-        setStatus(
-          "The Collection Manager tab is not connected. Close this page and reopen Live Scanner from the Collection Manager."
-        );
-
         return;
       }
 
       state.reviewOpen =
         true;
-
-      state.reviewLookupRequestId =
-        randomToken();
 
       state.reviewCardNumber =
         cardNumber;
@@ -3415,6 +3677,9 @@
         clampIncrement(
           state.increment
         );
+
+      state.reviewLookupRequestId =
+        randomToken();
 
       state.reviewLookupRetries =
         0;
@@ -3434,7 +3699,6 @@
       state.candidateHits =
         0;
 
-      clearPendingSaveWatchdog();
       clearReviewLookupTimer();
 
       document
@@ -3502,13 +3766,6 @@
         .disabled =
           true;
 
-      document
-        .getElementById(
-          "reviewRetryButton"
-        )
-        .disabled =
-          false;
-
       const localPreview =
         fastPreviewForCard(
           cardNumber
@@ -3526,26 +3783,654 @@
           cardNumber +
           " in " +
           state.lastOcrDurationMs +
-          " ms. Card loaded instantly from the local session library."
+          " ms. Card loaded from the local library."
         );
 
         return;
       }
 
       setReviewMessage(
-        state.fastLibraryReady
-          ? "This card is not in the local library. Checking the spreadsheet…"
-          : "The local card library is still loading. Checking the spreadsheet…",
+        "The card is not in the local cache. Checking the Collection Manager…",
         ""
       );
 
-      setStatus(
-        "Recognized " +
-        cardNumber +
-        ". Checking the Collection Manager…"
+      sendReviewLookup();
+    }
+
+
+    function fastPreviewForCard(
+      cardNumber
+    ) {
+      const record =
+        state.fastCardIndex[
+          cardNumber
+        ];
+
+      if (
+        !record
+      ) {
+        return false;
+      }
+
+      return {
+        ok:
+          true,
+
+        cardNumber:
+          record.cardNumber,
+
+        name:
+          record.name,
+
+        color:
+          record.color,
+
+        type:
+          record.type,
+
+        rarity:
+          record.rarity,
+
+        currentStock:
+          Number(
+            record.stock ||
+            0
+          ) +
+          pendingAmountForCard(
+            cardNumber
+          ),
+
+        inCollection:
+          record.inCollection,
+
+        source:
+          record.inCollection
+            ? "COLLECTION"
+            : "MASTER CATALOG",
+
+        destinationSheet:
+          record.destinationSheet,
+
+        indexRow:
+          record.indexRow,
+
+        local:
+          true,
+
+        message:
+          record.inCollection
+            ? (
+                cardNumber +
+                " loaded instantly from the local session library."
+              )
+            : (
+                cardNumber +
+                " will be added to " +
+                record.destinationSheet +
+                " when the queued save syncs."
+              )
+      };
+    }
+
+
+    function applyReviewPreview(
+      preview
+    ) {
+      state.reviewPreview =
+        preview;
+
+      state.reviewCardNumber =
+        preview.cardNumber ||
+        state.reviewCardNumber;
+
+      document
+        .getElementById(
+          "reviewCardNumber"
+        )
+        .textContent =
+          state.reviewCardNumber;
+
+      document
+        .getElementById(
+          "reviewCardNumberInput"
+        )
+        .value =
+          state.reviewCardNumber;
+
+      document
+        .getElementById(
+          "reviewCardName"
+        )
+        .textContent =
+          preview.name ||
+          "Unknown name";
+
+      document
+        .getElementById(
+          "reviewCardMeta"
+        )
+        .textContent =
+          [
+            preview.color,
+            preview.type,
+            preview.rarity,
+            preview.source,
+            preview.destinationSheet,
+            preview.local
+              ? "LOCAL SESSION"
+              : ""
+          ]
+            .filter(
+              Boolean
+            )
+            .join(
+              " · "
+            );
+
+      document
+        .getElementById(
+          "reviewCurrentStock"
+        )
+        .textContent =
+          Number(
+            preview.currentStock ||
+            0
+          );
+
+      document
+        .getElementById(
+          "reviewAmountInput"
+        )
+        .value =
+          state.reviewAmount;
+
+      updateReviewAmount();
+
+      setReviewMessage(
+        preview.message ||
+        "Review the card and press Save.",
+        preview.inCollection
+          ? "good"
+          : ""
+      );
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          false;
+    }
+
+
+    function reviewCardNumberChanged() {
+      const input =
+        document.getElementById(
+          "reviewCardNumberInput"
+        );
+
+      const normalized =
+        normalizeTypedCardNumber(
+          input.value
+        );
+
+      state.reviewCardNumber =
+        normalized;
+
+      state.reviewPreview =
+        null;
+
+      document
+        .getElementById(
+          "reviewCardNumber"
+        )
+        .textContent =
+          normalized ||
+          "—";
+
+      input.value =
+        normalized;
+
+      const localPreview =
+        fastPreviewForCard(
+          normalized
+        );
+
+      if (
+        localPreview
+      ) {
+        applyReviewPreview(
+          localPreview
+        );
+
+        return;
+      }
+
+      state.reviewLookupRequestId =
+        randomToken();
+
+      state.reviewLookupRetries =
+        0;
+
+      state.reviewLookupAcknowledged =
+        false;
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          true;
+
+      setReviewMessage(
+        "Loading the corrected Card Number from the Collection Manager…",
+        ""
       );
 
       sendReviewLookup();
+    }
+
+
+    function normalizeTypedCardNumber(
+      value
+    ) {
+      let text =
+        String(
+          value ||
+          ""
+        )
+          .trim()
+          .toUpperCase()
+          .replace(
+            /[–—_]/g,
+            "-"
+          )
+          .replace(
+            /\s+/g,
+            ""
+          );
+
+      let match =
+        text.match(
+          /^(PRB|OP|ST|EB)(\d{2})-?(\d{3})$/
+        );
+
+      if (
+        match
+      ) {
+        return (
+          match[1] +
+          match[2] +
+          "-" +
+          match[3]
+        );
+      }
+
+      match =
+        text.match(
+          /^P-?(\d{3})$/
+        );
+
+      if (
+        match
+      ) {
+        return (
+          "P-" +
+          match[1]
+        );
+      }
+
+      return text;
+    }
+
+
+    function updateReviewAmount() {
+      const input =
+        document.getElementById(
+          "reviewAmountInput"
+        );
+
+      state.reviewAmount =
+        clampIncrement(
+          input.value
+        );
+
+      input.value =
+        state.reviewAmount;
+
+      if (
+        state.reviewPreview
+      ) {
+        document
+          .getElementById(
+            "reviewNewStock"
+          )
+          .textContent =
+            Number(
+              state.reviewPreview.currentStock ||
+              0
+            ) +
+            state.reviewAmount;
+
+        document
+          .getElementById(
+            "reviewSaveButton"
+          )
+          .textContent =
+            "Save +" +
+            state.reviewAmount +
+            " to Collection";
+      }
+    }
+
+
+    function changeReviewAmount(
+      delta
+    ) {
+      const input =
+        document.getElementById(
+          "reviewAmountInput"
+        );
+
+      input.value =
+        clampIncrement(
+          Number(
+            input.value ||
+            1
+          ) +
+          Number(
+            delta ||
+            0
+          )
+        );
+
+      updateReviewAmount();
+    }
+
+
+    function saveReviewedCard() {
+      if (
+        !state.reviewPreview ||
+        !state.reviewCardNumber
+      ) {
+        setReviewMessage(
+          "Wait for the card information to finish loading.",
+          "error"
+        );
+
+        return;
+      }
+
+      updateReviewAmount();
+
+      const requestId =
+        randomToken();
+
+      const item = {
+        requestId:
+          requestId,
+
+        cardNumber:
+          state.reviewCardNumber,
+
+        amount:
+          state.reviewAmount,
+
+        indexRow:
+          Number(
+            state.reviewPreview.indexRow ||
+            (
+              state.fastCardIndex[
+                state.reviewCardNumber
+              ] &&
+              state.fastCardIndex[
+                state.reviewCardNumber
+              ].indexRow
+            ) ||
+            0
+          ),
+
+        status:
+          "PENDING",
+
+        attempts:
+          0,
+
+        created:
+          Date.now(),
+
+        error:
+          ""
+      };
+
+      state.syncQueue.push(
+        item
+      );
+
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
+
+      closeReview(
+        true
+      );
+
+      setStatus(
+        item.cardNumber +
+        " +" +
+        item.amount +
+        " queued. You can show the next card while Sheets syncs."
+      );
+
+      processScannerSyncQueue();
+    }
+
+
+    function retryReviewedCardSave() {
+      if (
+        !state.reviewOpen ||
+        !state.reviewCardNumber
+      ) {
+        return;
+      }
+
+      state.reviewPreview =
+        null;
+
+      state.reviewLookupRequestId =
+        randomToken();
+
+      state.reviewLookupRetries =
+        0;
+
+      state.reviewLookupAcknowledged =
+        false;
+
+      document
+        .getElementById(
+          "reviewSaveButton"
+        )
+        .disabled =
+          true;
+
+      setReviewMessage(
+        "Retrying the card lookup…",
+        ""
+      );
+
+      sendReviewLookup();
+    }
+
+
+    function cancelReviewedCard() {
+      closeReview(
+        false
+      );
+
+      state.awaitingClear =
+        false;
+
+      state.lastAccepted =
+        "";
+
+      state.clearFrames =
+        0;
+
+      state.candidate =
+        "";
+
+      state.candidateHits =
+        0;
+
+      setStatus(
+        "Canceled. Hold the card steady to scan it again."
+      );
+    }
+
+
+    function closeReview(
+      keepAccepted
+    ) {
+      clearReviewLookupTimer();
+
+      state.reviewOpen =
+        false;
+
+      state.reviewPreview =
+        null;
+
+      state.reviewLookupRequestId =
+        "";
+
+      document
+        .getElementById(
+          "reviewBackdrop"
+        )
+        .classList
+        .add(
+          "hidden"
+        );
+
+      if (
+        !keepAccepted
+      ) {
+        state.awaitingClear =
+          false;
+
+        state.lastAccepted =
+          "";
+      }
+    }
+
+
+    function setReviewMessage(
+      message,
+      style
+    ) {
+      const element =
+        document.getElementById(
+          "reviewMessage"
+        );
+
+      element.className =
+        "review-message";
+
+      if (
+        style
+      ) {
+        element.classList.add(
+          style
+        );
+      }
+
+      element.textContent =
+        message;
+    }
+
+
+    function sendReviewLookup() {
+      if (
+        !state.reviewOpen ||
+        !state.reviewLookupRequestId ||
+        !state.reviewCardNumber
+      ) {
+        return;
+      }
+
+      sendToParent({
+        action:
+          "LOOKUP",
+
+        requestId:
+          state.reviewLookupRequestId,
+
+        cardNumber:
+          state.reviewCardNumber
+      });
+
+      scheduleReviewLookupTimeout(
+        state.reviewLookupAcknowledged
+          ? 20000
+          : 7000
+      );
+    }
+
+
+    function scheduleReviewLookupTimeout(
+      delay
+    ) {
+      clearReviewLookupTimer();
+
+      state.reviewLookupTimer =
+        window.setTimeout(
+          function() {
+            if (
+              !state.reviewOpen ||
+              state.reviewPreview
+            ) {
+              return;
+            }
+
+            state.reviewLookupRetries++;
+
+            if (
+              state.reviewLookupRetries <=
+                2
+            ) {
+              setReviewMessage(
+                state.reviewLookupAcknowledged
+                  ? "The lookup is taking longer than expected. Retrying…"
+                  : "The Collection Manager has not answered. Retrying…",
+                ""
+              );
+
+              sendReviewLookup();
+
+              return;
+            }
+
+            setReviewMessage(
+              "The Collection Manager did not return the card. Keep its private /exec tab open, reload it, then press Retry Card Lookup.",
+              "error"
+            );
+          },
+          Math.max(
+            3000,
+            Number(
+              delay ||
+              7000
+            )
+          )
+        );
+    }
+
+
+    function clearReviewLookupTimer() {
+      window.clearTimeout(
+        state.reviewLookupTimer
+      );
+
+      state.reviewLookupTimer =
+        null;
     }
 
 
@@ -3554,7 +4439,7 @@
         const cached =
           JSON.parse(
             localStorage.getItem(
-              "ONE_PIECE_LIVE_FAST_INDEX_V1"
+              FAST_INDEX_CACHE_KEY
             ) ||
             "null"
           );
@@ -3600,7 +4485,7 @@
     function persistFastLibraryCache() {
       try {
         localStorage.setItem(
-          "ONE_PIECE_LIVE_FAST_INDEX_V1",
+          FAST_INDEX_CACHE_KEY,
           JSON.stringify({
             version:
               state.fastIndexVersion,
@@ -3624,6 +4509,22 @@
     function requestFastLibraryRefresh(
       force
     ) {
+      if (
+        !window.opener ||
+        window.opener.closed
+      ) {
+        state.fastLibraryLoading =
+          false;
+
+        updateFastSessionStatus();
+
+        setStatus(
+          "Open this scanner from the private Collection Manager so the card library can connect."
+        );
+
+        return;
+      }
+
       state.fastLibraryLoading =
         true;
 
@@ -3780,7 +4681,7 @@
         Object.keys(
           index
         ).length >
-        0;
+          0;
 
       state.fastLibraryLoading =
         false;
@@ -3793,185 +4694,64 @@
         Object.keys(
           index
         ).length +
-        " cards. Reviews now load without another spreadsheet call."
+        " cards."
       );
     }
 
 
-    function fastPreviewForCard(
-      cardNumber
-    ) {
-      const record =
-        state.fastCardIndex[
-          cardNumber
-        ];
-
-      if (
-        !record
-      ) {
-        return false;
-      }
-
-      return {
-        ok:
-          true,
-
-        cardNumber:
-          record.cardNumber,
-
-        name:
-          record.name,
-
-        color:
-          record.color,
-
-        type:
-          record.type,
-
-        rarity:
-          record.rarity,
-
-        currentStock:
-          Number(
-            record.stock ||
-            0
-          ) +
-          pendingAmountForCard(
-            cardNumber
-          ),
-
-        inCollection:
-          record.inCollection,
-
-        source:
-          record.inCollection
-            ? "COLLECTION"
-            : "MASTER CATALOG",
-
-        destinationSheet:
-          record.destinationSheet,
-
-        indexRow:
-          record.indexRow,
-
-        local:
-          true,
-
-        message:
-          record.inCollection
-            ? (
-                cardNumber +
-                " loaded instantly from the local session library."
-              )
-            : (
-                cardNumber +
-                " will be added to " +
-                record.destinationSheet +
-                " when its queued save syncs."
-              )
-      };
-    }
-
-
-    function applyReviewPreview(
-      preview
-    ) {
-      state.reviewPreview =
-        preview;
-
-      state.reviewCardNumber =
-        preview.cardNumber ||
-        state.reviewCardNumber;
-
-      state.reviewAmount =
-        clampIncrement(
-          state.increment
-        );
-
-      document
-        .getElementById(
-          "reviewCardNumber"
-        )
-        .textContent =
-          state.reviewCardNumber;
-
-      document
-        .getElementById(
-          "reviewCardNumberInput"
-        )
-        .value =
-          state.reviewCardNumber;
-
-      document
-        .getElementById(
-          "reviewCardName"
-        )
-        .textContent =
-          preview.name ||
-          "Unknown name";
-
-      document
-        .getElementById(
-          "reviewCardMeta"
-        )
-        .textContent =
-          [
-            preview.color,
-            preview.type,
-            preview.rarity,
-            preview.source,
-            preview.destinationSheet,
-            preview.local
-              ? "LOCAL SESSION"
-              : ""
-          ]
-            .filter(
-              Boolean
-            )
-            .join(
-              " · "
-            );
-
-      document
-        .getElementById(
-          "reviewCurrentStock"
-        )
-        .textContent =
-          Number(
-            preview.currentStock ||
-            0
+    function loadScannerSyncQueue() {
+      try {
+        const queue =
+          JSON.parse(
+            localStorage.getItem(
+              SYNC_QUEUE_KEY
+            ) ||
+            "[]"
           );
 
-      document
-        .getElementById(
-          "reviewAmountInput"
-        )
-        .value =
-          state.reviewAmount;
+        state.syncQueue =
+          Array.isArray(
+            queue
+          )
+            ? queue
+                .filter(function(item) {
+                  return item &&
+                    item.requestId &&
+                    item.cardNumber;
+                })
+                .map(function(item) {
+                  if (
+                    item.status ===
+                      "IN_FLIGHT"
+                  ) {
+                    item.status =
+                      "PENDING";
+                  }
 
-      updateReviewAmount();
+                  return item;
+                })
+            : [];
+      } catch (error) {
+        state.syncQueue =
+          [];
+      }
+    }
 
-      setReviewMessage(
-        preview.message ||
-        "Review the card and press Save.",
-        preview.inCollection
-          ? "good"
-          : ""
-      );
 
-      document
-        .getElementById(
-          "reviewSaveButton"
-        )
-        .disabled =
-          false;
-
-      document
-        .getElementById(
-          "reviewRetryButton"
-        )
-        .disabled =
-          false;
+    function persistScannerSyncQueue() {
+      try {
+        localStorage.setItem(
+          SYNC_QUEUE_KEY,
+          JSON.stringify(
+            state.syncQueue
+          )
+        );
+      } catch (error) {
+        console.log(
+          "Scanner sync queue could not be saved.",
+          error
+        );
+      }
     }
 
 
@@ -4001,56 +4781,6 @@
     }
 
 
-    function loadScannerSyncQueue() {
-      try {
-        const queue =
-          JSON.parse(
-            localStorage.getItem(
-              "ONE_PIECE_LIVE_SYNC_QUEUE_V1"
-            ) ||
-            "[]"
-          );
-
-        state.syncQueue =
-          Array.isArray(
-            queue
-          )
-            ? queue.map(function(item) {
-                if (
-                  item.status ===
-                    "IN_FLIGHT"
-                ) {
-                  item.status =
-                    "PENDING";
-                }
-
-                return item;
-              })
-            : [];
-      } catch (error) {
-        state.syncQueue =
-          [];
-      }
-    }
-
-
-    function persistScannerSyncQueue() {
-      try {
-        localStorage.setItem(
-          "ONE_PIECE_LIVE_SYNC_QUEUE_V1",
-          JSON.stringify(
-            state.syncQueue
-          )
-        );
-      } catch (error) {
-        console.log(
-          "Scanner sync queue could not be saved.",
-          error
-        );
-      }
-    }
-
-
     function processScannerSyncQueue() {
       if (
         state.syncInFlight
@@ -4060,10 +4790,8 @@
 
       const item =
         state.syncQueue.find(function(candidate) {
-          return (
-            candidate.status ===
-              "PENDING"
-          );
+          return candidate.status ===
+            "PENDING";
         });
 
       if (
@@ -4152,7 +4880,7 @@
 
             setStatus(
               item.cardNumber +
-              " has not received a final Sheets confirmation yet. The same transaction will retry safely."
+              " has not received final Sheets confirmation. The same transaction will retry safely."
             );
 
             window.setTimeout(
@@ -4164,7 +4892,7 @@
             5000,
             Number(
               delay ||
-              30000
+              18000
             )
           )
         );
@@ -4189,10 +4917,8 @@
       ) {
         const active =
           state.syncQueue.find(function(item) {
-            return (
-              item.requestId ===
-                state.syncInFlight
-            );
+            return item.requestId ===
+              state.syncInFlight;
           });
 
         if (
@@ -4247,6 +4973,212 @@
     }
 
 
+    function handleSaveResult(
+      data
+    ) {
+      const item =
+        state.syncQueue.find(function(candidate) {
+          return candidate.requestId ===
+            data.requestId;
+        });
+
+      if (
+        !item
+      ) {
+        return;
+      }
+
+      if (
+        data.pending
+      ) {
+        clearScannerSyncWatchdog();
+
+        item.status =
+          "PENDING";
+
+        state.syncInFlight =
+          "";
+
+        persistScannerSyncQueue();
+        updateFastSessionStatus();
+
+        window.setTimeout(
+          processScannerSyncQueue,
+          Math.max(
+            1500,
+            Number(
+              data.retryAfterMs ||
+              3500
+            )
+          )
+        );
+
+        return;
+      }
+
+      clearScannerSyncWatchdog();
+
+      state.syncInFlight =
+        "";
+
+      if (
+        data.ok &&
+        data.result
+      ) {
+        const result =
+          data.result;
+
+        updateFastCardAfterSave(
+          result
+        );
+
+        state.syncQueue =
+          state.syncQueue.filter(function(candidate) {
+            return candidate.requestId !==
+              item.requestId;
+          });
+
+        state.sessionCount++;
+
+        state.history.unshift({
+          ok:
+            true,
+
+          cardNumber:
+            result.cardNumber ||
+            item.cardNumber,
+
+          name:
+            result.name ||
+            (
+              state.fastCardIndex[
+                item.cardNumber
+              ] &&
+              state.fastCardIndex[
+                item.cardNumber
+              ].name
+            ) ||
+            "",
+
+          amount:
+            item.amount,
+
+          previousStock:
+            Number(
+              result.previousStock ||
+              0
+            ),
+
+          stock:
+            Number(
+              result.stock ||
+              result.newStock ||
+              0
+            ),
+
+          message:
+            result.message ||
+            "Saved."
+        });
+
+        state.history =
+          state.history.slice(
+            0,
+            12
+          );
+
+        document
+          .getElementById(
+            "sessionCount"
+          )
+          .textContent =
+            state.sessionCount;
+
+        document
+          .getElementById(
+            "lastCard"
+          )
+          .textContent =
+            result.cardNumber ||
+            item.cardNumber;
+
+        document
+          .getElementById(
+            "lastStock"
+          )
+          .textContent =
+            Number(
+              result.stock ||
+              result.newStock ||
+              0
+            );
+
+        signalSuccess();
+
+        setStatus(
+          result.message ||
+          (
+            item.cardNumber +
+            " saved."
+          )
+        );
+      } else {
+        item.status =
+          "FAILED";
+
+        item.error =
+          data.message ||
+          "Save failed.";
+
+        state.history.unshift({
+          ok:
+            false,
+
+          cardNumber:
+            item.cardNumber,
+
+          name:
+            "",
+
+          amount:
+            item.amount,
+
+          previousStock:
+            0,
+
+          stock:
+            0,
+
+          message:
+            item.error
+        });
+
+        state.history =
+          state.history.slice(
+            0,
+            12
+          );
+
+        signalError();
+
+        setStatus(
+          item.cardNumber +
+          " could not save: " +
+          item.error
+        );
+      }
+
+      persistScannerSyncQueue();
+      updateFastSessionStatus();
+      renderHistory();
+
+      window.setTimeout(
+        processScannerSyncQueue,
+        350
+      );
+    }
+
+
     function updateFastCardAfterSave(
       result
     ) {
@@ -4273,6 +5205,7 @@
         record.stock =
           Number(
             result.stock ||
+            result.newStock ||
             0
           ) ||
           0;
@@ -4301,31 +5234,6 @@
 
 
     function updateFastSessionStatus() {
-      const libraryStatus =
-        document.getElementById(
-          "fastLibraryStatus"
-        );
-
-      const libraryCount =
-        document.getElementById(
-          "fastLibraryCount"
-        );
-
-      const pendingCount =
-        document.getElementById(
-          "fastPendingCount"
-        );
-
-      const failedCount =
-        document.getElementById(
-          "fastFailedCount"
-        );
-
-      const retryButton =
-        document.getElementById(
-          "retryFailedSyncButton"
-        );
-
       const count =
         Object.keys(
           state.fastCardIndex
@@ -4343,16 +5251,15 @@
 
       const failed =
         state.syncQueue.filter(function(item) {
-          return (
-            item.status ===
-              "FAILED"
-          );
+          return item.status ===
+            "FAILED";
         }).length;
 
-      if (
-        libraryStatus
-      ) {
-        libraryStatus.textContent =
+      document
+        .getElementById(
+          "fastLibraryStatus"
+        )
+        .textContent =
           state.fastLibraryLoading
             ? "Loading"
             : (
@@ -4360,510 +5267,133 @@
                   ? "Ready"
                   : "Not ready"
               );
-      }
-
-      if (
-        libraryCount
-      ) {
-        libraryCount.textContent =
-          count;
-      }
-
-      if (
-        pendingCount
-      ) {
-        pendingCount.textContent =
-          pending;
-      }
-
-      if (
-        failedCount
-      ) {
-        failedCount.textContent =
-          failed;
-      }
-
-      if (
-        retryButton
-      ) {
-        retryButton.disabled =
-          failed ===
-          0;
-      }
-    }
-
-
-    function sendReviewLookup() {
-      if (
-        !state.reviewOpen ||
-        !state.reviewLookupRequestId ||
-        !state.reviewCardNumber
-      ) {
-        return;
-      }
-
-      sendToParent({
-        action:
-          "LOOKUP",
-
-        requestId:
-          state.reviewLookupRequestId,
-
-        cardNumber:
-          state.reviewCardNumber
-      });
-
-      scheduleReviewLookupTimeout(
-        state.reviewLookupAcknowledged
-          ? 20000
-          : 7000
-      );
-    }
-
-
-    function scheduleReviewLookupTimeout(
-      delay
-    ) {
-      clearReviewLookupTimer();
-
-      state.reviewLookupTimer =
-        window.setTimeout(
-          function() {
-            if (
-              !state.reviewOpen ||
-              state.reviewPreview
-            ) {
-              return;
-            }
-
-            state.reviewLookupRetries++;
-
-            if (
-              state.reviewLookupRetries <=
-                2
-            ) {
-              setReviewMessage(
-                state.reviewLookupAcknowledged
-                  ? "The spreadsheet lookup is taking longer than expected. Retrying…"
-                  : "The Collection Manager has not answered. Retrying the lookup…",
-                ""
-              );
-
-              sendReviewLookup();
-
-              return;
-            }
-
-            setReviewMessage(
-              state.reviewLookupAcknowledged
-                ? "The spreadsheet lookup timed out. Press Retry Save to try loading the card again."
-                : "The Collection Manager did not respond. This usually means the private app is still on an older deployment. Replace StockScanner.gs and CollectionWebApp.html, deploy a New version, reload the private /exec page, then reopen this scanner.",
-              "error"
-            );
-          },
-          Math.max(
-            3000,
-            Number(
-              delay ||
-              7000
-            )
-          )
-        );
-    }
-
-
-    function clearReviewLookupTimer() {
-      window.clearTimeout(
-        state.reviewLookupTimer
-      );
-
-      state.reviewLookupTimer =
-        null;
-    }
-
-
-    function reviewCardNumberChanged() {
-      const input =
-        document.getElementById(
-          "reviewCardNumberInput"
-        );
-
-      const normalized =
-        extractCardNumber(
-          input.value
-        ) ||
-        String(
-          input.value ||
-          ""
-        )
-          .trim()
-          .toUpperCase();
 
       document
         .getElementById(
-          "reviewCardNumber"
+          "fastLibraryCount"
         )
         .textContent =
-          normalized ||
-          "—";
-
-      state.reviewCardNumber =
-        normalized;
-
-      state.reviewPreview =
-        null;
-
-      const localPreview =
-        fastPreviewForCard(
-          normalized
-        );
-
-      if (
-        localPreview
-      ) {
-        applyReviewPreview(
-          localPreview
-        );
-
-        return;
-      }
-
-      state.reviewLookupRequestId =
-        randomToken();
-
-      state.reviewLookupRetries =
-        0;
-
-      state.reviewLookupAcknowledged =
-        false;
+          count;
 
       document
         .getElementById(
-          "reviewSaveButton"
+          "fastPendingCount"
+        )
+        .textContent =
+          pending;
+
+      document
+        .getElementById(
+          "fastFailedCount"
+        )
+        .textContent =
+          failed;
+
+      document
+        .getElementById(
+          "retryFailedSyncButton"
         )
         .disabled =
-          true;
-
-      setReviewMessage(
-        "Loading the corrected Card Number from the spreadsheet…",
-        ""
-      );
-
-      sendReviewLookup();
-    }
-
-
-    function recognitionModeChanged() {
-      const select =
-        document.getElementById(
-          "recognitionMode"
-        );
-
-      state.recognitionMode =
-        select
-          ? select.value
-          : "FAST";
-
-      state.ocrMissCount =
-        0;
-
-      updateRecognitionReadout();
-
-      setStatus(
-        state.recognitionMode ===
-          "FAST"
-          ? "Fast recognition selected. This is recommended for phones."
-          : (
-              state.recognitionMode ===
-                "BALANCED"
-                ? "Balanced recognition selected."
-                : "Accurate recognition selected. It may be much slower on phones."
-            )
-      );
-    }
-
-
-    function updateRecognitionReadout() {
-      const element =
-        document.getElementById(
-          "recognitionReadout"
-        );
-
-      if (
-        !element
-      ) {
-        return;
-      }
-
-      element.textContent =
-        (
-          state.recognitionMode ||
-          "FAST"
-        ) +
-        (
-          state.lastOcrDurationMs
-            ? " · " +
-              state.lastOcrDurationMs +
-              " ms"
-            : " OCR"
-        );
-    }
-
-
-    function updateReviewAmount() {
-      const input =
-        document.getElementById(
-          "reviewAmountInput"
-        );
-
-      state.reviewAmount =
-        clampIncrement(
-          input.value
-        );
-
-      input.value =
-        state.reviewAmount;
-
-      if (
-        state.reviewPreview
-      ) {
-        document
-          .getElementById(
-            "reviewNewStock"
-          )
-          .textContent =
-            Number(
-              state.reviewPreview.currentStock ||
-              0
-            ) +
-            state.reviewAmount;
-
-        document
-          .getElementById(
-            "reviewSaveButton"
-          )
-          .textContent =
-            "Save +" +
-            state.reviewAmount +
-            " to Collection";
-      }
-    }
-
-
-    function changeReviewAmount(
-      delta
-    ) {
-      state.reviewAmount =
-        clampIncrement(
-          state.reviewAmount +
-          Number(
-            delta ||
-            0
-          )
-        );
-
-      document
-        .getElementById(
-          "reviewAmountInput"
-        )
-        .value =
-          state.reviewAmount;
-
-      updateReviewAmount();
-    }
-
-
-    function saveReviewedCard() {
-      if (
-        !state.reviewOpen ||
-        !state.reviewPreview
-      ) {
-        return;
-      }
-
-      updateReviewAmount();
-
-      const requestId =
-        randomToken();
-
-      const queued = {
-        requestId:
-          requestId,
-
-        cardNumber:
-          state.reviewCardNumber,
-
-        amount:
-          state.reviewAmount,
-
-        indexRow:
-          Number(
-            state.reviewPreview.indexRow ||
-            0
-          ),
-
-        name:
-          String(
-            state.reviewPreview.name ||
-            ""
-          ),
-
-        previousStock:
-          Number(
-            state.reviewPreview.currentStock ||
-            0
-          ),
-
-        status:
-          "PENDING",
-
-        attempts:
-          0,
-
-        createdAt:
-          Date.now(),
-
-        error:
-          ""
-      };
-
-      state.syncQueue.push(
-        queued
-      );
-
-      persistScannerSyncQueue();
-      updateFastSessionStatus();
-
-      setReviewMessage(
-        "Queued +" +
-        queued.amount +
-        " Stock. The scanner will sync it in the background.",
-        "good"
-      );
-
-      window.setTimeout(
-        function() {
-          closeReviewDialog();
-
-          setStatus(
-            queued.cardNumber +
-            " +" +
-            queued.amount +
-            " is queued. Remove the card and scan the next one while Sheets syncs."
-          );
-
-          processScannerSyncQueue();
-        },
-        250
-      );
-    }
-
-
-    function retryReviewedCardSave() {
-      if (
-        !state.reviewPreview
-      ) {
-        state.reviewLookupRequestId =
-          randomToken();
-
-        state.reviewLookupRetries =
+          failed ===
           0;
-
-        state.reviewLookupAcknowledged =
-          false;
-
-        setReviewMessage(
-          "Retrying card lookup…",
-          ""
-        );
-
-        sendReviewLookup();
-
-        return;
-      }
-
-      if (
-        state.pendingRequestId
-      ) {
-        retryPendingSave(
-          false
-        );
-
-        return;
-      }
-
-      saveReviewedCard();
     }
 
 
-    function cancelReviewedCard() {
-      if (
-        state.pendingRequestId
-      ) {
-        setReviewMessage(
-          "Wait for the current save to finish before closing this review.",
-          "error"
+    function renderHistory() {
+      const container =
+        document.getElementById(
+          "history"
         );
 
-        return;
-      }
-
-      closeReviewDialog();
-
-      setStatus(
-        "Remove the card, then slide the next card into the guide."
-      );
-    }
-
-
-    function closeReviewDialog() {
-      clearReviewLookupTimer();
-
-      state.reviewOpen =
-        false;
-
-      state.reviewLookupRequestId =
+      container.innerHTML =
         "";
 
-      state.reviewLookupAcknowledged =
-        false;
+      state.history.forEach(function(item) {
+        const row =
+          document.createElement(
+            "div"
+          );
 
-      state.reviewPreview =
-        null;
+        row.className =
+          "history-row" +
+          (
+            item.ok
+              ? ""
+              : " error"
+          );
 
-      document
-        .getElementById(
-          "reviewBackdrop"
-        )
-        .classList
-        .add(
-          "hidden"
+        const left =
+          document.createElement(
+            "div"
+          );
+
+        const title =
+          document.createElement(
+            "strong"
+          );
+
+        title.textContent =
+          item.cardNumber +
+          (
+            item.name
+              ? (
+                  " — " +
+                  item.name
+                )
+              : ""
+          );
+
+        const copy =
+          document.createElement(
+            "span"
+          );
+
+        copy.textContent =
+          item.ok
+            ? (
+                "+" +
+                item.amount +
+                " Stock"
+              )
+            : item.message;
+
+        left.appendChild(
+          title
         );
 
-      updateQueueButtons();
-    }
-
-
-    function setReviewMessage(
-      message,
-      type
-    ) {
-      const element =
-        document.getElementById(
-          "reviewMessage"
+        left.appendChild(
+          copy
         );
 
-      element.className =
-        "review-message" +
-        (
-          type
-            ? " " +
-              type
-            : ""
+        const stock =
+          document.createElement(
+            "div"
+          );
+
+        stock.className =
+          "history-stock";
+
+        stock.textContent =
+          item.ok
+            ? (
+                item.previousStock +
+                " → " +
+                item.stock
+              )
+            : "FAILED";
+
+        row.appendChild(
+          left
         );
 
-      element.textContent =
-        message;
+        row.appendChild(
+          stock
+        );
+
+        container.appendChild(
+          row
+        );
+      });
     }
 
 
@@ -4878,29 +5408,20 @@
         return;
       }
 
+      if (
+        window.opener &&
+        event.source !==
+          window.opener
+      ) {
+        return;
+      }
+
       const data =
         event.data &&
         typeof event.data ===
           "object"
           ? event.data
           : {};
-
-      if (
-        data.type ===
-          "ONE_PIECE_LIVE_SCANNER_PARENT_CLOSING" &&
-        data.sessionToken ===
-          state.sessionToken
-      ) {
-        setStatus(
-          "The Collection Manager tab closed. Keep this scanner open only after reopening it from the Collection Manager."
-        );
-
-        stopScanner(
-          false
-        );
-
-        return;
-      }
 
       if (
         data.type !==
@@ -4920,6 +5441,14 @@
 
         updateFastSessionStatus();
 
+        if (
+          data.message
+        ) {
+          setStatus(
+            data.message
+          );
+        }
+
         return;
       }
 
@@ -4927,51 +5456,45 @@
         data.action ===
           "BOOTSTRAP_RESULT"
       ) {
-        state.fastLibraryLoading =
-          false;
-
         if (
-          !data.ok
+          data.ok &&
+          data.bootstrap
         ) {
+          applyFastBootstrap(
+            data.bootstrap
+          );
+        } else {
+          state.fastLibraryLoading =
+            false;
+
           updateFastSessionStatus();
 
           setStatus(
             data.message ||
             "The fast card library could not load."
           );
-
-          return;
         }
-
-        applyFastBootstrap(
-          data.bootstrap ||
-          {}
-        );
-
-        processScannerSyncQueue();
 
         return;
       }
 
       if (
         data.action ===
-          "LOOKUP_PENDING"
+          "LOOKUP_PENDING" &&
+        data.requestId ===
+          state.reviewLookupRequestId
       ) {
-        if (
-          data.requestId !==
-            state.reviewLookupRequestId
-        ) {
-          return;
-        }
-
         state.reviewLookupAcknowledged =
           true;
 
-        setReviewMessage(
-          data.message ||
-          "Collection Manager received the card. Loading spreadsheet data…",
-          ""
-        );
+        if (
+          data.message
+        ) {
+          setReviewMessage(
+            data.message,
+            ""
+          );
+        }
 
         scheduleReviewLookupTimeout(
           20000
@@ -4982,385 +5505,37 @@
 
       if (
         data.action ===
-          "LOOKUP_RESULT"
+          "LOOKUP_RESULT" &&
+        data.requestId ===
+          state.reviewLookupRequestId
       ) {
-        if (
-          data.requestId !==
-            state.reviewLookupRequestId
-        ) {
-          return;
-        }
-
         clearReviewLookupTimer();
 
         if (
-          !data.ok
+          data.ok &&
+          data.preview
         ) {
-          state.reviewPreview =
-            null;
-
-          document
-            .getElementById(
-              "reviewCardName"
-            )
-            .textContent =
-              "Card could not be loaded";
-
+          applyReviewPreview(
+            data.preview
+          );
+        } else {
           setReviewMessage(
             data.message ||
-            "The card was not found in the Collection or Master Catalog.",
+            "The card could not be loaded.",
             "error"
           );
-
-          document
-            .getElementById(
-              "reviewSaveButton"
-            )
-            .disabled =
-              true;
-
-          return;
         }
 
-        applyReviewPreview(
-          data.preview ||
-          {}
-        );
-
         return;
       }
 
       if (
-        data.action !==
+        data.action ===
           "SAVE_RESULT"
       ) {
-        return;
-      }
-
-      const item =
-        state.syncQueue.find(function(candidate) {
-          return (
-            candidate.requestId ===
-              data.requestId
-          );
-        });
-
-      if (
-        !item
-      ) {
-        return;
-      }
-
-      if (
-        data.pending
-      ) {
-        scheduleScannerSyncWatchdog(
-          item,
-          18000
+        handleSaveResult(
+          data
         );
-
-        return;
-      }
-
-      clearScannerSyncWatchdog();
-
-      state.syncInFlight =
-        "";
-
-      if (
-        data.ok
-      ) {
-        const result =
-          data.result ||
-          {};
-
-        state.syncQueue =
-          state.syncQueue.filter(function(candidate) {
-            return (
-              candidate.requestId !==
-                item.requestId
-            );
-          });
-
-        updateFastCardAfterSave(
-          result
-        );
-
-        state.sessionCount++;
-
-        state.history.unshift({
-          ok:
-            true,
-
-          cardNumber:
-            result.cardNumber ||
-            item.cardNumber,
-
-          name:
-            result.name ||
-            item.name ||
-            "",
-
-          previousStock:
-            Number(
-              result.previousStock ||
-              item.previousStock ||
-              0
-            ),
-
-          stock:
-            Number(
-              result.stock ||
-              0
-            ),
-
-          increment:
-            Number(
-              result.amount ||
-              item.amount ||
-              0
-            )
-        });
-
-        state.history =
-          state.history.slice(
-            0,
-            30
-          );
-
-        signalSuccess();
-        renderSummary();
-
-        setStatus(
-          result.message ||
-          (
-            item.cardNumber +
-            " synced successfully."
-          )
-        );
-      } else {
-        item.status =
-          "FAILED";
-
-        item.error =
-          data.message ||
-          "The background Stock save failed.";
-
-        state.history.unshift({
-          ok:
-            false,
-
-          cardNumber:
-            item.cardNumber,
-
-          message:
-            item.error
-        });
-
-        state.history =
-          state.history.slice(
-            0,
-            30
-          );
-
-        signalError();
-        renderSummary();
-
-        setStatus(
-          item.cardNumber +
-          " could not sync: " +
-          item.error
-        );
-      }
-
-      persistScannerSyncQueue();
-      updateFastSessionStatus();
-
-      window.setTimeout(
-        processScannerSyncQueue,
-        250
-      );
-    }
-
-
-    function schedulePendingSaveWatchdog(
-      delay
-    ) {
-      clearPendingSaveWatchdog();
-
-      if (
-        !state.pendingRequestId
-      ) {
-        return;
-      }
-
-      state.pendingRequestTimer =
-        window.setTimeout(
-          function() {
-            retryPendingSave(
-              true
-            );
-          },
-          Math.max(
-            3000,
-            Number(
-              delay ||
-              12000
-            )
-          )
-        );
-    }
-
-
-    function clearPendingSaveWatchdog() {
-      window.clearTimeout(
-        state.pendingRequestTimer
-      );
-
-      state.pendingRequestTimer =
-        null;
-    }
-
-
-    function retryPendingSave(
-      automatic
-    ) {
-      if (
-        !state.pendingRequestId ||
-        !state.pendingRequestPayload
-      ) {
-        return;
-      }
-
-      /*
-       * Retries reuse the same request ID. The Collection Manager
-       * caches the completed result, so this cannot add Stock
-       * twice even if the first response was merely delayed.
-       */
-      state.pendingRequestRetries++;
-
-      sendToParent(
-        state.pendingRequestPayload
-      );
-
-      if (
-        automatic &&
-        state.pendingRequestRetries <=
-          2
-      ) {
-        setStatus(
-          state.pendingRequestAcknowledged
-            ? "The save is taking longer than expected. Checking the same request again without adding twice…"
-            : "The Collection Manager did not acknowledge yet. Re-sending the same safe request…"
-        );
-
-        schedulePendingSaveWatchdog(
-          18000
-        );
-      } else {
-        setStatus(
-          "Still waiting for the Collection Manager. Keep both tabs open and press Retry Save in the review window."
-        );
-
-        document
-          .getElementById(
-            "retrySaveButton"
-          )
-          .classList
-          .remove(
-            "hidden"
-          );
-
-        schedulePendingSaveWatchdog(
-          30000
-        );
-      }
-
-      updateQueueButtons();
-    }
-
-
-    function readyForNextCard() {
-      if (
-        state.pendingRequestId
-      ) {
-        setStatus(
-          "Wait for the current Stock save to finish before moving to the next card."
-        );
-
-        return;
-      }
-
-      if (
-        state.reviewOpen
-      ) {
-        closeReviewDialog();
-      }
-
-      state.awaitingClear =
-        false;
-
-      state.clearFrames =
-        0;
-
-      state.lastAccepted =
-        "";
-
-      state.candidate =
-        "";
-
-      state.candidateHits =
-        0;
-
-      setStatus(
-        "Ready. Slide the next card inside the guide."
-      );
-
-      updateQueueButtons();
-    }
-
-
-    function updateQueueButtons() {
-      const nextButton =
-        document.getElementById(
-          "nextCardButton"
-        );
-
-      const retryButton =
-        document.getElementById(
-          "retrySaveButton"
-        );
-
-      const reviewRetry =
-        document.getElementById(
-          "reviewRetryButton"
-        );
-
-      if (
-        nextButton
-      ) {
-        nextButton.disabled =
-          Boolean(
-            state.pendingRequestId
-          ) ||
-          state.reviewOpen ||
-          !state.awaitingClear;
-      }
-
-      if (
-        retryButton
-      ) {
-        retryButton.classList.add(
-          "hidden"
-        );
-      }
-
-      if (
-        reviewRetry
-      ) {
-        reviewRetry.disabled =
-          !state.pendingRequestId &&
-          !state.reviewPreview;
       }
     }
 
@@ -5370,9 +5545,7 @@
     ) {
       if (
         !window.opener ||
-        window.opener.closed ||
-        !state.parentOrigin ||
-        !state.sessionToken
+        window.opener.closed
       ) {
         return;
       }
@@ -5384,1024 +5557,37 @@
               "ONE_PIECE_LIVE_SCANNER",
 
             sessionToken:
-              state.sessionToken
+              state.sessionToken,
+
+            scannerVersion:
+              SCANNER_VERSION
           },
           payload ||
           {}
         ),
-        state.parentOrigin
+        state.parentOrigin ||
+          "*"
       );
     }
 
 
-    function renderSummary() {
+    function setStatus(
+      message
+    ) {
       document
         .getElementById(
-          "sessionCount"
+          "status"
         )
         .textContent =
-          state.sessionCount;
+          message;
 
-      const latest =
-        state.history[0];
+      sendToParent({
+        action:
+          "STATUS",
 
-      document
-        .getElementById(
-          "lastCard"
-        )
-        .textContent =
-          latest
-            ? latest.cardNumber
-            : "—";
-
-      document
-        .getElementById(
-          "lastStock"
-        )
-        .textContent =
-          latest &&
-          latest.ok
-            ? latest.stock
-            : "—";
-
-      const history =
-        document.getElementById(
-          "history"
-        );
-
-      history.innerHTML =
-        "";
-
-      state.history.forEach(function(item) {
-        const row =
-          document.createElement(
-            "div"
-          );
-
-        row.className =
-          "history-row" +
-          (
-            item.ok
-              ? ""
-              : " error"
-          );
-
-        const info =
-          document.createElement(
-            "div"
-          );
-
-        const title =
-          document.createElement(
-            "strong"
-          );
-
-        title.textContent =
-          item.cardNumber +
-          (
-            item.name
-              ? " — " +
-                item.name
-              : ""
-          );
-
-        const detail =
-          document.createElement(
-            "span"
-          );
-
-        detail.textContent =
-          item.ok
-            ? (
-                "+" +
-                item.increment +
-                " Stock"
-              )
-            : (
-                item.message ||
-                "Not saved"
-              );
-
-        info.appendChild(
-          title
-        );
-
-        info.appendChild(
-          detail
-        );
-
-        const stock =
-          document.createElement(
-            "div"
-          );
-
-        stock.className =
-          "history-stock";
-
-        stock.textContent =
-          item.ok
-            ? (
-                item.previousStock +
-                " → " +
-                item.stock
-              )
-            : "NOT SAVED";
-
-        row.appendChild(
-          info
-        );
-
-        row.appendChild(
-          stock
-        );
-
-        history.appendChild(
-          row
-        );
+        message:
+          message
       });
-    }
-
-
-    async function getWorker() {
-      if (
-        state.worker
-      ) {
-        return state.worker;
-      }
-
-      if (
-        state.workerPromise
-      ) {
-        return state.workerPromise;
-      }
-
-      state.workerPromise =
-        (async function() {
-          await waitForTesseract();
-
-          const worker =
-            await Tesseract.createWorker(
-              "eng",
-              1,
-              {
-                logger:
-                  function(message) {
-                    if (
-                      !message ||
-                      typeof message.progress !==
-                        "number"
-                    ) {
-                      return;
-                    }
-
-                    setStatus(
-                      (
-                        message.status ||
-                        "Loading OCR"
-                      ) +
-                      " " +
-                      Math.round(
-                        message.progress *
-                        100
-                      ) +
-                      "%"
-                    );
-                  }
-              }
-            );
-
-          await worker.setParameters({
-            tessedit_pageseg_mode:
-              "7",
-
-            tessedit_char_whitelist:
-              "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-",
-
-            preserve_interword_spaces:
-              "1"
-          });
-
-          state.worker =
-            worker;
-
-          return worker;
-        })();
-
-      try {
-        return await state.workerPromise;
-      } catch (error) {
-        state.workerPromise =
-          null;
-
-        throw error;
-      }
-    }
-
-
-    function waitForTesseract() {
-      return new Promise(
-        function(resolve, reject) {
-          const started =
-            Date.now();
-
-          const timer =
-            window.setInterval(
-              function() {
-                if (
-                  window.Tesseract &&
-                  typeof Tesseract.createWorker ===
-                    "function"
-                ) {
-                  window.clearInterval(
-                    timer
-                  );
-
-                  resolve();
-
-                  return;
-                }
-
-                if (
-                  Date.now() -
-                  started >
-                  20000
-                ) {
-                  window.clearInterval(
-                    timer
-                  );
-
-                  reject(
-                    new Error(
-                      "The OCR library did not load. Check the internet connection and reload."
-                    )
-                  );
-                }
-              },
-              120
-            );
-        }
-      );
-    }
-
-
-    function drawImageCover(
-      source,
-      canvas
-    ) {
-      const sourceWidth =
-        source.videoWidth ||
-        source.width;
-
-      const sourceHeight =
-        source.videoHeight ||
-        source.height;
-
-      if (
-        !sourceWidth ||
-        !sourceHeight
-      ) {
-        throw new Error(
-          "The camera frame has no usable dimensions."
-        );
-      }
-
-      const scale =
-        Math.max(
-          canvas.width /
-            sourceWidth,
-          canvas.height /
-            sourceHeight
-        );
-
-      const drawWidth =
-        sourceWidth *
-        scale;
-
-      const drawHeight =
-        sourceHeight *
-        scale;
-
-      const left =
-        (
-          canvas.width -
-          drawWidth
-        ) /
-        2;
-
-      const top =
-        (
-          canvas.height -
-          drawHeight
-        ) /
-        2;
-
-      const context =
-        canvas.getContext(
-          "2d",
-          {
-            alpha:
-              false
-          }
-        );
-
-      context.fillStyle =
-        "#ffffff";
-
-      context.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-
-      context.drawImage(
-        source,
-        left,
-        top,
-        drawWidth,
-        drawHeight
-      );
-    }
-
-
-    function createCardNumberCrop(
-      video
-    ) {
-      const videoWidth =
-        Number(
-          video.videoWidth ||
-          0
-        );
-
-      const videoHeight =
-        Number(
-          video.videoHeight ||
-          0
-        );
-
-      if (
-        !videoWidth ||
-        !videoHeight
-      ) {
-        throw new Error(
-          "The camera frame does not have a usable resolution."
-        );
-      }
-
-      const videoRect =
-        video.getBoundingClientRect();
-
-      const guide =
-        document.querySelector(
-          ".number-guide"
-        );
-
-      const guideRect =
-        guide.getBoundingClientRect();
-
-      const scale =
-        Math.max(
-          videoRect.width /
-            videoWidth,
-          videoRect.height /
-            videoHeight
-        );
-
-      const renderedWidth =
-        videoWidth *
-        scale;
-
-      const renderedHeight =
-        videoHeight *
-        scale;
-
-      const offsetX =
-        (
-          videoRect.width -
-          renderedWidth
-        ) /
-        2;
-
-      const offsetY =
-        (
-          videoRect.height -
-          renderedHeight
-        ) /
-        2;
-
-      let sourceX =
-        (
-          guideRect.left -
-          videoRect.left -
-          offsetX
-        ) /
-        scale;
-
-      let sourceY =
-        (
-          guideRect.top -
-          videoRect.top -
-          offsetY
-        ) /
-        scale;
-
-      let sourceWidth =
-        guideRect.width /
-        scale;
-
-      let sourceHeight =
-        guideRect.height /
-        scale;
-
-      const paddingX =
-        sourceWidth *
-        0.06;
-
-      const paddingY =
-        sourceHeight *
-        0.12;
-
-      sourceX -=
-        paddingX;
-
-      sourceY -=
-        paddingY;
-
-      sourceWidth +=
-        paddingX *
-        2;
-
-      sourceHeight +=
-        paddingY *
-        2;
-
-      sourceX =
-        Math.max(
-          0,
-          Math.min(
-            videoWidth -
-            2,
-            sourceX
-          )
-        );
-
-      sourceY =
-        Math.max(
-          0,
-          Math.min(
-            videoHeight -
-            2,
-            sourceY
-          )
-        );
-
-      sourceWidth =
-        Math.max(
-          2,
-          Math.min(
-            videoWidth -
-            sourceX,
-            sourceWidth
-          )
-        );
-
-      sourceHeight =
-        Math.max(
-          2,
-          Math.min(
-            videoHeight -
-            sourceY,
-            sourceHeight
-          )
-        );
-
-      const crop =
-        document.getElementById(
-          "cropCanvas"
-        );
-
-      const mode =
-        state.recognitionMode ||
-        "FAST";
-
-      const targetWidth =
-        mode ===
-          "ACCURATE"
-          ? 1400
-          : (
-              mode ===
-                "BALANCED"
-                ? 1050
-                : 760
-            );
-
-      crop.width =
-        Math.round(
-          Math.max(
-            620,
-            Math.min(
-              targetWidth,
-              sourceWidth *
-              1.5
-            )
-          )
-        );
-
-      crop.height =
-        Math.max(
-          220,
-          Math.round(
-            sourceHeight *
-            (
-              crop.width /
-              sourceWidth
-            )
-          )
-        );
-
-      const context =
-        crop.getContext(
-          "2d",
-          {
-            alpha:
-              false,
-
-            willReadFrequently:
-              true
-          }
-        );
-
-      context.fillStyle =
-        "#ffffff";
-
-      context.fillRect(
-        0,
-        0,
-        crop.width,
-        crop.height
-      );
-
-      context.imageSmoothingEnabled =
-        true;
-
-      context.imageSmoothingQuality =
-        "high";
-
-      context.drawImage(
-        video,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        crop.width,
-        crop.height
-      );
-
-      return crop;
-    }
-
-
-    function makeVariant(
-      source,
-      mode
-    ) {
-      const canvas =
-        document.createElement(
-          "canvas"
-        );
-
-      canvas.width =
-        source.width;
-
-      canvas.height =
-        source.height;
-
-      const context =
-        canvas.getContext(
-          "2d",
-          {
-            alpha:
-              false,
-
-            willReadFrequently:
-              true
-          }
-        );
-
-      context.drawImage(
-        source,
-        0,
-        0
-      );
-
-      const imageData =
-        context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-
-      const pixels =
-        imageData.data;
-
-      let threshold =
-        155;
-
-      if (
-        mode ===
-          "threshold" ||
-        mode ===
-          "inverted"
-      ) {
-        threshold =
-          calculateOtsuThreshold(
-            pixels
-          );
-      }
-
-      for (
-        let index =
-          0;
-        index <
-          pixels.length;
-        index +=
-          4
-      ) {
-        const gray =
-          Math.round(
-            pixels[
-              index
-            ] *
-              0.299 +
-            pixels[
-              index +
-              1
-            ] *
-              0.587 +
-            pixels[
-              index +
-              2
-            ] *
-              0.114
-          );
-
-        let value;
-
-        if (
-          mode ===
-            "threshold"
-        ) {
-          value =
-            gray >
-              threshold
-              ? 255
-              : 0;
-        } else if (
-          mode ===
-            "inverted"
-        ) {
-          value =
-            gray >
-              threshold
-              ? 0
-              : 255;
-        } else {
-          value =
-            Math.max(
-              0,
-              Math.min(
-                255,
-                (
-                  gray -
-                  128
-                ) *
-                  2.15 +
-                128
-              )
-            );
-        }
-
-        pixels[
-          index
-        ] =
-          value;
-
-        pixels[
-          index +
-            1
-        ] =
-          value;
-
-        pixels[
-          index +
-            2
-        ] =
-          value;
-      }
-
-      context.putImageData(
-        imageData,
-        0,
-        0
-      );
-
-      return canvas;
-    }
-
-
-    function calculateOtsuThreshold(
-      pixels
-    ) {
-      const histogram =
-        new Array(
-          256
-        ).fill(
-          0
-        );
-
-      let total =
-        0;
-
-      let sum =
-        0;
-
-      for (
-        let index =
-          0;
-        index <
-          pixels.length;
-        index +=
-          4
-      ) {
-        const gray =
-          Math.round(
-            pixels[
-              index
-            ] *
-              0.299 +
-            pixels[
-              index +
-                1
-            ] *
-              0.587 +
-            pixels[
-              index +
-                2
-            ] *
-              0.114
-          );
-
-        histogram[
-          gray
-        ]++;
-
-        total++;
-
-        sum +=
-          gray;
-      }
-
-      let backgroundWeight =
-        0;
-
-      let backgroundSum =
-        0;
-
-      let maximumVariance =
-        0;
-
-      let threshold =
-        155;
-
-      for (
-        let value =
-          0;
-        value <
-          256;
-        value++
-      ) {
-        backgroundWeight +=
-          histogram[
-            value
-          ];
-
-        if (
-          !backgroundWeight
-        ) {
-          continue;
-        }
-
-        const foregroundWeight =
-          total -
-          backgroundWeight;
-
-        if (
-          !foregroundWeight
-        ) {
-          break;
-        }
-
-        backgroundSum +=
-          value *
-          histogram[
-            value
-          ];
-
-        const backgroundMean =
-          backgroundSum /
-          backgroundWeight;
-
-        const foregroundMean =
-          (
-            sum -
-            backgroundSum
-          ) /
-          foregroundWeight;
-
-        const variance =
-          backgroundWeight *
-          foregroundWeight *
-          Math.pow(
-            backgroundMean -
-            foregroundMean,
-            2
-          );
-
-        if (
-          variance >
-            maximumVariance
-        ) {
-          maximumVariance =
-            variance;
-
-          threshold =
-            value;
-        }
-      }
-
-      return threshold;
-    }
-
-
-    function extractCardNumber(
-      rawText
-    ) {
-      const compact =
-        String(
-          rawText ||
-          ""
-        )
-          .toUpperCase()
-          .replace(
-            /[–—_]/g,
-            "-"
-          )
-          .replace(
-            /0P/g,
-            "OP"
-          )
-          .replace(
-            /5T/g,
-            "ST"
-          )
-          .replace(
-            /E8/g,
-            "EB"
-          )
-          .replace(
-            /PR8/g,
-            "PRB"
-          )
-          .replace(
-            /[^A-Z0-9]/g,
-            "");
-
-      const setMatch =
-        compact.match(
-          /(PRB|OP|ST|EB)([0-9OQDILTZSBG]{2})([0-9OQDILTZSBG]{3})/
-        );
-
-      if (
-        setMatch
-      ) {
-        const setNumber =
-          scannerDigits(
-            setMatch[
-              2
-            ]
-          );
-
-        const cardNumber =
-          scannerDigits(
-            setMatch[
-              3
-            ]
-          );
-
-        if (
-          setNumber.length ===
-            2 &&
-          cardNumber.length ===
-            3
-        ) {
-          return (
-            setMatch[
-              1
-            ] +
-            setNumber +
-            "-" +
-            cardNumber
-          );
-        }
-      }
-
-      const promotional =
-        compact.match(
-          /P([0-9OQDILTZSBG]{3})/
-        );
-
-      if (
-        promotional
-      ) {
-        const number =
-          scannerDigits(
-            promotional[
-              1
-            ]
-          );
-
-        if (
-          number.length ===
-            3
-        ) {
-          return (
-            "P-" +
-            number
-          );
-        }
-      }
-
-      return "";
-    }
-
-
-    function scannerDigits(
-      value
-    ) {
-      const map = {
-        O:
-          "0",
-
-        Q:
-          "0",
-
-        D:
-          "0",
-
-        I:
-          "1",
-
-        L:
-          "1",
-
-        T:
-          "1",
-
-        Z:
-          "2",
-
-        S:
-          "5",
-
-        G:
-          "6",
-
-        B:
-          "8"
-      };
-
-      return String(
-        value ||
-        ""
-      )
-        .split(
-          ""
-        )
-        .map(function(character) {
-          return map[
-            character
-          ] ||
-          character;
-        })
-        .join(
-          "")
-        .replace(
-          /\D/g,
-          ""
-        );
     }
 
 
@@ -6419,7 +5605,7 @@
         .trim()
         .slice(
           0,
-          180
+          220
         );
     }
 
@@ -6434,13 +5620,21 @@
           .randomUUID()
           .replace(
             /-/g,
-            "");
+            ""
+          );
       }
 
       return (
         Date.now()
           .toString(
             36
+          ) +
+        Math.random()
+          .toString(
+            36
+          )
+          .slice(
+            2
           ) +
         Math.random()
           .toString(
@@ -6522,39 +5716,17 @@
         if (
           navigator.vibrate
         ) {
-          navigator.vibrate(
-            [
-              100,
-              70,
-              100
-            ]
-          );
+          navigator.vibrate([
+            100,
+            70,
+            100
+          ]);
         }
       } catch (error) {
         console.log(
           error
         );
       }
-    }
-
-
-    function setStatus(
-      message
-    ) {
-      document
-        .getElementById(
-          "status"
-        )
-        .textContent =
-          message;
-
-      sendToParent({
-        action:
-          "STATUS",
-
-        message:
-          message
-      });
     }
   </script>
 </body>
