@@ -661,7 +661,7 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>Secure Sheets Bridge · Continuous Mobile OCR · Scanner 1.9.0</span>
+          <span>Secure Sheets Bridge · Continuous Mobile OCR · Scanner 2.0.0</span>
         </div>
 
         <button type="button" onclick="window.close()">
@@ -1121,13 +1121,6 @@
     </section>
   </div>
 
-  <iframe
-    id="bridgeFrame"
-    class="bridge-frame"
-    title="secure Apps Script Sheets bridge"
-    aria-hidden="true"
-  ></iframe>
-
   <canvas id="frameCanvas"></canvas>
   <canvas id="cropCanvas"></canvas>
 
@@ -1137,7 +1130,7 @@
     "use strict";
 
     const SCANNER_VERSION =
-      "1.9.0";
+      "2.0.0";
 
     const FAST_INDEX_CACHE_KEY =
       "ONE_PIECE_LIVE_FAST_INDEX_V1";
@@ -4803,6 +4796,7 @@
     }
 
 
+
     function connectForegroundBridge() {
       const base =
         configuredBridgeUrl();
@@ -4844,79 +4838,40 @@
         return;
       }
 
-      const frame =
-        state.bridgeFrame ||
-        document.getElementById(
-          "bridgeFrame"
-        );
-
-      state.bridgeFrame =
-        frame;
-
-      if (
-        !frame
-      ) {
-        setStatus(
-          "The secure Sheets bridge frame is missing."
-        );
-
-        return;
-      }
-
-      let url;
-
-      try {
-        url =
-          new URL(
-            base
-          );
-      } catch (error) {
-        setStatus(
-          "The secure Sheets bridge URL is invalid."
-        );
-
-        return;
-      }
-
-      url.searchParams.set(
-        "scannerOrigin",
-        window.location.origin
-      );
-
-      url.searchParams.set(
-        "sessionToken",
-        state.sessionToken
-      );
-
-      url.searchParams.set(
-        "scannerVersion",
-        SCANNER_VERSION
-      );
-
-      url.searchParams.set(
-        "sessionExpiresAt",
-        String(
-          state.sessionExpiresAt ||
-          ""
-        )
-      );
-
-      url.searchParams.set(
-        "bridgeRefresh",
-        String(
-          Date.now()
-        )
-      );
-
-      frame.src =
-        url.toString();
-
       setStatus(
-        "Connecting the secure Sheets bridge…"
+        "Connecting directly to the secure Sheets bridge…"
       );
+
+      directBridgeJsonpRequest(
+        "validate",
+        {},
+        20000
+      )
+        .then(function(data) {
+          receiveScannerMessage({
+            data:
+              data,
+
+            __directBridge:
+              true
+          });
+        })
+        .catch(function(error) {
+          state.bridgeReady =
+            false;
+
+          updateFastSessionStatus();
+
+          setStatus(
+            "The direct Sheets bridge could not connect: " +
+            errorMessage(
+              error
+            )
+          );
+        });
 
       scheduleBridgeReconnect(
-        12000
+        22000
       );
     }
 
@@ -4950,7 +4905,7 @@
             }
 
             setStatus(
-              "The secure Sheets bridge did not connect. Close this scanner and reopen it from the private Collection Manager."
+              "The direct Sheets bridge did not connect. Press Reconnect Sheets."
             );
 
             updateFastSessionStatus();
@@ -4959,7 +4914,7 @@
             5000,
             Number(
               delay ||
-              12000
+              22000
             )
           )
         );
@@ -4980,33 +4935,38 @@
               return;
             }
 
-            if (
-              Date.now() -
-              Number(
-                state.bridgeLastSeenAt ||
-                0
-              ) >
-                30000
-            ) {
-              state.bridgeReady =
-                false;
+            directBridgeJsonpRequest(
+              "validate",
+              {},
+              15000
+            )
+              .then(function(data) {
+                state.bridgeLastSeenAt =
+                  Date.now();
 
-              updateFastSessionStatus();
+                if (
+                  !data ||
+                  data.ok !==
+                    true
+                ) {
+                  throw new Error(
+                    data &&
+                    data.message
+                      ? data.message
+                      : "The secure Sheets bridge heartbeat failed."
+                  );
+                }
+              })
+              .catch(function() {
+                state.bridgeReady =
+                  false;
 
-              reconnectForegroundBridge();
+                updateFastSessionStatus();
 
-              return;
-            }
-
-            sendToBridge({
-              action:
-                "PING",
-
-              sentAt:
-                Date.now()
-            });
+                reconnectForegroundBridge();
+              });
           },
-          10000
+          30000
         );
     }
 
@@ -5015,30 +4975,261 @@
       payload
     ) {
       if (
-        !state.bridgeReady ||
-        !state.bridgeFrame ||
-        !state.bridgeFrame.contentWindow
+        !state.bridgeReady
       ) {
         return false;
       }
 
-      state.bridgeFrame.contentWindow.postMessage(
-        Object.assign(
-          {
+      const data =
+        payload &&
+        typeof payload ===
+          "object"
+          ? payload
+          : {};
+
+      const action =
+        String(
+          data.action ||
+          ""
+        );
+
+      if (
+        action ===
+          "PING"
+      ) {
+        state.bridgeLastSeenAt =
+          Date.now();
+
+        return true;
+      }
+
+      let apiAction =
+        "";
+
+      let timeoutMs =
+        30000;
+
+      const requestParameters =
+        {};
+
+      if (
+        action ===
+          "BOOTSTRAP"
+      ) {
+        apiAction =
+          "bootstrap";
+
+        timeoutMs =
+          90000;
+
+        requestParameters.version =
+          data.force ===
+            true
+            ? ""
+            : String(
+                data.version ||
+                ""
+              );
+
+        receiveScannerMessage({
+          __directBridge:
+            true,
+
+          data: {
             type:
-              "ONE_PIECE_LIVE_SCANNER_BRIDGE",
+              "ONE_PIECE_LIVE_SCANNER_BRIDGE_RESULT",
 
             sessionToken:
               state.sessionToken,
 
-            scannerVersion:
-              SCANNER_VERSION
-          },
-          payload ||
-          {}
-        ),
-        "*"
-      );
+            action:
+              "BOOTSTRAP_PENDING",
+
+            pending:
+              true,
+
+            message:
+              "The direct secure bridge is loading the compact card library…"
+          }
+        });
+      } else if (
+        action ===
+          "LOOKUP"
+      ) {
+        apiAction =
+          "lookup";
+
+        requestParameters.requestId =
+          String(
+            data.requestId ||
+            ""
+          );
+
+        requestParameters.cardNumber =
+          String(
+            data.cardNumber ||
+            ""
+          );
+
+        requestParameters.indexRow =
+          String(
+            Number(
+              data.indexRow ||
+              0
+            )
+          );
+
+        receiveScannerMessage({
+          __directBridge:
+            true,
+
+          data: {
+            type:
+              "ONE_PIECE_LIVE_SCANNER_BRIDGE_RESULT",
+
+            sessionToken:
+              state.sessionToken,
+
+            action:
+              "LOOKUP_PENDING",
+
+            requestId:
+              requestParameters.requestId,
+
+            pending:
+              true,
+
+            message:
+              "The direct secure bridge received " +
+              requestParameters.cardNumber +
+              ". Loading the card…"
+          }
+        });
+      } else if (
+        action ===
+          "SAVE"
+      ) {
+        apiAction =
+          "save";
+
+        timeoutMs =
+          60000;
+
+        requestParameters.requestId =
+          String(
+            data.requestId ||
+            ""
+          );
+
+        requestParameters.cardNumber =
+          String(
+            data.cardNumber ||
+            ""
+          );
+
+        requestParameters.amount =
+          String(
+            Number(
+              data.amount ||
+              0
+            )
+          );
+
+        requestParameters.indexRow =
+          String(
+            Number(
+              data.indexRow ||
+              0
+            )
+          );
+      } else {
+        return false;
+      }
+
+      directBridgeJsonpRequest(
+        apiAction,
+        requestParameters,
+        timeoutMs
+      )
+        .then(function(result) {
+          receiveScannerMessage({
+            data:
+              result,
+
+            __directBridge:
+              true
+          });
+        })
+        .catch(function(error) {
+          const message =
+            errorMessage(
+              error
+            );
+
+          if (
+            action ===
+              "SAVE"
+          ) {
+            receiveScannerMessage({
+              __directBridge:
+                true,
+
+              data: {
+                type:
+                  "ONE_PIECE_LIVE_SCANNER_BRIDGE_RESULT",
+
+                sessionToken:
+                  state.sessionToken,
+
+                action:
+                  "SAVE_RESULT",
+
+                requestId:
+                  requestParameters.requestId,
+
+                pending:
+                  true,
+
+                retryAfterMs:
+                  3500,
+
+                message:
+                  "The direct Sheets request was interrupted. The same transaction will retry safely."
+              }
+            });
+
+            return;
+          }
+
+          receiveScannerMessage({
+            __directBridge:
+              true,
+
+            data: {
+              type:
+                "ONE_PIECE_LIVE_SCANNER_BRIDGE_RESULT",
+
+              sessionToken:
+                state.sessionToken,
+
+              action:
+                action ===
+                  "BOOTSTRAP"
+                  ? "BOOTSTRAP_RESULT"
+                  : "LOOKUP_RESULT",
+
+              requestId:
+                requestParameters.requestId ||
+                "",
+
+              ok:
+                false,
+
+              message:
+                message
+            }
+          });
+        });
 
       return true;
     }
@@ -5050,6 +5241,219 @@
       return sendToBridge(
         payload
       );
+    }
+
+
+    function directBridgeJsonpRequest(
+      apiAction,
+      requestParameters,
+      timeoutMs
+    ) {
+      return new Promise(function(resolve, reject) {
+        const base =
+          configuredBridgeUrl();
+
+        if (
+          !base
+        ) {
+          reject(
+            new Error(
+              "The secure Sheets bridge URL is missing."
+            )
+          );
+
+          return;
+        }
+
+        let url;
+
+        try {
+          url =
+            new URL(
+              base
+            );
+        } catch (error) {
+          reject(
+            new Error(
+              "The secure Sheets bridge URL is invalid."
+            )
+          );
+
+          return;
+        }
+
+        const callbackName =
+          "__onePieceScannerBridge_" +
+          randomToken();
+
+        let finished =
+          false;
+
+        const script =
+          document.createElement(
+            "script"
+          );
+
+        const cleanup =
+          function() {
+            if (
+              finished
+            ) {
+              return;
+            }
+
+            finished =
+              true;
+
+            window.clearTimeout(
+              timer
+            );
+
+            if (
+              script.parentNode
+            ) {
+              script.parentNode.removeChild(
+                script
+              );
+            }
+
+            try {
+              delete window[
+                callbackName
+              ];
+            } catch (error) {
+              window[
+                callbackName
+              ] =
+                undefined;
+            }
+          };
+
+        window[
+          callbackName
+        ] =
+          function(result) {
+            cleanup();
+
+            if (
+              !result ||
+              typeof result !==
+                "object"
+            ) {
+              reject(
+                new Error(
+                  "The secure Sheets bridge returned an empty response."
+                )
+              );
+
+              return;
+            }
+
+            resolve(
+              result
+            );
+          };
+
+        const parameters =
+          requestParameters &&
+          typeof requestParameters ===
+            "object"
+            ? requestParameters
+            : {};
+
+        url.searchParams.set(
+          "api",
+          String(
+            apiAction ||
+            ""
+          )
+        );
+
+        url.searchParams.set(
+          "callback",
+          callbackName
+        );
+
+        url.searchParams.set(
+          "sessionToken",
+          state.sessionToken
+        );
+
+        url.searchParams.set(
+          "scannerOrigin",
+          window.location.origin
+        );
+
+        url.searchParams.set(
+          "scannerVersion",
+          SCANNER_VERSION
+        );
+
+        Object.keys(
+          parameters
+        ).forEach(function(key) {
+          url.searchParams.set(
+            key,
+            String(
+              parameters[
+                key
+              ] == null
+                ? ""
+                : parameters[
+                    key
+                  ]
+            )
+          );
+        });
+
+        url.searchParams.set(
+          "_",
+          String(
+            Date.now()
+          )
+        );
+
+        script.async =
+          true;
+
+        script.src =
+          url.toString();
+
+        script.onerror =
+          function() {
+            cleanup();
+
+            reject(
+              new Error(
+                "The browser could not load the secure Sheets response."
+              )
+            );
+          };
+
+        const timer =
+          window.setTimeout(
+            function() {
+              cleanup();
+
+              reject(
+                new Error(
+                  "The secure Sheets bridge request timed out."
+                )
+              );
+            },
+            Math.max(
+              8000,
+              Number(
+                timeoutMs ||
+                30000
+              )
+            )
+          );
+
+        document.head.appendChild(
+          script
+        );
+      });
     }
 
 
@@ -5989,9 +6393,15 @@
           "ONE_PIECE_LIVE_SCANNER_BRIDGE_RESULT" &&
         data.sessionToken ===
           state.sessionToken &&
-        state.bridgeFrame &&
-        event.source ===
-          state.bridgeFrame.contentWindow;
+        (
+          event.__directBridge ===
+            true ||
+          (
+            state.bridgeFrame &&
+            event.source ===
+              state.bridgeFrame.contentWindow
+          )
+        );
 
       const fromOpener =
         data.type ===
@@ -6043,7 +6453,7 @@
         updateFastSessionStatus();
 
         setStatus(
-          "Secure Sheets bridge connected. Saves will continue while the scanner stays open."
+          "Direct secure Sheets bridge connected. Saves will continue while the scanner stays open."
         );
 
         requestFastLibraryRefresh(
