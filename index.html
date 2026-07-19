@@ -8,7 +8,7 @@
   >
   <meta name="theme-color" content="#0f1117">
 
-  <title>One Piece Live Stock Scanner 1.8</title>
+  <title>One Piece Live Stock Scanner 1.9</title>
 
   <style>
     :root {
@@ -661,7 +661,7 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>Foreground Sheets Bridge · Mobile OCR Recovery · Scanner 1.8.0</span>
+          <span>Secure Sheets Bridge · Continuous Mobile OCR · Scanner 1.9.0</span>
         </div>
 
         <button type="button" onclick="window.close()">
@@ -1124,7 +1124,7 @@
   <iframe
     id="bridgeFrame"
     class="bridge-frame"
-    title="Apps Script foreground bridge"
+    title="secure Apps Script Sheets bridge"
     aria-hidden="true"
   ></iframe>
 
@@ -1137,24 +1137,13 @@
     "use strict";
 
     const SCANNER_VERSION =
-      "1.8.0";
+      "1.9.0";
 
     const FAST_INDEX_CACHE_KEY =
       "ONE_PIECE_LIVE_FAST_INDEX_V1";
 
     const SYNC_QUEUE_KEY =
       "ONE_PIECE_LIVE_SYNC_QUEUE_V1";
-
-    /*
-     * Paste the private Apps Script /exec URL between the quotes.
-     * Example:
-     * https://script.google.com/macros/s/DEPLOYMENT_ID/exec
-     *
-     * This foreground iframe bridge keeps google.script.run active
-     * while the phone is showing the scanner tab.
-     */
-    const APPS_SCRIPT_WEB_APP_URL =
-      "https://script.google.com/macros/s/AKfycbxvepVqDI-2YaHhYwUWZNOAp1RyhMZIXmT1xh9dqi7ZqrAiSP3cBBxUp1ksOnDm1avk/exec";
 
     const params =
       new URLSearchParams(
@@ -1178,7 +1167,21 @@
         params.get(
           "bridgeUrl"
         ) ||
-        APPS_SCRIPT_WEB_APP_URL,
+        "",
+
+      bridgeMode:
+        params.get(
+          "bridgeMode"
+        ) ||
+        "",
+
+      sessionExpiresAt:
+        Number(
+          params.get(
+            "sessionExpiresAt"
+          ) ||
+          0
+        ),
 
       bridgeFrame:
         null,
@@ -1220,12 +1223,6 @@
 
       workerPromise:
         null,
-
-      workerRecycleRequested:
-        false,
-
-      acceptedSinceWorkerRecycle:
-        0,
 
       facingMode:
         "environment",
@@ -1439,17 +1436,6 @@
       startBridgeHeartbeat();
 
       await checkPermissionState();
-
-      sendToParent({
-        action:
-          "READY",
-
-        version:
-          state.fastIndexVersion,
-
-        scannerVersion:
-          SCANNER_VERSION
-      });
 
       window.setTimeout(
         function() {
@@ -2534,18 +2520,6 @@
         return;
       }
 
-      if (
-        state.workerRecycleRequested
-      ) {
-        setStatus(
-          "Refreshing OCR memory for the next cards…"
-        );
-
-        await recycleOcrWorker(
-          true
-        );
-      }
-
       const video =
         document.getElementById(
           "video"
@@ -2789,9 +2763,6 @@
 
       state.workerPromise =
         null;
-
-      state.workerRecycleRequested =
-        false;
 
       if (
         worker &&
@@ -4484,19 +4455,6 @@
       persistScannerSyncQueue();
       updateFastSessionStatus();
 
-      state.acceptedSinceWorkerRecycle++;
-
-      if (
-        state.acceptedSinceWorkerRecycle >=
-          3
-      ) {
-        state.acceptedSinceWorkerRecycle =
-          0;
-
-        state.workerRecycleRequested =
-          true;
-      }
-
       closeReview(
         true
       );
@@ -4656,7 +4614,7 @@
         })
       ) {
         setReviewMessage(
-          "The foreground Sheets bridge is not connected. Press Reconnect Sheets, then retry the card lookup.",
+          "The secure Sheets bridge is not connected. Press Reconnect Sheets, then retry the card lookup.",
           "error"
         );
 
@@ -4811,9 +4769,7 @@
         ).trim();
 
       if (
-        !value ||
-        value ===
-          "PASTE_YOUR_PRIVATE_APPS_SCRIPT_EXEC_URL_HERE"
+        !value
       ) {
         return "";
       }
@@ -4826,7 +4782,13 @@
 
         if (
           url.protocol !==
-            "https:"
+            "https:" ||
+          !/script\.google\.com$/i.test(
+            url.hostname
+          ) ||
+          !/\/macros\/s\/[^/]+\/exec$/i.test(
+            url.pathname
+          )
         ) {
           return "";
         }
@@ -4854,7 +4816,29 @@
         !base
       ) {
         setStatus(
-          "Paste the private Apps Script /exec URL into APPS_SCRIPT_WEB_APP_URL in GitHub index.html."
+          "The secure Sheets bridge URL is missing. Close this scanner and reopen it from the private Collection Manager."
+        );
+
+        return;
+      }
+
+      if (
+        !state.sessionToken
+      ) {
+        setStatus(
+          "The secure scanner session token is missing. Close this scanner and reopen it from the private Collection Manager."
+        );
+
+        return;
+      }
+
+      if (
+        state.sessionExpiresAt &&
+        Date.now() >=
+          state.sessionExpiresAt
+      ) {
+        setStatus(
+          "This secure scanner session expired. Close the scanner and open a new session from the Collection Manager."
         );
 
         return;
@@ -4873,7 +4857,7 @@
         !frame
       ) {
         setStatus(
-          "The foreground Sheets bridge frame is missing."
+          "The secure Sheets bridge frame is missing."
         );
 
         return;
@@ -4888,16 +4872,11 @@
           );
       } catch (error) {
         setStatus(
-          "The Apps Script bridge URL is not valid."
+          "The secure Sheets bridge URL is invalid."
         );
 
         return;
       }
-
-      url.searchParams.set(
-        "liveScannerBridge",
-        "1"
-      );
 
       url.searchParams.set(
         "scannerOrigin",
@@ -4915,6 +4894,14 @@
       );
 
       url.searchParams.set(
+        "sessionExpiresAt",
+        String(
+          state.sessionExpiresAt ||
+          ""
+        )
+      );
+
+      url.searchParams.set(
         "bridgeRefresh",
         String(
           Date.now()
@@ -4925,7 +4912,7 @@
         url.toString();
 
       setStatus(
-        "Connecting the foreground Sheets bridge…"
+        "Connecting the secure Sheets bridge…"
       );
 
       scheduleBridgeReconnect(
@@ -4963,7 +4950,7 @@
             }
 
             setStatus(
-              "The Sheets bridge did not connect. Confirm the private /exec URL, redeploy Apps Script, then press Reconnect Sheets."
+              "The secure Sheets bridge did not connect. Close this scanner and reopen it from the private Collection Manager."
             );
 
             updateFastSessionStatus();
@@ -5078,7 +5065,7 @@
         updateFastSessionStatus();
 
         setStatus(
-          "The foreground Sheets bridge is not connected yet."
+          "The secure Sheets bridge is not connected yet."
         );
 
         return;
@@ -5365,7 +5352,7 @@
         !state.bridgeReady
       ) {
         setStatus(
-          "Queued cards are waiting for the foreground Sheets bridge. Press Reconnect Sheets."
+          "Queued cards are waiting for the secure Sheets bridge. Press Reconnect Sheets."
         );
 
         return;
@@ -6056,7 +6043,7 @@
         updateFastSessionStatus();
 
         setStatus(
-          "Foreground Sheets bridge connected. Saves will continue while the scanner stays open."
+          "Secure Sheets bridge connected. Saves will continue while the scanner stays open."
         );
 
         requestFastLibraryRefresh(
@@ -6064,6 +6051,23 @@
         );
 
         processScannerSyncQueue();
+
+        return;
+      }
+
+      if (
+        data.action ===
+          "BRIDGE_ERROR"
+      ) {
+        state.bridgeReady =
+          false;
+
+        updateFastSessionStatus();
+
+        setStatus(
+          data.message ||
+          "The secure Sheets bridge rejected this scanner session."
+        );
 
         return;
       }
