@@ -358,6 +358,19 @@
       margin-top: 10px;
     }
 
+    .force-scan-button {
+      grid-column: 1 / -1;
+      border-color: rgba(238, 224, 55, 0.72);
+      background: rgba(238, 224, 55, 0.14);
+      color: #fff8bd;
+    }
+
+    .force-scan-button:disabled {
+      border-color: var(--line);
+      background: var(--button);
+      color: var(--muted);
+    }
+
     .status {
       min-height: 54px;
       margin-top: 10px;
@@ -661,7 +674,7 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>Secure Sheets Bridge · Continuous Mobile OCR · Scanner 2.0.0</span>
+          <span>Secure Sheets Bridge · Continuous Mobile OCR · Force Scan · Scanner 2.0.1</span>
         </div>
 
         <button type="button" onclick="window.close()">
@@ -892,6 +905,16 @@
             disabled
           >
             I Removed Card — Next
+          </button>
+
+          <button
+            id="forceScanButton"
+            class="force-scan-button"
+            type="button"
+            onclick="forceScanCurrentCard()"
+            disabled
+          >
+            Force Scan Current Card
           </button>
         </div>
 
@@ -1130,7 +1153,7 @@
     "use strict";
 
     const SCANNER_VERSION =
-      "2.0.0";
+      "2.0.1";
 
     const FAST_INDEX_CACHE_KEY =
       "ONE_PIECE_LIVE_FAST_INDEX_V1";
@@ -1209,6 +1232,9 @@
         null,
 
       busy:
+        false,
+
+      forceScanInProgress:
         false,
 
       worker:
@@ -1722,6 +1748,13 @@
           .disabled =
             false;
 
+        document
+          .getElementById(
+            "forceScanButton"
+          )
+          .disabled =
+            false;
+
         setStatus(
           "Ready. Slide one card inside the guide."
         );
@@ -1922,6 +1955,13 @@
       document
         .getElementById(
           "nextCardButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "forceScanButton"
         )
         .disabled =
           true;
@@ -2602,6 +2642,208 @@
       scheduleScanLoop(
         delay
       );
+    }
+
+
+    async function forceScanCurrentCard() {
+      const button =
+        document.getElementById(
+          "forceScanButton"
+        );
+
+      if (
+        !state.active
+      ) {
+        setStatus(
+          "Start the camera before using Force Scan."
+        );
+
+        return;
+      }
+
+      if (
+        state.reviewOpen
+      ) {
+        setStatus(
+          "Finish or cancel the current card review before forcing another scan."
+        );
+
+        return;
+      }
+
+      if (
+        state.busy ||
+        state.forceScanInProgress
+      ) {
+        setStatus(
+          "OCR is already reading the card. Wait one moment and try Force Scan again."
+        );
+
+        return;
+      }
+
+      const video =
+        document.getElementById(
+          "video"
+        );
+
+      if (
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
+        setStatus(
+          "The camera image is not ready yet. Hold the card still and try again."
+        );
+
+        return;
+      }
+
+      state.forceScanInProgress =
+        true;
+
+      window.clearTimeout(
+        state.timer
+      );
+
+      state.timer =
+        null;
+
+      const previousMode =
+        state.recognitionMode;
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        "Force Scanning…";
+
+      setStatus(
+        "Force Scan is running a one-time accurate OCR read. Keep the Card Number still inside the green guide."
+      );
+
+      try {
+        const frame =
+          document.getElementById(
+            "frameCanvas"
+          );
+
+        frame.width =
+          1200;
+
+        frame.height =
+          1600;
+
+        drawImageCover(
+          video,
+          frame
+        );
+
+        /*
+         * Force Scan changes only the OCR mode for this one read.
+         * It does not call, modify, or bypass the Sheets bridge.
+         */
+        state.recognitionMode =
+          "ACCURATE";
+
+        const result =
+          await recognizeCardNumber(
+            frame
+          );
+
+        document
+          .getElementById(
+            "raw"
+          )
+          .textContent =
+            result.rawText
+              ? (
+                  "FORCE OCR: " +
+                  result.rawText
+                )
+              : "FORCE OCR: no valid Card Number found";
+
+        if (
+          !result.cardNumber
+        ) {
+          setStatus(
+            "Force Scan could not read a valid Card Number. Move the card closer, remove glare, and try again."
+          );
+
+          return;
+        }
+
+        /*
+         * A deliberate button press may be used for another physical
+         * copy of the same Card Number. It opens the normal review
+         * popup, but never saves automatically.
+         */
+        state.awaitingClear =
+          false;
+
+        state.clearFrames =
+          0;
+
+        state.lastAccepted =
+          "";
+
+        state.candidate =
+          result.cardNumber;
+
+        state.candidateHits =
+          0;
+
+        handleCardNumber({
+          cardNumber:
+            result.cardNumber,
+
+          confirmations:
+            2,
+
+          confidence:
+            result.confidence,
+
+          durationMs:
+            result.durationMs,
+
+          rawText:
+            result.rawText
+        });
+      } catch (error) {
+        console.log(
+          error
+        );
+
+        await recycleOcrWorker(
+          false
+        );
+
+        setStatus(
+          "Force Scan restarted OCR after a temporary error. Hold the card still and press Force Scan again."
+        );
+      } finally {
+        state.recognitionMode =
+          previousMode;
+
+        state.forceScanInProgress =
+          false;
+
+        button.textContent =
+          "Force Scan Current Card";
+
+        button.disabled =
+          !state.active;
+
+        updateRecognitionReadout();
+
+        if (
+          state.active &&
+          !state.reviewOpen
+        ) {
+          scheduleScanLoop(
+            350
+          );
+        }
+      }
     }
 
 
