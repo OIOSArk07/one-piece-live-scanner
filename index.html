@@ -336,6 +336,35 @@
       pointer-events: none;
     }
 
+    /*
+     * Precision Bottom Scan moves the OCR target into the middle of the
+     * camera. The user can bring only the printed Card Number close to the
+     * lens instead of keeping the entire card visible.
+     */
+    .stage.precision-bottom .card-guide {
+      opacity: 0.16;
+      border-style: dashed;
+    }
+
+    .stage.precision-bottom .number-guide {
+      left: 6%;
+      right: 6%;
+      top: 39%;
+      bottom: auto;
+      width: auto;
+      height: 19%;
+      border-width: 4px;
+      background: rgba(86, 211, 136, 0.12);
+      box-shadow:
+        0 0 0 999px rgba(0, 0, 0, 0.34),
+        0 0 24px rgba(86, 211, 136, 0.28);
+    }
+
+    .stage.precision-bottom .guide-label {
+      top: 30%;
+      background: rgba(20, 88, 49, 0.92);
+    }
+
     .guide-label {
       position: absolute;
       left: 50%;
@@ -366,6 +395,26 @@
     }
 
     .force-scan-button:disabled {
+      border-color: var(--line);
+      background: var(--button);
+      color: var(--muted);
+    }
+
+    .precision-scan-button {
+      grid-column: 1 / -1;
+      border-color: rgba(86, 211, 136, 0.72);
+      background: rgba(86, 211, 136, 0.12);
+      color: #d8ffe6;
+    }
+
+    .precision-scan-button.active {
+      border-color: rgba(86, 211, 136, 0.98);
+      background: rgba(86, 211, 136, 0.28);
+      color: #ffffff;
+      box-shadow: 0 0 18px rgba(86, 211, 136, 0.16);
+    }
+
+    .precision-scan-button:disabled {
       border-color: var(--line);
       background: var(--button);
       color: var(--muted);
@@ -650,6 +699,128 @@
       display: none;
     }
 
+
+    .visual-scan-button {
+      grid-column: 1 / -1;
+      min-height: 50px;
+      border-color: rgba(101, 167, 255, 0.70);
+      background: linear-gradient(135deg, rgba(101, 167, 255, 0.22), rgba(86, 211, 136, 0.15));
+      color: #eaf4ff;
+    }
+
+    .visual-scan-button:disabled {
+      opacity: 0.45;
+    }
+
+    .visual-candidate-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      display: grid;
+      place-items: center;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+      background: rgba(0, 0, 0, 0.82);
+    }
+
+    .visual-candidate-dialog {
+      width: min(540px, 100%);
+      max-height: 92vh;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #171a22;
+      box-shadow: var(--shadow);
+    }
+
+    .visual-candidate-header {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .visual-candidate-header strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .visual-candidate-header span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      line-height: 1.45;
+    }
+
+    .visual-candidate-list {
+      display: grid;
+      gap: 9px;
+      padding: 14px;
+    }
+
+    .visual-candidate-card {
+      width: 100%;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 64px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 11px;
+      background: #10131a;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .visual-candidate-card.best {
+      border-color: rgba(86, 211, 136, 0.72);
+      background: rgba(86, 211, 136, 0.08);
+    }
+
+    .visual-candidate-number {
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 950;
+      letter-spacing: 0.03em;
+    }
+
+    .visual-candidate-name {
+      margin-top: 3px;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .visual-candidate-meta {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.67rem;
+    }
+
+    .visual-score {
+      min-width: 66px;
+      border-radius: 10px;
+      padding: 8px 7px;
+      background: #272c37;
+      color: #d8ffe6;
+      font-size: 0.78rem;
+      font-weight: 950;
+      text-align: center;
+    }
+
+    .visual-candidate-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 0 14px 14px;
+    }
+
+    .visual-index-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.66rem;
+      line-height: 1.4;
+      text-align: center;
+    }
+
     @media (max-width: 560px) {
       .settings,
       .camera-tools,
@@ -674,7 +845,7 @@
       <header>
         <div>
           <strong>One Piece Live Stock Scanner</strong>
-          <span>Secure Sheets Bridge · Continuous Mobile OCR · Force Scan · Scanner 2.0.1</span>
+          <span>Secure Sheets Bridge · Free Visual AI + OCR · Scanner 3.0.0 Alpha</span>
         </div>
 
         <button type="button" onclick="window.close()">
@@ -857,7 +1028,7 @@
           </button>
         </section>
 
-        <div class="stage">
+        <div id="scannerStage" class="stage">
           <video
             id="video"
             autoplay
@@ -865,10 +1036,10 @@
             muted
           ></video>
 
-          <div class="card-guide"></div>
-          <div class="number-guide"></div>
+          <div id="cardGuide" class="card-guide"></div>
+          <div id="numberGuide" class="number-guide"></div>
 
-          <div class="guide-label">
+          <div id="guideLabel" class="guide-label">
             Full card in yellow · Card Number in green
           </div>
         </div>
@@ -908,6 +1079,16 @@
           </button>
 
           <button
+            id="precisionScanButton"
+            class="precision-scan-button"
+            type="button"
+            onclick="togglePrecisionBottomMode()"
+            disabled
+          >
+            Precision Bottom Scan: Off
+          </button>
+
+          <button
             id="forceScanButton"
             class="force-scan-button"
             type="button"
@@ -915,6 +1096,16 @@
             disabled
           >
             Force Scan Current Card
+          </button>
+
+          <button
+            id="visualScanButton"
+            class="visual-scan-button"
+            type="button"
+            onclick="visualScanCurrentCard()"
+            disabled
+          >
+            Free AI Visual Scan Current Card
           </button>
         </div>
 
@@ -935,6 +1126,11 @@
           <div class="session-pill">
             <span>Sheets bridge</span>
             <strong id="bridgeStatus">Connecting</strong>
+          </div>
+
+          <div class="session-pill">
+            <span>Visual AI</span>
+            <strong id="visualAiStatus">Loading</strong>
           </div>
 
           <div class="session-pill">
@@ -1144,6 +1340,35 @@
     </section>
   </div>
 
+  <div
+    id="visualCandidateBackdrop"
+    class="visual-candidate-backdrop hidden"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="visualCandidateTitle"
+  >
+    <section class="visual-candidate-dialog">
+      <div class="visual-candidate-header">
+        <strong id="visualCandidateTitle">Choose the visual match</strong>
+        <span id="visualCandidateMessage">
+          The free on-device model compared the whole card with your indexed card images.
+        </span>
+      </div>
+
+      <div id="visualCandidateList" class="visual-candidate-list"></div>
+
+      <div class="visual-candidate-actions">
+        <button type="button" onclick="closeVisualCandidates(false)">
+          Cancel
+        </button>
+
+        <button class="primary" type="button" onclick="visualScanCurrentCard()">
+          Scan Again
+        </button>
+      </div>
+    </section>
+  </div>
+
   <canvas id="frameCanvas"></canvas>
   <canvas id="cropCanvas"></canvas>
 
@@ -1153,13 +1378,28 @@
     "use strict";
 
     const SCANNER_VERSION =
-      "2.0.1";
+      "3.0.0-alpha1";
 
     const FAST_INDEX_CACHE_KEY =
       "ONE_PIECE_LIVE_FAST_INDEX_V1";
 
     const SYNC_QUEUE_KEY =
       "ONE_PIECE_LIVE_SYNC_QUEUE_V1";
+
+    const VISUAL_INDEX_FILE =
+      "visual-index.json";
+
+    const VISUAL_MODEL_ID =
+      "mobilenet-v2-alpha-0.50-256-int8-v1";
+
+    const VISUAL_VECTOR_DIMENSIONS =
+      256;
+
+    const VISUAL_TFJS_URL =
+      "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
+
+    const VISUAL_MOBILENET_URL =
+      "https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js";
 
     const params =
       new URLSearchParams(
@@ -1235,6 +1475,9 @@
         false,
 
       forceScanInProgress:
+        false,
+
+      precisionBottomMode:
         false,
 
       worker:
@@ -1345,6 +1588,27 @@
       sessionCount:
         0,
 
+      visualIndex:
+        [],
+
+      visualIndexReady:
+        false,
+
+      visualIndexVersion:
+        "",
+
+      visualModel:
+        null,
+
+      visualModelPromise:
+        null,
+
+      visualBusy:
+        false,
+
+      visualCandidates:
+        [],
+
       history:
         []
     };
@@ -1379,6 +1643,7 @@
       updateFastSessionStatus();
       updateRecognitionReadout();
       renderHistory();
+      loadVisualIndex();
 
       state.bridgeFrame =
         document.getElementById(
@@ -1755,6 +2020,15 @@
           .disabled =
             false;
 
+        document
+          .getElementById(
+            "precisionScanButton"
+          )
+          .disabled =
+            false;
+
+        updateVisualScanButton();
+
         setStatus(
           "Ready. Slide one card inside the guide."
         );
@@ -1965,6 +2239,25 @@
         )
         .disabled =
           true;
+
+      document
+        .getElementById(
+          "precisionScanButton"
+        )
+        .disabled =
+          true;
+
+      document
+        .getElementById(
+          "visualScanButton"
+        )
+        .disabled =
+          true;
+
+      setPrecisionBottomMode(
+        false,
+        false
+      );
 
       document
         .getElementById(
@@ -2495,6 +2788,11 @@
             "FAST"
           ) +
           (
+            state.precisionBottomMode
+              ? " · BOTTOM"
+              : ""
+          ) +
+          (
             state.lastOcrDurationMs
               ? (
                   " · " +
@@ -2645,6 +2943,90 @@
     }
 
 
+    function togglePrecisionBottomMode() {
+      setPrecisionBottomMode(
+        !state.precisionBottomMode,
+        true
+      );
+    }
+
+
+    function setPrecisionBottomMode(
+      enabled,
+      announce
+    ) {
+      state.precisionBottomMode =
+        enabled ===
+          true;
+
+      const stage =
+        document.getElementById(
+          "scannerStage"
+        );
+
+      const button =
+        document.getElementById(
+          "precisionScanButton"
+        );
+
+      const label =
+        document.getElementById(
+          "guideLabel"
+        );
+
+      if (
+        stage
+      ) {
+        stage.classList.toggle(
+          "precision-bottom",
+          state.precisionBottomMode
+        );
+      }
+
+      if (
+        button
+      ) {
+        button.classList.toggle(
+          "active",
+          state.precisionBottomMode
+        );
+
+        button.textContent =
+          state.precisionBottomMode
+            ? "Precision Bottom Scan: On"
+            : "Precision Bottom Scan: Off";
+      }
+
+      if (
+        label
+      ) {
+        label.textContent =
+          state.precisionBottomMode
+            ? "Move closer · Put only the printed Card Number in green"
+            : "Full card in yellow · Card Number in green";
+      }
+
+      state.candidate =
+        "";
+
+      state.candidateHits =
+        0;
+
+      state.ocrMissCount =
+        0;
+
+      if (
+        announce
+      ) {
+        setStatus(
+          state.precisionBottomMode
+            ? "Precision Bottom Scan is on. Move the card closer until only the printed Card Number fills the green box. Keep the rarity letter and cost icon outside the box."
+            : "Precision Bottom Scan is off. Place the full card inside the yellow guide."
+        );
+      }
+    }
+
+
     async function forceScanCurrentCard() {
       const button =
         document.getElementById(
@@ -2718,7 +3100,9 @@
         "Force Scanning…";
 
       setStatus(
-        "Force Scan is running a one-time accurate OCR read. Keep the Card Number still inside the green guide."
+        state.precisionBottomMode
+          ? "Force Scan is reading the enlarged bottom number. Keep only the printed Card Number sharp inside the green box."
+          : "Force Scan is running a one-time accurate OCR read. Keep the Card Number still inside the green guide."
       );
 
       try {
@@ -2766,7 +3150,9 @@
           !result.cardNumber
         ) {
           setStatus(
-            "Force Scan could not read a valid Card Number. Move the card closer, remove glare, and try again."
+            state.precisionBottomMode
+              ? "Force Scan could not read the number. Fill the green box with only the printed Card Number, keep it horizontal, and remove glare."
+              : "Force Scan could not read a valid Card Number. Turn on Precision Bottom Scan, move the number closer, and try again."
           );
 
           return;
@@ -3024,6 +3410,1296 @@
     }
 
 
+
+    // ====================================================
+    // FREE ON-DEVICE VISUAL MATCHING
+    // ====================================================
+
+    async function loadVisualIndex() {
+      const status =
+        document.getElementById(
+          "visualAiStatus"
+        );
+
+      if (status) {
+        status.textContent =
+          "Loading";
+      }
+
+      try {
+        const url =
+          new URL(
+            VISUAL_INDEX_FILE,
+            window.location.href
+          );
+
+        const response =
+          await fetch(
+            url.toString(),
+            {
+              cache:
+                "no-cache"
+            }
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            "visual-index.json was not found beside index.html."
+          );
+        }
+
+        const payload =
+          await response.json();
+
+        if (
+          !payload ||
+          payload.format !==
+            "one-piece-visual-index" ||
+          payload.model !==
+            VISUAL_MODEL_ID ||
+          Number(
+            payload.dimensions ||
+            0
+          ) !==
+            VISUAL_VECTOR_DIMENSIONS ||
+          !Array.isArray(
+            payload.entries
+          )
+        ) {
+          throw new Error(
+            "The visual index format does not match this scanner. Rebuild and upload the new visual-index.json."
+          );
+        }
+
+        const decoded = [];
+
+        payload.entries.forEach(function(entry) {
+          const cardNumber =
+            String(
+              entry.c ||
+              ""
+            );
+
+          const encoded =
+            String(
+              entry.e ||
+              ""
+            );
+
+          if (
+            !cardNumber ||
+            !encoded
+          ) {
+            return;
+          }
+
+          const vector =
+            decodeVisualInt8(
+              encoded
+            );
+
+          if (
+            vector.length !==
+              VISUAL_VECTOR_DIMENSIONS
+          ) {
+            return;
+          }
+
+          let normSquared =
+            0;
+
+          for (
+            let index = 0;
+            index < vector.length;
+            index++
+          ) {
+            normSquared +=
+              vector[index] *
+              vector[index];
+          }
+
+          decoded.push({
+            cardNumber:
+              cardNumber,
+
+            vector:
+              vector,
+
+            norm:
+              Math.sqrt(
+                normSquared
+              ) ||
+              1,
+
+            hash:
+              String(
+                entry.h ||
+                ""
+              )
+          });
+        });
+
+        if (!decoded.length) {
+          throw new Error(
+            "The visual index contains no usable card fingerprints."
+          );
+        }
+
+        state.visualIndex =
+          decoded;
+
+        state.visualIndexReady =
+          true;
+
+        state.visualIndexVersion =
+          String(
+            payload.updatedAt ||
+            payload.createdAt ||
+            ""
+          );
+
+        if (status) {
+          status.textContent =
+            decoded.length +
+            " ready";
+        }
+
+        updateVisualScanButton();
+      } catch (error) {
+        state.visualIndex =
+          [];
+
+        state.visualIndexReady =
+          false;
+
+        if (status) {
+          status.textContent =
+            "Not indexed";
+        }
+
+        updateVisualScanButton();
+
+        console.log(
+          error
+        );
+      }
+    }
+
+
+    function updateVisualScanButton() {
+      const button =
+        document.getElementById(
+          "visualScanButton"
+        );
+
+      if (!button) {
+        return;
+      }
+
+      button.disabled =
+        !state.active ||
+        !state.visualIndexReady ||
+        state.visualBusy;
+
+      if (
+        state.visualBusy
+      ) {
+        button.textContent =
+          "Visual AI is comparing…";
+      } else if (
+        !state.visualIndexReady
+      ) {
+        button.textContent =
+          "Visual AI Index Not Loaded";
+      } else {
+        button.textContent =
+          "Free AI Visual Scan Current Card";
+      }
+    }
+
+
+    async function visualScanCurrentCard() {
+      if (
+        state.visualBusy
+      ) {
+        return;
+      }
+
+      closeVisualCandidates(
+        false
+      );
+
+      if (
+        !state.visualIndexReady
+      ) {
+        setStatus(
+          "The visual AI index is not loaded. Upload visual-index.json beside the GitHub index.html file."
+        );
+
+        return;
+      }
+
+      const video =
+        document.getElementById(
+          "video"
+        );
+
+      if (
+        !state.active ||
+        !video ||
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
+        setStatus(
+          "Start the camera before using Visual AI Scan."
+        );
+
+        return;
+      }
+
+      state.visualBusy =
+        true;
+
+      updateVisualScanButton();
+
+      setStatus(
+        "Loading the free on-device visual model and comparing the whole card…"
+      );
+
+      try {
+        const model =
+          await getVisualModel();
+
+        const frame =
+          document.getElementById(
+            "frameCanvas"
+          );
+
+        frame.width =
+          1200;
+
+        frame.height =
+          1600;
+
+        drawImageCover(
+          video,
+          frame
+        );
+
+        const cardCrop =
+          createCardGuideCrop(
+            frame,
+            0.015,
+            0.015,
+            0.97,
+            0.97,
+            640
+          );
+
+        const prepared =
+          prepareVisualModelCanvas(
+            cardCrop
+          );
+
+        const embeddingTensor =
+          model.infer(
+            prepared,
+            true
+          );
+
+        const embedding =
+          await embeddingTensor.data();
+
+        embeddingTensor.dispose();
+
+        const queryVector =
+          projectVisualEmbedding(
+            embedding
+          );
+
+        const queryHash =
+          createVisualDifferenceHash(
+            cardCrop
+          );
+
+        state.visualCandidates =
+          findVisualMatches(
+            queryVector,
+            queryHash,
+            3
+          );
+
+        if (
+          !state.visualCandidates.length
+        ) {
+          throw new Error(
+            "No visual candidates were found."
+          );
+        }
+
+        showVisualCandidates(
+          state.visualCandidates
+        );
+
+        setStatus(
+          "Visual AI finished. Choose the correct card from the best matches."
+        );
+      } catch (error) {
+        setStatus(
+          error &&
+          error.message
+            ? error.message
+            : String(
+                error
+              )
+        );
+      } finally {
+        state.visualBusy =
+          false;
+
+        updateVisualScanButton();
+      }
+    }
+
+
+    async function getVisualModel() {
+      if (
+        state.visualModel
+      ) {
+        return state.visualModel;
+      }
+
+      if (
+        state.visualModelPromise
+      ) {
+        return state.visualModelPromise;
+      }
+
+      state.visualModelPromise =
+        (async function() {
+          await loadExternalScript(
+            VISUAL_TFJS_URL,
+            "tf"
+          );
+
+          await loadExternalScript(
+            VISUAL_MOBILENET_URL,
+            "mobilenet"
+          );
+
+          if (
+            window.tf &&
+            typeof window.tf.ready ===
+              "function"
+          ) {
+            await window.tf.ready();
+          }
+
+          const model =
+            await window.mobilenet.load({
+              version:
+                2,
+
+              alpha:
+                0.50
+            });
+
+          state.visualModel =
+            model;
+
+          return model;
+        })();
+
+      try {
+        return await state.visualModelPromise;
+      } catch (error) {
+        state.visualModelPromise =
+          null;
+
+        throw error;
+      }
+    }
+
+
+    function loadExternalScript(
+      source,
+      globalName
+    ) {
+      if (
+        window[globalName]
+      ) {
+        return Promise.resolve();
+      }
+
+      return new Promise(function(resolve, reject) {
+        const existing =
+          Array.from(
+            document.scripts
+          )
+            .find(function(script) {
+              return script.src ===
+                source;
+            });
+
+        if (existing) {
+          existing.addEventListener(
+            "load",
+            resolve,
+            {
+              once:
+                true
+            }
+          );
+
+          existing.addEventListener(
+            "error",
+            function() {
+              reject(
+                new Error(
+                  "A visual AI library could not load. Check the internet connection and try again."
+                )
+              );
+            },
+            {
+              once:
+                true
+            }
+          );
+
+          return;
+        }
+
+        const script =
+          document.createElement(
+            "script"
+          );
+
+        script.src =
+          source;
+
+        script.async =
+          true;
+
+        script.onload =
+          resolve;
+
+        script.onerror =
+          function() {
+            reject(
+              new Error(
+                "A visual AI library could not load. Check the internet connection and try again."
+              )
+            );
+          };
+
+        document.head.appendChild(
+          script
+        );
+      });
+    }
+
+
+    function getCardGuideRatios() {
+      const stage =
+        document.getElementById(
+          "scannerStage"
+        );
+
+      const guide =
+        document.getElementById(
+          "cardGuide"
+        );
+
+      if (
+        !stage ||
+        !guide
+      ) {
+        return {
+          x:
+            0.09,
+          y:
+            0.05,
+          width:
+            0.82,
+          height:
+            0.90
+        };
+      }
+
+      const stageRect =
+        stage.getBoundingClientRect();
+
+      const guideRect =
+        guide.getBoundingClientRect();
+
+      if (
+        !stageRect.width ||
+        !stageRect.height
+      ) {
+        return {
+          x:
+            0.09,
+          y:
+            0.05,
+          width:
+            0.82,
+          height:
+            0.90
+        };
+      }
+
+      return {
+        x:
+          (
+            guideRect.left -
+            stageRect.left
+          ) /
+          stageRect.width,
+
+        y:
+          (
+            guideRect.top -
+            stageRect.top
+          ) /
+          stageRect.height,
+
+        width:
+          guideRect.width /
+          stageRect.width,
+
+        height:
+          guideRect.height /
+          stageRect.height
+      };
+    }
+
+
+    function createCardGuideCrop(
+      source,
+      innerX,
+      innerY,
+      innerWidth,
+      innerHeight,
+      targetWidth
+    ) {
+      const guide =
+        getCardGuideRatios();
+
+      const x =
+        guide.x +
+        guide.width *
+        Number(
+          innerX ||
+          0
+        );
+
+      const y =
+        guide.y +
+        guide.height *
+        Number(
+          innerY ||
+          0
+        );
+
+      const width =
+        guide.width *
+        Number(
+          innerWidth ||
+          1
+        );
+
+      const height =
+        guide.height *
+        Number(
+          innerHeight ||
+          1
+        );
+
+      return createCrop(
+        source,
+        Math.max(
+          0,
+          x
+        ),
+        Math.max(
+          0,
+          y
+        ),
+        Math.min(
+          1 - x,
+          width
+        ),
+        Math.min(
+          1 - y,
+          height
+        ),
+        targetWidth ||
+        640
+      );
+    }
+
+
+    function prepareVisualModelCanvas(
+      source
+    ) {
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width =
+        224;
+
+      canvas.height =
+        224;
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false
+          }
+        );
+
+      context.fillStyle =
+        "#7f7f7f";
+
+      context.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      const scale =
+        Math.min(
+          canvas.width /
+          source.width,
+          canvas.height /
+          source.height
+        );
+
+      const width =
+        source.width *
+        scale;
+
+      const height =
+        source.height *
+        scale;
+
+      context.imageSmoothingEnabled =
+        true;
+
+      context.imageSmoothingQuality =
+        "high";
+
+      context.drawImage(
+        source,
+        (
+          canvas.width -
+          width
+        ) /
+        2,
+        (
+          canvas.height -
+          height
+        ) /
+        2,
+        width,
+        height
+      );
+
+      return canvas;
+    }
+
+
+    function projectVisualEmbedding(
+      embedding
+    ) {
+      const output =
+        new Float32Array(
+          VISUAL_VECTOR_DIMENSIONS
+        );
+
+      const sourceLength =
+        embedding.length;
+
+      let normSquared =
+        0;
+
+      for (
+        let index = 0;
+        index < VISUAL_VECTOR_DIMENSIONS;
+        index++
+      ) {
+        const sourceIndex =
+          Math.min(
+            sourceLength -
+            1,
+            Math.floor(
+              index *
+              sourceLength /
+              VISUAL_VECTOR_DIMENSIONS
+            )
+          );
+
+        const value =
+          Number(
+            embedding[
+              sourceIndex
+            ] ||
+            0
+          );
+
+        output[index] =
+          value;
+
+        normSquared +=
+          value *
+          value;
+      }
+
+      const norm =
+        Math.sqrt(
+          normSquared
+        ) ||
+        1;
+
+      for (
+        let index = 0;
+        index < output.length;
+        index++
+      ) {
+        output[index] /=
+          norm;
+      }
+
+      return output;
+    }
+
+
+    function findVisualMatches(
+      queryVector,
+      queryHash,
+      limit
+    ) {
+      let queryNormSquared =
+        0;
+
+      for (
+        let index = 0;
+        index < queryVector.length;
+        index++
+      ) {
+        queryNormSquared +=
+          queryVector[index] *
+          queryVector[index];
+      }
+
+      const queryNorm =
+        Math.sqrt(
+          queryNormSquared
+        ) ||
+        1;
+
+      const byCard =
+        {};
+
+      state.visualIndex.forEach(function(reference) {
+        let dot =
+          0;
+
+        for (
+          let index = 0;
+          index < queryVector.length;
+          index++
+        ) {
+          dot +=
+            queryVector[index] *
+            reference.vector[index];
+        }
+
+        const cosine =
+          Math.max(
+            -1,
+            Math.min(
+              1,
+              dot /
+              (
+                queryNorm *
+                reference.norm
+              )
+            )
+          );
+
+        const hashSimilarity =
+          queryHash &&
+          reference.hash
+            ? (
+                1 -
+                visualHammingDistance(
+                  queryHash,
+                  reference.hash
+                ) /
+                64
+              )
+            : cosine;
+
+        const score =
+          cosine *
+          0.84 +
+          hashSimilarity *
+          0.16;
+
+        const existing =
+          byCard[
+            reference.cardNumber
+          ];
+
+        if (
+          !existing ||
+          score >
+            existing.score
+        ) {
+          const card =
+            state.fastCardIndex[
+              reference.cardNumber
+            ] ||
+            {};
+
+          byCard[
+            reference.cardNumber
+          ] = {
+            cardNumber:
+              reference.cardNumber,
+
+            name:
+              String(
+                card.name ||
+                ""
+              ),
+
+            color:
+              String(
+                card.color ||
+                ""
+              ),
+
+            type:
+              String(
+                card.type ||
+                ""
+              ),
+
+            rarity:
+              String(
+                card.rarity ||
+                ""
+              ),
+
+            score:
+              score,
+
+            cosine:
+              cosine,
+
+            hashSimilarity:
+              hashSimilarity
+          };
+        }
+      });
+
+      return Object.keys(
+        byCard
+      )
+        .map(function(cardNumber) {
+          return byCard[
+            cardNumber
+          ];
+        })
+        .sort(function(left, right) {
+          return right.score -
+            left.score;
+        })
+        .slice(
+          0,
+          Math.max(
+            1,
+            Number(
+              limit ||
+              3
+            )
+          )
+        );
+    }
+
+
+    function showVisualCandidates(
+      candidates
+    ) {
+      const backdrop =
+        document.getElementById(
+          "visualCandidateBackdrop"
+        );
+
+      const list =
+        document.getElementById(
+          "visualCandidateList"
+        );
+
+      list.innerHTML =
+        "";
+
+      candidates.forEach(function(candidate, index) {
+        const button =
+          document.createElement(
+            "button"
+          );
+
+        button.type =
+          "button";
+
+        button.className =
+          "visual-candidate-card" +
+          (
+            index ===
+              0
+              ? " best"
+              : ""
+          );
+
+        button.addEventListener(
+          "click",
+          function() {
+            chooseVisualCandidate(
+              candidate.cardNumber
+            );
+          }
+        );
+
+        const details =
+          document.createElement(
+            "div"
+          );
+
+        const number =
+          document.createElement(
+            "div"
+          );
+
+        number.className =
+          "visual-candidate-number";
+
+        number.textContent =
+          candidate.cardNumber;
+
+        const name =
+          document.createElement(
+            "div"
+          );
+
+        name.className =
+          "visual-candidate-name";
+
+        name.textContent =
+          candidate.name ||
+          "Card name will load during review";
+
+        const meta =
+          document.createElement(
+            "div"
+          );
+
+        meta.className =
+          "visual-candidate-meta";
+
+        meta.textContent =
+          [
+            candidate.color,
+            candidate.type,
+            candidate.rarity,
+            index ===
+              0
+              ? "Best match"
+              : "Alternative match"
+          ]
+            .filter(
+              Boolean
+            )
+            .join(
+              " · "
+            );
+
+        details.appendChild(
+          number
+        );
+
+        details.appendChild(
+          name
+        );
+
+        details.appendChild(
+          meta
+        );
+
+        const score =
+          document.createElement(
+            "div"
+          );
+
+        score.className =
+          "visual-score";
+
+        score.textContent =
+          Math.max(
+            0,
+            Math.min(
+              100,
+              Math.round(
+                candidate.score *
+                100
+              )
+            )
+          ) +
+          "%";
+
+        button.appendChild(
+          details
+        );
+
+        button.appendChild(
+          score
+        );
+
+        list.appendChild(
+          button
+        );
+      });
+
+      backdrop.classList.remove(
+        "hidden"
+      );
+    }
+
+
+    function chooseVisualCandidate(
+      cardNumber
+    ) {
+      closeVisualCandidates(
+        true
+      );
+
+      state.awaitingClear =
+        false;
+
+      state.lastAccepted =
+        "";
+
+      requestCardReview(
+        cardNumber
+      );
+    }
+
+
+    function closeVisualCandidates(
+      keepCandidates
+    ) {
+      const backdrop =
+        document.getElementById(
+          "visualCandidateBackdrop"
+        );
+
+      if (backdrop) {
+        backdrop.classList.add(
+          "hidden"
+        );
+      }
+
+      if (!keepCandidates) {
+        state.visualCandidates =
+          [];
+      }
+    }
+
+
+    function decodeVisualInt8(
+      encoded
+    ) {
+      const binary =
+        window.atob(
+          encoded
+        );
+
+      const output =
+        new Int8Array(
+          binary.length
+        );
+
+      for (
+        let index = 0;
+        index < binary.length;
+        index++
+      ) {
+        const value =
+          binary.charCodeAt(
+            index
+          );
+
+        output[index] =
+          value >
+            127
+            ? value -
+              256
+            : value;
+      }
+
+      return output;
+    }
+
+
+    function createVisualDifferenceHash(
+      source
+    ) {
+      const canvas =
+        document.createElement(
+          "canvas"
+        );
+
+      canvas.width =
+        9;
+
+      canvas.height =
+        8;
+
+      const context =
+        canvas.getContext(
+          "2d",
+          {
+            alpha:
+              false,
+            willReadFrequently:
+              true
+          }
+        );
+
+      context.drawImage(
+        source,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      const data =
+        context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        ).data;
+
+      let bits =
+        0n;
+
+      for (
+        let y = 0;
+        y < 8;
+        y++
+      ) {
+        for (
+          let x = 0;
+          x < 8;
+          x++
+        ) {
+          const leftIndex =
+            (
+              y *
+              9 +
+              x
+            ) *
+            4;
+
+          const rightIndex =
+            leftIndex +
+            4;
+
+          const left =
+            data[leftIndex] *
+              0.299 +
+            data[leftIndex + 1] *
+              0.587 +
+            data[leftIndex + 2] *
+              0.114;
+
+          const right =
+            data[rightIndex] *
+              0.299 +
+            data[rightIndex + 1] *
+              0.587 +
+            data[rightIndex + 2] *
+              0.114;
+
+          bits =
+            (
+              bits <<
+              1n
+            ) |
+            (
+              left >
+                right
+                ? 1n
+                : 0n
+            );
+        }
+      }
+
+      return bits
+        .toString(
+          16
+        )
+        .padStart(
+          16,
+          "0"
+        );
+    }
+
+
+    function visualHammingDistance(
+      left,
+      right
+    ) {
+      try {
+        let value =
+          BigInt(
+            "0x" +
+            left
+          ) ^
+          BigInt(
+            "0x" +
+            right
+          );
+
+        let count =
+          0;
+
+        while (
+          value
+        ) {
+          value &=
+            value -
+            1n;
+
+          count++;
+        }
+
+        return count;
+      } catch (error) {
+        return 64;
+      }
+    }
+
+
     async function getWorker() {
       if (
         state.worker
@@ -3221,6 +4897,306 @@
     }
 
 
+    function getNumberGuideRatios() {
+      const stage =
+        document.getElementById(
+          "scannerStage"
+        );
+
+      const guide =
+        document.getElementById(
+          "numberGuide"
+        );
+
+      if (
+        !stage ||
+        !guide
+      ) {
+        return {
+          x:
+            0.43,
+          y:
+            0.80,
+          width:
+            0.48,
+          height:
+            0.15
+        };
+      }
+
+      const stageRect =
+        stage.getBoundingClientRect();
+
+      const guideRect =
+        guide.getBoundingClientRect();
+
+      if (
+        !stageRect.width ||
+        !stageRect.height
+      ) {
+        return {
+          x:
+            0.43,
+          y:
+            0.80,
+          width:
+            0.48,
+          height:
+            0.15
+        };
+      }
+
+      return {
+        x:
+          (
+            guideRect.left -
+            stageRect.left
+          ) /
+          stageRect.width,
+
+        y:
+          (
+            guideRect.top -
+            stageRect.top
+          ) /
+          stageRect.height,
+
+        width:
+          guideRect.width /
+          stageRect.width,
+
+        height:
+          guideRect.height /
+          stageRect.height
+      };
+    }
+
+
+    function createNumberGuideCrop(
+      source,
+      innerX,
+      innerY,
+      innerWidth,
+      innerHeight,
+      targetWidth
+    ) {
+      const guide =
+        getNumberGuideRatios();
+
+      const rawX =
+        guide.x +
+        guide.width *
+        Number(
+          innerX ||
+          0
+        );
+
+      const rawY =
+        guide.y +
+        guide.height *
+        Number(
+          innerY ||
+          0
+        );
+
+      const rawWidth =
+        guide.width *
+        Number(
+          innerWidth ||
+          1
+        );
+
+      const rawHeight =
+        guide.height *
+        Number(
+          innerHeight ||
+          1
+        );
+
+      const x =
+        Math.max(
+          0,
+          Math.min(
+            0.98,
+            rawX
+          )
+        );
+
+      const y =
+        Math.max(
+          0,
+          Math.min(
+            0.98,
+            rawY
+          )
+        );
+
+      const width =
+        Math.max(
+          0.02,
+          Math.min(
+            1 -
+            x,
+            rawWidth
+          )
+        );
+
+      const height =
+        Math.max(
+          0.02,
+          Math.min(
+            1 -
+            y,
+            rawHeight
+          )
+        );
+
+      return createCrop(
+        source,
+        x,
+        y,
+        width,
+        height,
+        targetWidth
+      );
+    }
+
+
+    function calculateOtsuThreshold(
+      pixels
+    ) {
+      const histogram =
+        new Array(
+          256
+        ).fill(
+          0
+        );
+
+      let total =
+        0;
+
+      let sum =
+        0;
+
+      for (
+        let index = 0;
+        index < pixels.length;
+        index += 4
+      ) {
+        const gray =
+          Math.max(
+            0,
+            Math.min(
+              255,
+              Math.round(
+                pixels[index] *
+                  0.299 +
+                pixels[index + 1] *
+                  0.587 +
+                pixels[index + 2] *
+                  0.114
+              )
+            )
+          );
+
+        histogram[
+          gray
+        ]++;
+
+        total++;
+
+        sum +=
+          gray;
+      }
+
+      let sumBackground =
+        0;
+
+      let backgroundWeight =
+        0;
+
+      let bestVariance =
+        -1;
+
+      let bestThreshold =
+        150;
+
+      for (
+        let threshold = 0;
+        threshold < 256;
+        threshold++
+      ) {
+        backgroundWeight +=
+          histogram[
+            threshold
+          ];
+
+        if (
+          backgroundWeight ===
+            0
+        ) {
+          continue;
+        }
+
+        const foregroundWeight =
+          total -
+          backgroundWeight;
+
+        if (
+          foregroundWeight ===
+            0
+        ) {
+          break;
+        }
+
+        sumBackground +=
+          threshold *
+          histogram[
+            threshold
+          ];
+
+        const backgroundMean =
+          sumBackground /
+          backgroundWeight;
+
+        const foregroundMean =
+          (
+            sum -
+            sumBackground
+          ) /
+          foregroundWeight;
+
+        const variance =
+          backgroundWeight *
+          foregroundWeight *
+          Math.pow(
+            backgroundMean -
+            foregroundMean,
+            2
+          );
+
+        if (
+          variance >
+          bestVariance
+        ) {
+          bestVariance =
+            variance;
+
+          bestThreshold =
+            threshold;
+        }
+      }
+
+      return Math.max(
+        70,
+        Math.min(
+          210,
+          bestThreshold
+        )
+      );
+    }
+
+
     function makeVariant(
       source,
       mode
@@ -3264,6 +5240,18 @@
       const pixels =
         imageData.data;
 
+      const adaptiveThreshold =
+        (
+          mode ===
+            "otsu" ||
+          mode ===
+            "otsu-inverted"
+        )
+          ? calculateOtsuThreshold(
+              pixels
+            )
+          : 150;
+
       for (
         let index = 0;
         index < pixels.length;
@@ -3283,20 +5271,24 @@
 
         if (
           mode ===
-            "threshold"
+            "threshold" ||
+          mode ===
+            "otsu"
         ) {
           value =
             gray >
-              150
+              adaptiveThreshold
               ? 255
               : 0;
         } else if (
           mode ===
-            "inverted"
+            "inverted" ||
+          mode ===
+            "otsu-inverted"
         ) {
           value =
             gray >
-              150
+              adaptiveThreshold
               ? 0
               : 255;
         } else {
@@ -3413,40 +5405,78 @@
 
       try {
         /*
-         * These three crops all cover the green guide, but at
-         * slightly different sizes. The tight crop removes rarity,
-         * cost, copyright text, and borders. The wide crop recovers
-         * a card held slightly off-center.
+         * Crop from the green guide's real on-screen position instead of
+         * relying on hard-coded camera coordinates.
+         *
+         * Normal mode favors the left side of the green guide so the rarity
+         * letter and cost icon do not confuse OCR.
+         *
+         * Precision Bottom Scan expects only the printed Card Number inside
+         * the enlarged center guide.
          */
-        tight =
-          createCrop(
-            frame,
-            0.425,
-            0.805,
-            0.445,
-            0.105,
-            1200
-          );
+        if (
+          state.precisionBottomMode
+        ) {
+          tight =
+            createNumberGuideCrop(
+              frame,
+              0.02,
+              0.12,
+              0.96,
+              0.76,
+              1550
+            );
 
-        normal =
-          createCrop(
-            frame,
-            0.405,
-            0.785,
-            0.515,
-            0.145,
-            1300
-          );
+          normal =
+            createNumberGuideCrop(
+              frame,
+              0.00,
+              0.02,
+              1.00,
+              0.96,
+              1650
+            );
 
-        wide =
-          createCrop(
-            frame,
-            0.335,
-            0.755,
-            0.625,
-            0.205,
-            1400
-          );
+          wide =
+            createNumberGuideCrop(
+              frame,
+              -0.03,
+              -0.18,
+              1.06,
+              1.36,
+              1750
+            );
+        } else {
+          tight =
+            createNumberGuideCrop(
+              frame,
+              0.02,
+              0.18,
+              0.72,
+              0.64,
+              1350
+            );
+
+          normal =
+            createNumberGuideCrop(
+              frame,
+              0.00,
+              0.08,
+              0.88,
+              0.84,
+              1450
+            );
+
+          wide =
+            createNumberGuideCrop(
+              frame,
+              -0.14,
+              -0.22,
+              1.22,
+              1.42,
+              1550
+            );
+        }
 
         const worker =
           await getWorker();
@@ -3464,7 +5494,7 @@
             ],
             [
               tight,
-              "threshold"
+              "otsu"
             ],
             [
               normal,
@@ -3472,7 +5502,7 @@
             ],
             [
               normal,
-              "threshold"
+              "otsu"
             ],
             [
               wide,
@@ -3480,7 +5510,7 @@
             ],
             [
               wide,
-              "inverted"
+              "otsu-inverted"
             ]
           ];
         } else if (
@@ -3494,7 +5524,7 @@
             ],
             [
               tight,
-              "threshold"
+              "otsu"
             ],
             [
               normal,
@@ -3513,7 +5543,7 @@
             ],
             [
               tight,
-              "threshold"
+              "otsu"
             ],
             state.ocrMissCount %
               2 ===
